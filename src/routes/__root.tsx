@@ -79,13 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "JobMatch — Job Search Workspace" },
+      { title: "JobLanded — Job Search Workspace" },
       {
         name: "description",
         content:
           "Parse your resume, score job matches, tailor documents and track applications in one workspace.",
       },
-      { property: "og:title", content: "JobMatch — Job Search Workspace" },
+      { property: "og:title", content: "JobLanded — Job Search Workspace" },
       {
         property: "og:description",
         content: "Resume parsing, match scoring and application tracking in one place.",

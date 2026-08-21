@@ -8,12 +8,12 @@ import { FileText, Briefcase, ClipboardList } from "lucide-react";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — JobMatch" },
+      { title: "Dashboard — JobLanded" },
       {
         name: "description",
         content: "Your job search at a glance: resume status, saved jobs and follow-ups due.",
       },
-      { property: "og:title", content: "Dashboard — JobMatch" },
+      { property: "og:title", content: "Dashboard — JobLanded" },
       { property: "og:description", content: "Resume status, saved jobs and follow-ups due." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -5,13 +5,13 @@ import { FileText, Target, ClipboardList, BellRing } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "JobMatch — Resume Parsing, Job Matching & Application Tracking" },
+      { title: "JobLanded — Resume Parsing, Job Matching & Application Tracking" },
       {
         name: "description",
         content:
-          "JobMatch turns your resume into a structured profile, scores every job you save, tailors resumes and cover letters, and tracks follow-ups.",
+          "JobLanded turns your resume into a structured profile, scores every job you save, tailors resumes and cover letters, and tracks follow-ups.",
       },
-      { property: "og:title", content: "JobMatch — Run your job search in one place" },
+      { property: "og:title", content: "JobLanded — Run your job search in one place" },
       {
         property: "og:description",
         content:
@@ -51,7 +51,7 @@ function Landing() {
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-        <span className="font-display text-lg font-semibold text-primary">JobMatch</span>
+        <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
         <Button asChild variant="outline" size="sm">
           <Link to="/auth">Sign in</Link>
         </Button>
@@ -65,7 +65,7 @@ function Landing() {
           From resume to follow-up, without the spreadsheet.
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          JobMatch reads your resume once, then scores, tailors and tracks every role you go after.
+          JobLanded reads your resume once, then scores, tailors and tracks every role you go after.
         </p>
         <div className="mt-8 flex justify-center gap-3">
           <Button asChild size="lg">
