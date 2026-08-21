@@ -68,7 +68,7 @@ export const parseResume = createServerFn({ method: "POST" })
       .insert({
         user_id: userId,
         raw_text: data.rawText,
-        parsed_json: parsed,
+        parsed_json: parsed as never,
         file_url: data.fileUrl ?? null,
       })
       .select("id, raw_text, parsed_json, file_url, created_at")
@@ -103,7 +103,7 @@ export const saveParsedResume = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("resumes")
-      .update({ parsed_json: data.parsed })
+      .update({ parsed_json: data.parsed as never })
       .eq("id", data.id)
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
