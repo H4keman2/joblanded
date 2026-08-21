@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLatestResume } from "@/lib/resume.functions";
+import { getActiveApplications } from "@/lib/account.functions";
 import { Button } from "@/components/ui/button";
 import { FileText, Briefcase, ClipboardList } from "lucide-react";
 
@@ -22,11 +23,31 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
+const statusLabels: Record<string, string> = {
+  applied: "Applied",
+  interviewing: "Interviewing",
+  offer: "Offer",
+};
+
+function formatDate(value: string | null) {
+  if (!value) return null;
+  const d = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
 function Dashboard() {
   const fetchResume = useServerFn(getLatestResume);
+  const fetchActive = useServerFn(getActiveApplications);
+
   const { data: resume, isLoading } = useQuery({
     queryKey: ["latest-resume"],
     queryFn: () => fetchResume(),
+  });
+
+  const { data: applications, isLoading: loadingApps } = useQuery({
+    queryKey: ["active-applications"],
+    queryFn: () => fetchActive(),
   });
 
   return (
@@ -52,6 +73,57 @@ function Dashboard() {
         </div>
       )}
 
+      <section className="space-y-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-xl font-semibold">Active applications</h2>
+          <Link to="/applications" className="text-sm text-primary hover:underline">
+            View all
+          </Link>
+        </div>
+
+        {loadingApps ? (
+          <div className="panel p-6 text-sm text-muted-foreground">Loading…</div>
+        ) : applications && applications.length > 0 ? (
+          <ul className="space-y-3">
+            {applications.map((app) => {
+              const job = app.jobs as { title: string; company: string | null } | null;
+              const followUp = formatDate(app.follow_up_date);
+              return (
+                <li
+                  key={app.id}
+                  className="panel flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div>
+                    <p className="font-medium">{job?.title ?? "Untitled role"}</p>
+                    <p className="text-sm text-muted-foreground">{job?.company ?? "—"}</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground">
+                      {statusLabels[app.status] ?? app.status}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {followUp ? `Follow up ${followUp}` : "No follow-up set"}
+                    </span>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <div className="panel flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-medium">No active applications yet</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Add a job and mark it applied to start tracking follow-ups.
+              </p>
+            </div>
+            <Button asChild variant="outline">
+              <Link to="/jobs">Go to Jobs</Link>
+            </Button>
+          </div>
+        )}
+      </section>
+
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           icon={FileText}
@@ -60,7 +132,12 @@ function Dashboard() {
           to="/resume"
         />
         <StatCard icon={Briefcase} label="Jobs" value="Coming next" to="/jobs" />
-        <StatCard icon={ClipboardList} label="Applications" value="Coming next" to="/applications" />
+        <StatCard
+          icon={ClipboardList}
+          label="Applications"
+          value={loadingApps ? "…" : `${applications?.length ?? 0} active`}
+          to="/applications"
+        />
       </div>
     </div>
   );
