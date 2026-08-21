@@ -3,12 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/_authenticated/applications")({
   head: () => ({
     meta: [
-      { title: "Applications — JobMatch" },
+      { title: "Applications — JobLanded" },
       {
         name: "description",
         content: "Track application status, notes and follow-up dates for every role you pursue.",
       },
-      { property: "og:title", content: "Applications — JobMatch" },
+      { property: "og:title", content: "Applications — JobLanded" },
       { property: "og:description", content: "Status, notes and follow-ups for every application." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -15,13 +15,13 @@ import { Upload, Sparkles, Loader2 } from "lucide-react";
 export const Route = createFileRoute("/_authenticated/resume")({
   head: () => ({
     meta: [
-      { title: "Your Resume — JobMatch" },
+      { title: "Your Resume — JobLanded" },
       {
         name: "description",
         content:
           "Upload a PDF or paste your resume text, then review and edit the skills, titles and experience we extracted.",
       },
-      { property: "og:title", content: "Your Resume — JobMatch" },
+      { property: "og:title", content: "Your Resume — JobLanded" },
       {
         property: "og:description",
         content: "Upload, parse and review your structured resume profile.",

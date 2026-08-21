@@ -10,13 +10,13 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Sign in to JobMatch — Job Search Workspace" },
+      { title: "Sign in to JobLanded — Job Search Workspace" },
       {
         name: "description",
         content:
-          "Sign in to JobMatch to parse your resume, score job matches and track every application in one place.",
+          "Sign in to JobLanded to parse your resume, score job matches and track every application in one place.",
       },
-      { property: "og:title", content: "Sign in to JobMatch" },
+      { property: "og:title", content: "Sign in to JobLanded" },
       {
         property: "og:description",
         content: "Access your resume profile, job matches and application tracker.",
@@ -71,7 +71,7 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-md panel p-8">
         <Link to="/" className="font-display text-xl font-semibold text-primary">
-          JobMatch
+          JobLanded
         </Link>
         <h1 className="mt-6 text-2xl font-semibold">
           {mode === "signin" ? "Welcome back" : "Create your account"}

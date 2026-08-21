@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
           <Link to="/dashboard" className="font-display text-lg font-semibold text-primary">
-            JobMatch
+            JobLanded
           </Link>
           <nav className="flex flex-1 items-center gap-1 overflow-x-auto">
             {nav.map(({ to, label, icon: Icon }) => (
