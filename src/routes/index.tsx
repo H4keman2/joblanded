@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { FileText, Target, ClipboardList, BellRing } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,26 +23,22 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const features = [
+const outcomes = [
   {
-    icon: FileText,
-    title: "Resume parsing",
-    body: "Upload a PDF or paste your resume — get skills, titles, experience and education extracted and editable.",
+    title: "Stop guessing which jobs are worth your time",
+    body: "Every posting gets scored against your actual experience, so you apply to the roles you're likely to land, not just the ones that sound good.",
   },
   {
-    icon: Target,
-    title: "Match scoring",
-    body: "Every job you save gets a match percentage plus a short explanation of the fit.",
+    title: "Never rewrite a resume from scratch again",
+    body: "Your resume is parsed once into structured data. Each application draws from it to build a tailored version, no starting over at 11pm before a deadline.",
   },
   {
-    icon: ClipboardList,
-    title: "Application tracker",
-    body: "Saved, applied, interviewing, rejected, offer — with notes on every role.",
+    title: "Know where every application stands",
+    body: "Saved, applied, interviewing, offer, it's all in one list instead of scattered across email threads and a half-updated spreadsheet.",
   },
   {
-    icon: BellRing,
-    title: "Follow-up reminders",
-    body: "Set a follow-up date when you apply and see what's due on your dashboard.",
+    title: "Follow up before it's too late",
+    body: "Set a follow-up date when you apply, or let JobLanded suggest one. It shows up on your dashboard the day it's due.",
   },
 ];
 
@@ -52,37 +47,71 @@ function Landing() {
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
         <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
-        <Button asChild variant="outline" size="sm">
-          <Link to="/auth">Sign in</Link>
-        </Button>
+        <Link
+          to="/auth"
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Sign in
+        </Link>
       </header>
 
-      <section className="mx-auto max-w-3xl px-4 pb-16 pt-12 text-center sm:pt-20">
+      <section className="mx-auto max-w-3xl px-4 pb-14 pt-12 text-center sm:pt-20">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Job search workspace
         </p>
-        <h1 className="mt-4 text-4xl font-semibold leading-tight sm:text-5xl">
-          From resume to follow-up, without the spreadsheet.
+        <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
+          From resume to follow-up,
+          <br />
+          <span className="text-primary">without the spreadsheet.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
           JobLanded reads your resume once, then scores, tailors and tracks every role you go after.
         </p>
-        <div className="mt-8 flex justify-center gap-3">
+        <div className="mt-8 flex justify-center">
           <Button asChild size="lg">
             <Link to="/auth">Get started free</Link>
           </Button>
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-5xl gap-4 px-4 pb-20 sm:grid-cols-2">
-        {features.map(({ icon: Icon, title, body }) => (
-          <article key={title} className="panel p-6">
-            <Icon className="size-5 text-primary" />
-            <h2 className="mt-4 text-lg font-semibold">{title}</h2>
-            <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-          </article>
-        ))}
+      <section className="mx-auto grid max-w-5xl gap-10 px-4 pb-24 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16">
+        <div className="grid gap-6 sm:grid-cols-2">
+          {outcomes.map(({ title, body }) => (
+            <div key={title}>
+              <h2 className="text-base font-semibold">{title}</h2>
+              <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>
+            </div>
+          ))}
+        </div>
+
+        <MatchPreviewCard />
       </section>
+    </div>
+  );
+}
+
+function MatchPreviewCard() {
+  return (
+    <div className="panel w-full max-w-sm shrink-0 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold">Senior Product Designer</p>
+          <p className="text-xs text-muted-foreground">Northwind Labs · Remote</p>
+        </div>
+        <span className="shrink-0 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+          92% match
+        </span>
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Strong overlap on design systems and cross-functional leadership. Light on the B2B
+        analytics experience listed as preferred.
+      </p>
+      <div className="mt-4 flex items-center gap-2 border-t border-border pt-3">
+        <span className="rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+          Applied
+        </span>
+        <span className="text-xs text-muted-foreground">Follow up in 4 days</span>
+      </div>
     </div>
   );
 }
