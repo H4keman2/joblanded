@@ -60,7 +60,7 @@ function Landing() {
           Job search workspace
         </p>
         <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
-          From resume to follow-up,
+          From Start to JobLanded,
           <br />
           <span className="text-primary">without the spreadsheet.</span>
         </h1>
