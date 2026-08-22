@@ -42,6 +42,25 @@ const outcomes = [
   },
 ];
 
+const steps = [
+  {
+    title: "1. Parse your resume",
+    body: "Upload a PDF or paste plain text. JobLanded extracts skills, titles, experience, and education into a structured profile.",
+  },
+  {
+    title: "2. Score every job",
+    body: "Paste in job descriptions and get a match percentage plus a plain-language breakdown of why it's a fit—or not.",
+  },
+  {
+    title: "3. Tailor your story",
+    body: "Generate a tailored resume and cover letter for each role, then edit the output before you send it.",
+  },
+  {
+    title: "4. Follow up on time",
+    body: "Track statuses, set follow-up reminders, and keep every application moving from saved to offer.",
+  },
+];
+
 function Landing() {
   return (
     <div className="min-h-screen">
