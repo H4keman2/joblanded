@@ -42,6 +42,25 @@ const outcomes = [
   },
 ];
 
+const steps = [
+  {
+    title: "1. Parse your resume",
+    body: "Upload a PDF or paste plain text. JobLanded extracts skills, titles, experience, and education into a structured profile.",
+  },
+  {
+    title: "2. Score every job",
+    body: "Paste in job descriptions and get a match percentage plus a plain-language breakdown of why it's a fit—or not.",
+  },
+  {
+    title: "3. Tailor your story",
+    body: "Generate a tailored resume and cover letter for each role, then edit the output before you send it.",
+  },
+  {
+    title: "4. Follow up on time",
+    body: "Track statuses, set follow-up reminders, and keep every application moving from saved to offer.",
+  },
+];
+
 function Landing() {
   return (
     <div className="min-h-screen">
@@ -71,6 +90,20 @@ function Landing() {
           <Button asChild size="lg">
             <Link to="/auth">Get started free</Link>
           </Button>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-4 pb-16">
+        <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          How JobLanded works
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map(({ title, body }) => (
+            <div key={title} className="panel p-5">
+              <h3 className="text-base font-semibold">{title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
+            </div>
+          ))}
         </div>
       </section>
 
