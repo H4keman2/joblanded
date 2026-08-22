@@ -65,7 +65,7 @@ function Landing() {
           <span className="text-primary">without the spreadsheet.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          JobLanded reads your resume once, then scores, tailors and tracks every role you go after.
+          Stop bouncing between tabs. Find the right roles, tailor your story, and follow up on time.
         </p>
         <div className="mt-8 flex justify-center">
           <Button asChild size="lg">
