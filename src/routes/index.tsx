@@ -119,6 +119,179 @@ function Landing() {
 
         <MatchPreviewCard />
       </section>
+
+      <WorkedExample />
+    </div>
+  );
+}
+
+function WorkedExample() {
+  return (
+    <section className="border-t border-border bg-secondary/30">
+      <div className="mx-auto max-w-5xl px-4 py-20">
+        <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          A worked example
+        </h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted-foreground">
+          Meet Maya, a product designer applying to Northwind Labs. Here&apos;s exactly what
+          JobLanded produces at each step.
+        </p>
+
+        <div className="mt-10 space-y-6">
+          <ExampleStep
+            step="Step 1"
+            title="Parse"
+            caption="Maya uploads a 2-page PDF resume. JobLanded returns a structured profile she can edit."
+          >
+            <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+              <Row label="Name" value="Maya Ortiz" />
+              <Row label="Years of experience" value="7" />
+              <Row label="Titles" value="Product Designer, UX Designer" />
+              <Row label="Education" value="BFA Design, RISD (2017)" />
+            </dl>
+            <div className="mt-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Skills extracted
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {[
+                  "Design systems",
+                  "Figma",
+                  "Prototyping",
+                  "User research",
+                  "Accessibility",
+                  "Design ops",
+                  "Cross-functional leadership",
+                ].map((s) => (
+                  <span
+                    key={s}
+                    className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </ExampleStep>
+
+          <ExampleStep
+            step="Step 2"
+            title="Match"
+            caption="She pastes the Northwind Labs job description. It's scored against her parsed profile."
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="font-semibold">Senior Product Designer</p>
+                <p className="text-xs text-muted-foreground">Northwind Labs · Remote · $150–175k</p>
+              </div>
+              <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
+                92% match
+              </span>
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Strengths
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  <li>7 yrs vs. 5+ required</li>
+                  <li>Owned a design system end-to-end</li>
+                  <li>Led cross-functional launches</li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Gaps
+                </p>
+                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                  <li>No B2B analytics tooling (preferred)</li>
+                  <li>Light on quantitative research</li>
+                </ul>
+              </div>
+            </div>
+          </ExampleStep>
+
+          <ExampleStep
+            step="Step 3"
+            title="Tailor"
+            caption="A resume summary and cover letter opener are drafted for this role. Maya edits before sending."
+          >
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Rewritten resume summary
+            </p>
+            <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+              Product designer with 7 years shipping systems-driven B2B software. Built and
+              maintained a 60-component design system adopted by four product teams, cutting
+              handoff time by 40%.
+            </blockquote>
+            <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Cover letter opener
+            </p>
+            <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+              Northwind&apos;s move toward a unified analytics surface is exactly the problem I
+              spent the last two years on — consolidating five inconsistent dashboards into one
+              system that a small team could actually maintain.
+            </blockquote>
+          </ExampleStep>
+
+          <ExampleStep
+            step="Step 4"
+            title="Follow up"
+            caption="She marks it applied and sets a date. It surfaces on her dashboard the day it's due."
+          >
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                Applied
+              </span>
+              <span className="text-muted-foreground">Applied Mar 4 · Follow up Mar 11</span>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              On Mar 11 the application moves to the top of her dashboard. If she hears back, she
+              flips the status to Interviewing and sets the next date.
+            </p>
+          </ExampleStep>
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <Button asChild size="lg">
+            <Link to="/auth">Try it with your resume</Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ExampleStep({
+  step,
+  title,
+  caption,
+  children,
+}: {
+  step: string;
+  title: string;
+  caption: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="panel p-6">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
+          {step}
+        </span>
+        <h3 className="font-display text-lg font-semibold">{title}</h3>
+      </div>
+      <p className="mt-1.5 text-sm text-muted-foreground">{caption}</p>
+      <div className="mt-5 border-t border-border pt-5">{children}</div>
+    </div>
+  );
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex gap-2">
+      <dt className="shrink-0 text-muted-foreground">{label}:</dt>
+      <dd className="font-medium">{value}</dd>
     </div>
   );
 }
