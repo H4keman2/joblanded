@@ -74,6 +74,20 @@ function Landing() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-5xl px-4 pb-16">
+        <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+          How JobLanded works
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map(({ title, body }) => (
+            <div key={title} className="panel p-5">
+              <h3 className="text-base font-semibold">{title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="mx-auto grid max-w-5xl gap-10 px-4 pb-24 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16">
         <div className="grid gap-6 sm:grid-cols-2">
           {outcomes.map(({ title, body }) => (
