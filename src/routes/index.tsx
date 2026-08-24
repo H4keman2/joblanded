@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -125,7 +126,136 @@ function Landing() {
   );
 }
 
+const exampleSteps = [
+  {
+    key: "parse",
+    label: "Parse",
+    step: "Step 1",
+    caption: "Maya uploads a 2-page PDF resume. JobLanded returns a structured profile she can edit.",
+    render: () => (
+      <>
+        <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+          <Row label="Name" value="Maya Ortiz" />
+          <Row label="Years of experience" value="7" />
+          <Row label="Titles" value="Product Designer, UX Designer" />
+          <Row label="Education" value="BFA Design, RISD (2017)" />
+        </dl>
+        <div className="mt-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Skills extracted
+          </p>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {[
+              "Design systems",
+              "Figma",
+              "Prototyping",
+              "User research",
+              "Accessibility",
+              "Design ops",
+              "Cross-functional leadership",
+            ].map((s) => (
+              <span
+                key={s}
+                className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
+              >
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+      </>
+    ),
+  },
+  {
+    key: "match",
+    label: "Match",
+    step: "Step 2",
+    caption: "She pastes the Northwind Labs job description. It's scored against her parsed profile.",
+    render: () => (
+      <>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-semibold">Senior Product Designer</p>
+            <p className="text-xs text-muted-foreground">Northwind Labs · Remote · $150–175k</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
+            92% match
+          </span>
+        </div>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Strengths
+            </p>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+              <li>7 yrs vs. 5+ required</li>
+              <li>Owned a design system end-to-end</li>
+              <li>Led cross-functional launches</li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Gaps</p>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+              <li>No B2B analytics tooling (preferred)</li>
+              <li>Light on quantitative research</li>
+            </ul>
+          </div>
+        </div>
+      </>
+    ),
+  },
+  {
+    key: "tailor",
+    label: "Tailor",
+    step: "Step 3",
+    caption:
+      "A resume summary and cover letter opener are drafted for this role. Maya edits before sending.",
+    render: () => (
+      <>
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Rewritten resume summary
+        </p>
+        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+          Product designer with 7 years shipping systems-driven B2B software. Built and maintained a
+          60-component design system adopted by four product teams, cutting handoff time by 40%.
+        </blockquote>
+        <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Cover letter opener
+        </p>
+        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+          Northwind&apos;s move toward a unified analytics surface is exactly the problem I spent the
+          last two years on — consolidating five inconsistent dashboards into one system that a small
+          team could actually maintain.
+        </blockquote>
+      </>
+    ),
+  },
+  {
+    key: "followup",
+    label: "Follow up",
+    step: "Step 4",
+    caption: "She marks it applied and sets a date. It surfaces on her dashboard the day it's due.",
+    render: () => (
+      <>
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+            Applied
+          </span>
+          <span className="text-muted-foreground">Applied Mar 4 · Follow up Mar 11</span>
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          On Mar 11 the application moves to the top of her dashboard. If she hears back, she flips
+          the status to Interviewing and sets the next date.
+        </p>
+      </>
+    ),
+  },
+];
+
 function WorkedExample() {
+  const [active, setActive] = useState(0);
+  const current = exampleSteps[active]!;
+
   return (
     <section className="border-t border-border bg-secondary/30">
       <div className="mx-auto max-w-5xl px-4 py-20">
@@ -133,123 +263,56 @@ function WorkedExample() {
           A worked example
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted-foreground">
-          Meet Maya, a product designer applying to Northwind Labs. Here&apos;s exactly what
-          JobLanded produces at each step.
+          Meet Maya, a product designer applying to Northwind Labs. Click through each step to see
+          exactly what JobLanded produces.
         </p>
 
-        <div className="mt-10 space-y-6">
-          <ExampleStep
-            step="Step 1"
-            title="Parse"
-            caption="Maya uploads a 2-page PDF resume. JobLanded returns a structured profile she can edit."
-          >
-            <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-              <Row label="Name" value="Maya Ortiz" />
-              <Row label="Years of experience" value="7" />
-              <Row label="Titles" value="Product Designer, UX Designer" />
-              <Row label="Education" value="BFA Design, RISD (2017)" />
-            </dl>
-            <div className="mt-4">
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Skills extracted
-              </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {[
-                  "Design systems",
-                  "Figma",
-                  "Prototyping",
-                  "User research",
-                  "Accessibility",
-                  "Design ops",
-                  "Cross-functional leadership",
-                ].map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </ExampleStep>
+        <div
+          role="tablist"
+          aria-label="Worked example steps"
+          className="mx-auto mt-8 flex max-w-xl flex-wrap justify-center gap-2"
+        >
+          {exampleSteps.map((s, i) => (
+            <button
+              key={s.key}
+              role="tab"
+              aria-selected={i === active}
+              onClick={() => setActive(i)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                i === active
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
 
-          <ExampleStep
-            step="Step 2"
-            title="Match"
-            caption="She pastes the Northwind Labs job description. It's scored against her parsed profile."
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-semibold">Senior Product Designer</p>
-                <p className="text-xs text-muted-foreground">Northwind Labs · Remote · $150–175k</p>
-              </div>
-              <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
-                92% match
-              </span>
-            </div>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Strengths
-                </p>
-                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                  <li>7 yrs vs. 5+ required</li>
-                  <li>Owned a design system end-to-end</li>
-                  <li>Led cross-functional launches</li>
-                </ul>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Gaps
-                </p>
-                <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-                  <li>No B2B analytics tooling (preferred)</li>
-                  <li>Light on quantitative research</li>
-                </ul>
-              </div>
-            </div>
+        <div className="mt-6">
+          <ExampleStep key={current.key} step={current.step} title={current.label} caption={current.caption}>
+            {current.render()}
           </ExampleStep>
+        </div>
 
-          <ExampleStep
-            step="Step 3"
-            title="Tailor"
-            caption="A resume summary and cover letter opener are drafted for this role. Maya edits before sending."
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Button
+            variant="outline"
+            onClick={() => setActive((i) => Math.max(0, i - 1))}
+            disabled={active === 0}
           >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Rewritten resume summary
-            </p>
-            <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-              Product designer with 7 years shipping systems-driven B2B software. Built and
-              maintained a 60-component design system adopted by four product teams, cutting
-              handoff time by 40%.
-            </blockquote>
-            <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Cover letter opener
-            </p>
-            <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-              Northwind&apos;s move toward a unified analytics surface is exactly the problem I
-              spent the last two years on — consolidating five inconsistent dashboards into one
-              system that a small team could actually maintain.
-            </blockquote>
-          </ExampleStep>
-
-          <ExampleStep
-            step="Step 4"
-            title="Follow up"
-            caption="She marks it applied and sets a date. It surfaces on her dashboard the day it's due."
+            Back
+          </Button>
+          <span className="text-xs text-muted-foreground">
+            {active + 1} of {exampleSteps.length}
+          </span>
+          <Button
+            variant="outline"
+            onClick={() => setActive((i) => Math.min(exampleSteps.length - 1, i + 1))}
+            disabled={active === exampleSteps.length - 1}
           >
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
-                Applied
-              </span>
-              <span className="text-muted-foreground">Applied Mar 4 · Follow up Mar 11</span>
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              On Mar 11 the application moves to the top of her dashboard. If she hears back, she
-              flips the status to Interviewing and sets the next date.
-            </p>
-          </ExampleStep>
+            Next
+          </Button>
         </div>
 
         <div className="mt-10 flex justify-center">
@@ -274,7 +337,7 @@ function ExampleStep({
   children: React.ReactNode;
 }) {
   return (
-    <div className="panel p-6">
+    <div className="panel animate-in fade-in p-6 duration-300">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="text-xs font-semibold uppercase tracking-[0.15em] text-primary">
           {step}
