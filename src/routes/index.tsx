@@ -254,7 +254,7 @@ const exampleSteps = [
 
 function WorkedExample() {
   const [active, setActive] = useState(0);
-  const current = exampleSteps[active];
+  const current = exampleSteps[active]!;
 
   return (
     <section className="border-t border-border bg-secondary/30">
