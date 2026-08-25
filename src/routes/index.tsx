@@ -331,6 +331,7 @@ function WorkedExample() {
   const current = exampleSteps[active]!;
 
   return (
+    <TooltipProvider delayDuration={100}>
     <section className="border-t border-border bg-secondary/30">
       <div className="mx-auto max-w-5xl px-4 py-20">
         <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
