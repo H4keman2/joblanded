@@ -365,7 +365,13 @@ function WorkedExample() {
         </div>
 
         <div className="mt-6">
-          <ExampleStep key={current.key} step={current.step} title={current.label} caption={current.caption}>
+          <ExampleStep
+            key={current.key}
+            step={current.step}
+            title={current.label}
+            caption={current.caption}
+            why={current.why}
+          >
             {current.render()}
           </ExampleStep>
         </div>
