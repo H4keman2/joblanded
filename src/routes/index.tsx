@@ -403,6 +403,7 @@ function WorkedExample() {
         </div>
       </div>
     </section>
+    </TooltipProvider>
   );
 }
 
@@ -410,11 +411,13 @@ function ExampleStep({
   step,
   title,
   caption,
+  why,
   children,
 }: {
   step: string;
   title: string;
   caption: string;
+  why: string;
   children: React.ReactNode;
 }) {
   return (
@@ -427,15 +430,21 @@ function ExampleStep({
       </div>
       <p className="mt-1.5 text-sm text-muted-foreground">{caption}</p>
       <div className="mt-5 border-t border-border pt-5">{children}</div>
+      <div className="mt-5 rounded-lg border border-border bg-background p-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+          What drove this
+        </p>
+        <p className="mt-1.5 text-sm text-muted-foreground">{why}</p>
+      </div>
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, tip }: { label: string; value: string; tip?: string }) {
   return (
     <div className="flex gap-2">
       <dt className="shrink-0 text-muted-foreground">{label}:</dt>
-      <dd className="font-medium">{value}</dd>
+      <dd className="font-medium">{tip ? <Hint tip={tip}>{value}</Hint> : value}</dd>
     </div>
   );
 }
