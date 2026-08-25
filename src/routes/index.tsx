@@ -154,13 +154,30 @@ const exampleSteps = [
     label: "Parse",
     step: "Step 1",
     caption: "Maya uploads a 2-page PDF resume. JobLanded returns a structured profile she can edit.",
+    why: "Everything downstream reads from this structured profile, not the raw PDF. Fixing a wrong title or a missing skill here changes every future match score and tailored draft.",
     render: () => (
       <>
         <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-          <Row label="Name" value="Maya Ortiz" />
-          <Row label="Years of experience" value="7" />
-          <Row label="Titles" value="Product Designer, UX Designer" />
-          <Row label="Education" value="BFA Design, RISD (2017)" />
+          <Row
+            label="Name"
+            value="Maya Ortiz"
+            tip="Pulled from the resume header. Used on tailored documents."
+          />
+          <Row
+            label="Years of experience"
+            value="7"
+            tip="Summed from role date ranges, overlaps counted once. This is the number compared against a job's minimum requirement."
+          />
+          <Row
+            label="Titles"
+            value="Product Designer, UX Designer"
+            tip="Past job titles. Title similarity is one of the four scoring inputs — closer titles score higher."
+          />
+          <Row
+            label="Education"
+            value="BFA Design, RISD (2017)"
+            tip="Degree and year. Only affects scoring when a posting states a specific education requirement."
+          />
         </dl>
         <div className="mt-4">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -168,22 +185,24 @@ const exampleSteps = [
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {[
-              "Design systems",
-              "Figma",
-              "Prototyping",
-              "User research",
-              "Accessibility",
-              "Design ops",
-              "Cross-functional leadership",
-            ].map((s) => (
-              <span
-                key={s}
-                className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
-              >
-                {s}
-              </span>
+              ["Design systems", "Appears 4 times across her roles, so it's treated as a core skill rather than a mention."],
+              ["Figma", "Named tool. Matched literally against tools listed in the posting."],
+              ["Prototyping", "Inferred from bullet wording, not a skills list."],
+              ["User research", "Present but shallow — this is what produces the research gap in step 2."],
+              ["Accessibility", "Extra skill the posting doesn't ask for; never counted against her."],
+              ["Design ops", "Grouped from process and tooling ownership bullets."],
+              ["Cross-functional leadership", "Derived from bullets about leading engineers and PMs through launches."],
+            ].map(([s, tip]) => (
+              <Hint key={s} tip={tip!}>
+                <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+                  {s}
+                </span>
+              </Hint>
             ))}
           </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Hover any field or skill to see where it came from and how it&apos;s used.
+          </p>
         </div>
       </>
     ),
@@ -193,6 +212,7 @@ const exampleSteps = [
     label: "Match",
     step: "Step 2",
     caption: "She pastes the Northwind Labs job description. It's scored against her parsed profile.",
+    why: "The score is a weighted read of four things: required skills covered (50%), years of experience vs. the minimum (20%), title similarity (20%), and preferred-but-optional extras (10%). Missing a preferred item costs a few points; missing a required skill costs a lot.",
     render: () => (
       <>
         <div className="flex items-start justify-between gap-4">
@@ -200,9 +220,11 @@ const exampleSteps = [
             <p className="font-semibold">Senior Product Designer</p>
             <p className="text-xs text-muted-foreground">Northwind Labs · Remote · $150–175k</p>
           </div>
-          <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
-            92% match
-          </span>
+          <Hint tip="92% = 8 of 9 required skills (≈46/50) + experience above the minimum (20/20) + a near-exact title match (19/20) + 1 of 3 preferred extras (≈7/10).">
+            <span className="shrink-0 rounded-full bg-accent px-3 py-1 text-sm font-semibold text-accent-foreground">
+              92% match
+            </span>
+          </Hint>
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
@@ -210,16 +232,36 @@ const exampleSteps = [
               Strengths
             </p>
             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-              <li>7 yrs vs. 5+ required</li>
-              <li>Owned a design system end-to-end</li>
-              <li>Led cross-functional launches</li>
+              <li>
+                <Hint tip="Posting asks for 5+ years; her parsed total is 7. Clearing the minimum earns the full 20 points — going far beyond it adds nothing.">
+                  7 yrs vs. 5+ required
+                </Hint>
+              </li>
+              <li>
+                <Hint tip="Design systems is the posting's first required skill and her most repeated one, so it carries the heaviest single weight in the score.">
+                  Owned a design system end-to-end
+                </Hint>
+              </li>
+              <li>
+                <Hint tip="Matches the posting's line about partnering with engineering and product — evidence for a required responsibility, not just a skill keyword.">
+                  Led cross-functional launches
+                </Hint>
+              </li>
             </ul>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Gaps</p>
             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
-              <li>No B2B analytics tooling (preferred)</li>
-              <li>Light on quantitative research</li>
+              <li>
+                <Hint tip="Listed under &ldquo;nice to have,&rdquo; so it only reduces the 10% preferred bucket — roughly 3 points, not a disqualifier.">
+                  No B2B analytics tooling (preferred)
+                </Hint>
+              </li>
+              <li>
+                <Hint tip="Her resume mentions research but shows no quantitative studies. Partial credit on a required skill costs about 4 points — and it's the one thing worth addressing in the cover letter.">
+                  Light on quantitative research
+                </Hint>
+              </li>
             </ul>
           </div>
         </div>
@@ -232,22 +274,27 @@ const exampleSteps = [
     step: "Step 3",
     caption:
       "A resume summary and cover letter opener are drafted for this role. Maya edits before sending.",
+    why: "The drafts are built from the step 2 output, not from scratch: strengths get pulled forward with numbers attached, and the closest gap gets addressed obliquely. Nothing is invented — every claim traces back to a line in her parsed resume.",
     render: () => (
       <>
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Rewritten resume summary
         </p>
         <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          Product designer with 7 years shipping systems-driven B2B software. Built and maintained a
-          60-component design system adopted by four product teams, cutting handoff time by 40%.
+          <Hint tip="Leads with the posting's top required skill and her strongest signal, restated with the metric already on her resume (60 components, 4 teams, 40%). Quantified strengths land better than adjectives.">
+            Product designer with 7 years shipping systems-driven B2B software. Built and maintained
+            a 60-component design system adopted by four product teams, cutting handoff time by 40%.
+          </Hint>
         </blockquote>
         <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Cover letter opener
         </p>
         <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          Northwind&apos;s move toward a unified analytics surface is exactly the problem I spent the
-          last two years on — consolidating five inconsistent dashboards into one system that a small
-          team could actually maintain.
+          <Hint tip="Opens on the analytics-tooling gap from step 2 and reframes it with the closest real experience she has, so the weakest part of the match is answered in the first sentence instead of ignored.">
+            Northwind&apos;s move toward a unified analytics surface is exactly the problem I spent
+            the last two years on — consolidating five inconsistent dashboards into one system that a
+            small team could actually maintain.
+          </Hint>
         </blockquote>
       </>
     ),
@@ -257,13 +304,18 @@ const exampleSteps = [
     label: "Follow up",
     step: "Step 4",
     caption: "She marks it applied and sets a date. It surfaces on her dashboard the day it's due.",
+    why: "The follow-up date is the only thing that decides what your dashboard shows. Applications with a date due today or earlier rise to the top; everything else stays out of the way.",
     render: () => (
       <>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
-            Applied
-          </span>
-          <span className="text-muted-foreground">Applied Mar 4 · Follow up Mar 11</span>
+          <Hint tip="Status drives visibility: applied and interviewing stay on the dashboard, saved and rejected don't.">
+            <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
+              Applied
+            </span>
+          </Hint>
+          <Hint tip="Default suggestion is one week after applying — early enough to be useful, late enough not to nag. Maya can pick any date.">
+            <span className="text-muted-foreground">Applied Mar 4 · Follow up Mar 11</span>
+          </Hint>
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
           On Mar 11 the application moves to the top of her dashboard. If she hears back, she flips
