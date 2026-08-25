@@ -1,6 +1,28 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+function Hint({ children, tip }: { children: React.ReactNode; tip: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="cursor-help rounded underline decoration-dotted decoration-from-font underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {children}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs text-left">{tip}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
