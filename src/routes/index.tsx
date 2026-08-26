@@ -265,7 +265,9 @@ const exampleSteps = [
             </ul>
           </div>
         </div>
+        <ScoreBreakdown />
       </>
+
     ),
   },
   {
