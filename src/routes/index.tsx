@@ -450,11 +450,51 @@ const scoreBuckets = [
     detail: "8 of 9 required skills matched, 1 partial",
     tip: "Each required skill is worth ~5.6 points. Design systems, Figma, prototyping, design ops and cross-functional leadership matched outright; quantitative research got partial credit.",
     items: [
-      { label: "Design systems", weight: "+5.6", note: "Exact match, posting's top requirement, 4 mentions on her resume" },
-      { label: "Figma", weight: "+5.6", note: "Literal tool match against the posting's tooling line" },
-      { label: "Cross-functional leadership", weight: "+5.6", note: "Matched to \"partner with engineering and product\"" },
-      { label: "Prototyping", weight: "+5.6", note: "Inferred from bullet wording, counted as a full match" },
-      { label: "Quantitative research", weight: "+1.6", note: "Partial: research mentioned, no studies with numbers — costs ~4 points" },
+      {
+        label: "Design systems",
+        weight: "+5.6",
+        note: "Exact match, posting's top requirement, 4 mentions on her resume",
+        resume: "Built and maintained a 60-component design system adopted by four product teams.",
+        resumeMark: ["design system"],
+        job: "You will own our design system and scale it across a growing product surface.",
+        jobMark: ["design system"],
+      },
+      {
+        label: "Figma",
+        weight: "+5.6",
+        note: "Literal tool match against the posting's tooling line",
+        resume: "Ran all design work in Figma, including shared libraries and component documentation.",
+        resumeMark: ["Figma"],
+        job: "Deep fluency in Figma and modern prototyping tools.",
+        jobMark: ["Figma"],
+      },
+      {
+        label: "Cross-functional leadership",
+        weight: "+5.6",
+        note: "Matched to \"partner with engineering and product\"",
+        resume: "Led cross-functional launches with engineering and product for four major releases.",
+        resumeMark: ["cross-functional", "engineering and product"],
+        job: "Partner with engineering and product to take features from concept to launch.",
+        jobMark: ["engineering and product"],
+      },
+      {
+        label: "Prototyping",
+        weight: "+5.6",
+        note: "Inferred from bullet wording, counted as a full match",
+        resume: "Tested interactive flows with clickable mockups before handoff.",
+        resumeMark: ["interactive flows", "clickable mockups"],
+        job: "Deep fluency in Figma and modern prototyping tools.",
+        jobMark: ["prototyping"],
+      },
+      {
+        label: "Quantitative research",
+        weight: "+1.6",
+        note: "Partial: research mentioned, no studies with numbers — costs ~4 points",
+        resume: "Informed roadmap decisions with user research sessions.",
+        resumeMark: ["user research"],
+        job: "Run quantitative research studies and translate metrics into design decisions.",
+        jobMark: ["quantitative research", "metrics"],
+      },
     ],
   },
   {
@@ -463,7 +503,17 @@ const scoreBuckets = [
     max: 20,
     detail: "7 yrs against a 5+ yr minimum",
     tip: "This bucket is pass/fail at the minimum. Clearing 5+ years earns all 20 points; extra years add nothing.",
-    items: [{ label: "7 yrs vs. 5+ required", weight: "+20", note: "Full credit — no bonus for exceeding the minimum" }],
+    items: [
+      {
+        label: "7 yrs vs. 5+ required",
+        weight: "+20",
+        note: "Full credit — no bonus for exceeding the minimum",
+        resume: "Product Designer, Halcyon (2019–2024) · UX Designer, Bright Fig (2017–2019)",
+        resumeMark: ["2019–2024", "2017–2019"],
+        job: "5+ years of product design experience in software teams.",
+        jobMark: ["5+ years"],
+      },
+    ],
   },
   {
     name: "Title similarity",
@@ -472,8 +522,24 @@ const scoreBuckets = [
     detail: "\"Product Designer\" vs. \"Senior Product Designer\"",
     tip: "Titles are compared as phrases. A seniority-only difference costs a single point; a different discipline would cost most of the bucket.",
     items: [
-      { label: "Product Designer → Senior Product Designer", weight: "+19", note: "Same discipline, one seniority step below" },
-      { label: "UX Designer", weight: "+0", note: "Second title, already covered by the stronger match" },
+      {
+        label: "Product Designer → Senior Product Designer",
+        weight: "+19",
+        note: "Same discipline, one seniority step below",
+        resume: "Product Designer, Halcyon — 2019 to 2024",
+        resumeMark: ["Product Designer"],
+        job: "Senior Product Designer, Northwind Labs",
+        jobMark: ["Senior Product Designer"],
+      },
+      {
+        label: "UX Designer",
+        weight: "+0",
+        note: "Second title, already covered by the stronger match",
+        resume: "UX Designer, Bright Fig — 2017 to 2019",
+        resumeMark: ["UX Designer"],
+        job: "Senior Product Designer, Northwind Labs",
+        jobMark: ["Product Designer"],
+      },
     ],
   },
   {
@@ -483,11 +549,115 @@ const scoreBuckets = [
     detail: "1 of 3 nice-to-haves",
     tip: "Preferred items never disqualify. Missing B2B analytics tooling is the only real deduction in the whole score.",
     items: [
-      { label: "Design ops ownership", weight: "+7", note: "Listed as preferred, matched from her tooling and process bullets" },
-      { label: "B2B analytics tooling", weight: "+0", note: "Not present — the ~3 point gap that keeps this off 95%" },
+      {
+        label: "Design ops ownership",
+        weight: "+7",
+        note: "Listed as preferred, matched from her tooling and process bullets",
+        resume: "Owned design ops: file structure, contribution process, and review rituals.",
+        resumeMark: ["design ops"],
+        job: "Nice to have: experience improving design ops and team process.",
+        jobMark: ["design ops"],
+      },
+      {
+        label: "B2B analytics tooling",
+        weight: "+0",
+        note: "Not present — the ~3 point gap that keeps this off 95%",
+        resume: null,
+        resumeMark: [],
+        job: "Nice to have: prior work on B2B analytics or data-heavy dashboards.",
+        jobMark: ["B2B analytics"],
+      },
     ],
   },
-];
+] as const;
+
+function Marked({ text, marks }: { text: string; marks: readonly string[] }) {
+  if (marks.length === 0) return <>{text}</>;
+  const pattern = new RegExp(
+    `(${marks.map((m) => m.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`,
+    "gi",
+  );
+  return (
+    <>
+      {text.split(pattern).map((part, i) =>
+        marks.some((m) => m.toLowerCase() === part.toLowerCase()) ? (
+          <mark
+            key={i}
+            className="rounded bg-accent px-1 py-0.5 font-medium text-accent-foreground"
+          >
+            {part}
+          </mark>
+        ) : (
+          <span key={i}>{part}</span>
+        ),
+      )}
+    </>
+  );
+}
+
+function Evidence({
+  resume,
+  resumeMark,
+  job,
+  jobMark,
+}: {
+  resume: string | null;
+  resumeMark: readonly string[];
+  job: string;
+  jobMark: readonly string[];
+}) {
+  return (
+    <div className="mt-2 grid gap-2 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          From your resume
+        </p>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+          {resume ? <Marked text={resume} marks={resumeMark} /> : "No matching line found."}
+        </p>
+      </div>
+      <div>
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          From the job post
+        </p>
+        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+          <Marked text={job} marks={jobMark} />
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ScoreItem({ item }: { item: (typeof scoreBuckets)[number]["items"][number] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <li>
+      <div className="flex items-baseline justify-between gap-3 text-xs">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          className="text-left text-muted-foreground underline decoration-dotted underline-offset-4 transition-colors hover:text-foreground"
+        >
+          {item.label}
+          <span className="ml-1.5 text-[10px] uppercase tracking-wide">
+            {open ? "hide evidence" : "evidence"}
+          </span>
+        </button>
+        <span className="shrink-0 font-mono text-muted-foreground">{item.weight}</span>
+      </div>
+      <p className="mt-0.5 text-[11px] text-muted-foreground/80">{item.note}</p>
+      {open && (
+        <Evidence
+          resume={item.resume}
+          resumeMark={item.resumeMark}
+          job={item.job}
+          jobMark={item.jobMark}
+        />
+      )}
+    </li>
+  );
+}
 
 function ScoreBreakdown() {
   return (
@@ -517,21 +687,16 @@ function ScoreBreakdown() {
               />
             </div>
             <p className="mt-1.5 text-xs text-muted-foreground">{bucket.detail}</p>
-            <ul className="mt-2 space-y-1">
+            <ul className="mt-2 space-y-2.5">
               {bucket.items.map((item) => (
-                <li key={item.label} className="flex items-baseline justify-between gap-3 text-xs">
-                  <Hint tip={item.note}>
-                    <span className="text-muted-foreground">{item.label}</span>
-                  </Hint>
-                  <span className="shrink-0 font-mono text-muted-foreground">{item.weight}</span>
-                </li>
+                <ScoreItem key={item.label} item={item} />
               ))}
             </ul>
           </div>
         ))}
       </div>
       <p className="mt-4 text-xs text-muted-foreground">
-        Hover any line to see why it earned — or lost — those points.
+        Click any line to see the exact resume and job-post text that triggered the match.
       </p>
     </div>
   );
