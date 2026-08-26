@@ -265,7 +265,9 @@ const exampleSteps = [
             </ul>
           </div>
         </div>
+        <ScoreBreakdown />
       </>
+
     ),
   },
   {
@@ -440,7 +442,103 @@ function ExampleStep({
   );
 }
 
+const scoreBuckets = [
+  {
+    name: "Required skills covered",
+    earned: 45.6,
+    max: 50,
+    detail: "8 of 9 required skills matched, 1 partial",
+    tip: "Each required skill is worth ~5.6 points. Design systems, Figma, prototyping, design ops and cross-functional leadership matched outright; quantitative research got partial credit.",
+    items: [
+      { label: "Design systems", weight: "+5.6", note: "Exact match, posting's top requirement, 4 mentions on her resume" },
+      { label: "Figma", weight: "+5.6", note: "Literal tool match against the posting's tooling line" },
+      { label: "Cross-functional leadership", weight: "+5.6", note: "Matched to \"partner with engineering and product\"" },
+      { label: "Prototyping", weight: "+5.6", note: "Inferred from bullet wording, counted as a full match" },
+      { label: "Quantitative research", weight: "+1.6", note: "Partial: research mentioned, no studies with numbers — costs ~4 points" },
+    ],
+  },
+  {
+    name: "Experience vs. minimum",
+    earned: 20,
+    max: 20,
+    detail: "7 yrs against a 5+ yr minimum",
+    tip: "This bucket is pass/fail at the minimum. Clearing 5+ years earns all 20 points; extra years add nothing.",
+    items: [{ label: "7 yrs vs. 5+ required", weight: "+20", note: "Full credit — no bonus for exceeding the minimum" }],
+  },
+  {
+    name: "Title similarity",
+    earned: 19,
+    max: 20,
+    detail: "\"Product Designer\" vs. \"Senior Product Designer\"",
+    tip: "Titles are compared as phrases. A seniority-only difference costs a single point; a different discipline would cost most of the bucket.",
+    items: [
+      { label: "Product Designer → Senior Product Designer", weight: "+19", note: "Same discipline, one seniority step below" },
+      { label: "UX Designer", weight: "+0", note: "Second title, already covered by the stronger match" },
+    ],
+  },
+  {
+    name: "Preferred extras",
+    earned: 7,
+    max: 10,
+    detail: "1 of 3 nice-to-haves",
+    tip: "Preferred items never disqualify. Missing B2B analytics tooling is the only real deduction in the whole score.",
+    items: [
+      { label: "Design ops ownership", weight: "+7", note: "Listed as preferred, matched from her tooling and process bullets" },
+      { label: "B2B analytics tooling", weight: "+0", note: "Not present — the ~3 point gap that keeps this off 95%" },
+    ],
+  },
+];
+
+function ScoreBreakdown() {
+  return (
+    <div className="mt-6 border-t border-border pt-5">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Score breakdown
+        </p>
+        <p className="text-xs text-muted-foreground">91.6 of 100 points · rounded to 92%</p>
+      </div>
+
+      <div className="mt-4 space-y-5">
+        {scoreBuckets.map((bucket) => (
+          <div key={bucket.name}>
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <Hint tip={bucket.tip}>
+                <span className="font-medium">{bucket.name}</span>
+              </Hint>
+              <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                {bucket.earned} / {bucket.max}
+              </span>
+            </div>
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${(bucket.earned / bucket.max) * 100}%` }}
+              />
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">{bucket.detail}</p>
+            <ul className="mt-2 space-y-1">
+              {bucket.items.map((item) => (
+                <li key={item.label} className="flex items-baseline justify-between gap-3 text-xs">
+                  <Hint tip={item.note}>
+                    <span className="text-muted-foreground">{item.label}</span>
+                  </Hint>
+                  <span className="shrink-0 font-mono text-muted-foreground">{item.weight}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 text-xs text-muted-foreground">
+        Hover any line to see why it earned — or lost — those points.
+      </p>
+    </div>
+  );
+}
+
 function Row({ label, value, tip }: { label: string; value: string; tip?: string }) {
+
   return (
     <div className="flex gap-2">
       <dt className="shrink-0 text-muted-foreground">{label}:</dt>
