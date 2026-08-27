@@ -277,29 +277,7 @@ const exampleSteps = [
     caption:
       "A resume summary and cover letter opener are drafted for this role. Maya edits before sending.",
     why: "The drafts are built from the step 2 output, not from scratch: strengths get pulled forward with numbers attached, and the closest gap gets addressed obliquely. Nothing is invented — every claim traces back to a line in her parsed resume.",
-    render: () => (
-      <>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Rewritten resume summary
-        </p>
-        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          <Hint tip="Leads with the posting's top required skill and her strongest signal, restated with the metric already on her resume (60 components, 4 teams, 40%). Quantified strengths land better than adjectives.">
-            Product designer with 7 years shipping systems-driven B2B software. Built and maintained
-            a 60-component design system adopted by four product teams, cutting handoff time by 40%.
-          </Hint>
-        </blockquote>
-        <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Cover letter opener
-        </p>
-        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          <Hint tip="Opens on the analytics-tooling gap from step 2 and reframes it with the closest real experience she has, so the weakest part of the match is answered in the first sentence instead of ignored.">
-            Northwind&apos;s move toward a unified analytics surface is exactly the problem I spent
-            the last two years on — consolidating five inconsistent dashboards into one system that a
-            small team could actually maintain.
-          </Hint>
-        </blockquote>
-      </>
-    ),
+    render: () => <TailorStudio />,
   },
   {
     key: "followup",
