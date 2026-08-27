@@ -277,29 +277,7 @@ const exampleSteps = [
     caption:
       "A resume summary and cover letter opener are drafted for this role. Maya edits before sending.",
     why: "The drafts are built from the step 2 output, not from scratch: strengths get pulled forward with numbers attached, and the closest gap gets addressed obliquely. Nothing is invented — every claim traces back to a line in her parsed resume.",
-    render: () => (
-      <>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Rewritten resume summary
-        </p>
-        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          <Hint tip="Leads with the posting's top required skill and her strongest signal, restated with the metric already on her resume (60 components, 4 teams, 40%). Quantified strengths land better than adjectives.">
-            Product designer with 7 years shipping systems-driven B2B software. Built and maintained
-            a 60-component design system adopted by four product teams, cutting handoff time by 40%.
-          </Hint>
-        </blockquote>
-        <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Cover letter opener
-        </p>
-        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          <Hint tip="Opens on the analytics-tooling gap from step 2 and reframes it with the closest real experience she has, so the weakest part of the match is answered in the first sentence instead of ignored.">
-            Northwind&apos;s move toward a unified analytics surface is exactly the problem I spent
-            the last two years on — consolidating five inconsistent dashboards into one system that a
-            small team could actually maintain.
-          </Hint>
-        </blockquote>
-      </>
-    ),
+    render: () => <TailorStudio />,
   },
   {
     key: "followup",
@@ -408,6 +386,159 @@ function WorkedExample() {
     </TooltipProvider>
   );
 }
+
+const tailorDrafts = [
+  {
+    angle: "Systems & scale",
+    summary:
+      "Product designer with 7 years shipping systems-driven B2B software. Built and maintained a 60-component design system adopted by four product teams, cutting handoff time by 40%.",
+    cover:
+      "Northwind's move toward a unified analytics surface is exactly the problem I spent the last two years on — consolidating five inconsistent dashboards into one system that a small team could actually maintain.",
+    why: "Leads with the posting's top required skill (design systems) and attaches the metric already on her resume. Opens the letter on the analytics-tooling gap so the weakest part of the match is answered first.",
+  },
+  {
+    angle: "Outcome-first",
+    summary:
+      "Product designer who turns messy B2B workflows into measurable wins: 40% faster design-to-ship handoff, five dashboards consolidated into one, four teams on a shared component library.",
+    cover:
+      "In my last two years I cut a five-dashboard mess down to one analytics surface that a three-person team maintains without a backlog — the same consolidation Northwind is starting now.",
+    why: "Same evidence, reordered so numbers come before role language. Useful when the posting emphasizes impact and ownership over craft vocabulary.",
+  },
+  {
+    angle: "Collaboration & craft",
+    summary:
+      "Product designer partnering closely with engineering on B2B tooling. Owned a 60-component library with four product teams as customers, and ran the review rituals that kept it adopted.",
+    cover:
+      "What drew me to Northwind is that the analytics work is cross-team by nature. My last consolidation succeeded because I treated four product teams as customers of the system, not consumers of a spec.",
+    why: "Foregrounds the cross-functional signal from her resume, since the posting names 'partner with data engineering' twice. Trades one metric for adoption language.",
+  },
+  {
+    angle: "Gap-forward",
+    summary:
+      "Product designer with 7 years in B2B software and two years designing data-heavy interfaces — dashboards, filters, and drill-downs used daily by internal analytics teams.",
+    cover:
+      "I'll be direct about the analytics-tooling line in your posting: I haven't shipped a BI product, but I've spent two years designing the dashboards and drill-downs analysts live in, and that's where the consolidation work actually happens.",
+    why: "Addresses the flagged gap head-on rather than obliquely. Scores lower on keyword overlap but reads honestly for roles where the gap is likely to come up in screening anyway.",
+  },
+] as const;
+
+function TailorStudio() {
+  const [versions, setVersions] = useState<number[]>([0]);
+  const [selected, setSelected] = useState(0);
+  const [compare, setCompare] = useState<number | null>(null);
+
+  const regenerate = () => {
+    const next = versions.length % tailorDrafts.length;
+    setVersions((v) => [...v, next]);
+    setSelected(versions.length);
+    setCompare(null);
+  };
+
+  const primary = tailorDrafts[versions[selected]!]!;
+  const secondary = compare === null ? null : tailorDrafts[versions[compare]!]!;
+
+  return (
+    <div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Version history
+        </span>
+        {versions.map((d, i) => (
+          <Hint key={i} tip={`Angle: ${tailorDrafts[d]!.angle}. Same parsed resume and job post — only the framing changes.`}>
+            <button
+              onClick={() => setSelected(i)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                i === selected
+                  ? "bg-primary text-primary-foreground"
+                  : i === compare
+                    ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
+                    : "bg-background text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              v{i + 1}
+            </button>
+          </Hint>
+        ))}
+        <Button size="sm" variant="outline" onClick={regenerate} disabled={versions.length >= 4}>
+          Regenerate
+        </Button>
+        {versions.length > 1 && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() =>
+              setCompare((c) =>
+                c === null ? versions.map((_, i) => i).find((i) => i !== selected) ?? null : null,
+              )
+            }
+          >
+            {compare === null ? "Compare" : "Exit compare"}
+          </Button>
+        )}
+      </div>
+
+      <div className={`mt-5 grid gap-6 ${secondary ? "md:grid-cols-2" : ""}`}>
+        <DraftCard label={`v${selected + 1}`} draft={primary} />
+        {secondary && compare !== null && (
+          <div className="border-t border-border pt-6 md:border-l md:border-t-0 md:pt-0 md:pl-6">
+            <div className="mb-3 flex flex-wrap gap-2">
+              {versions.map((_, i) =>
+                i === selected ? null : (
+                  <button
+                    key={i}
+                    onClick={() => setCompare(i)}
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      i === compare
+                        ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
+                        : "bg-background text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    v{i + 1}
+                  </button>
+                ),
+              )}
+            </div>
+            <DraftCard label={`v${compare + 1}`} draft={secondary} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DraftCard({
+  label,
+  draft,
+}: {
+  label: string;
+  draft: (typeof tailorDrafts)[number];
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-primary">{label}</span>
+        <span className="text-xs text-muted-foreground">{draft.angle}</span>
+      </div>
+      <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Rewritten resume summary
+      </p>
+      <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+        {draft.summary}
+      </blockquote>
+      <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Cover letter opener
+      </p>
+      <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+        {draft.cover}
+      </blockquote>
+      <p className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
+        <span className="font-semibold text-foreground">Why this version: </span>
+        {draft.why}
+      </p>
+    </div>
+  );
+}
+
 
 function ExampleStep({
   step,
