@@ -395,6 +395,17 @@ const tailorDrafts = [
     cover:
       "Northwind's move toward a unified analytics surface is exactly the problem I spent the last two years on — consolidating five inconsistent dashboards into one system that a small team could actually maintain.",
     why: "Leads with the posting's top required skill (design systems) and attaches the metric already on her resume. Opens the letter on the analytics-tooling gap so the weakest part of the match is answered first.",
+    ats: {
+      score: 94,
+      note: "Standard section headings, single-column layout, no tables or graphics — parses cleanly in every major ATS.",
+      flags: ["Standard headings", "Single column", "No tables/images", "Standard bullets"],
+    },
+    keywords: {
+      score: 91,
+      note: "Covers 9 of 10 posting keywords. 'Analytics tooling' appears once in the cover but not in the summary.",
+      hits: ["design system", "component library", "B2B software", "product designer", "handoff", "adopted", "analytics surface", "maintain", "teams"],
+      misses: ["analytics tooling"],
+    },
   },
   {
     angle: "Outcome-first",
@@ -403,6 +414,17 @@ const tailorDrafts = [
     cover:
       "In my last two years I cut a five-dashboard mess down to one analytics surface that a three-person team maintains without a backlog — the same consolidation Northwind is starting now.",
     why: "Same evidence, reordered so numbers come before role language. Useful when the posting emphasizes impact and ownership over craft vocabulary.",
+    ats: {
+      score: 92,
+      note: "Clean structure and standard headings. The colon-heavy summary line reads slightly dense to parsers but stays within tolerance.",
+      flags: ["Standard headings", "Single column", "No tables/images", "Slightly dense summary"],
+    },
+    keywords: {
+      score: 84,
+      note: "Covers 8 of 10 keywords. Swapping 'design system' for 'component library' drops the posting's top exact-match phrase.",
+      hits: ["component library", "B2B workflows", "product designer", "handoff", "dashboards", "analytics surface", "maintains", "teams"],
+      misses: ["design system", "analytics tooling"],
+    },
   },
   {
     angle: "Collaboration & craft",
@@ -411,6 +433,17 @@ const tailorDrafts = [
     cover:
       "What drew me to Northwind is that the analytics work is cross-team by nature. My last consolidation succeeded because I treated four product teams as customers of the system, not consumers of a spec.",
     why: "Foregrounds the cross-functional signal from her resume, since the posting names 'partner with data engineering' twice. Trades one metric for adoption language.",
+    ats: {
+      score: 95,
+      note: "The cleanest of the four: short sentences, standard headings, and no formatting the parser can trip on.",
+      flags: ["Standard headings", "Single column", "Short sentences", "No tables/images"],
+    },
+    keywords: {
+      score: 79,
+      note: "Covers 7 of 10 keywords. 'Partnering with engineering' is a near-match for 'partner with data engineering' but not exact, and no metric keywords carry over.",
+      hits: ["product designer", "B2B tooling", "component library", "product teams", "engineering", "adopted", "cross-team"],
+      misses: ["design system", "analytics tooling", "handoff"],
+    },
   },
   {
     angle: "Gap-forward",
@@ -419,6 +452,17 @@ const tailorDrafts = [
     cover:
       "I'll be direct about the analytics-tooling line in your posting: I haven't shipped a BI product, but I've spent two years designing the dashboards and drill-downs analysts live in, and that's where the consolidation work actually happens.",
     why: "Addresses the flagged gap head-on rather than obliquely. Scores lower on keyword overlap but reads honestly for roles where the gap is likely to come up in screening anyway.",
+    ats: {
+      score: 90,
+      note: "Fully parseable, though the em-dash phrasing and first-person honesty line are written for a human reader, not a keyword ranker.",
+      flags: ["Standard headings", "Single column", "No tables/images", "Human-first phrasing"],
+    },
+    keywords: {
+      score: 72,
+      note: "Covers 6 of 10 keywords. 'Analytics tooling' is named directly (a win for screening questions) but systems vocabulary disappears entirely.",
+      hits: ["product designer", "B2B software", "analytics tooling", "dashboards", "drill-downs", "analytics teams"],
+      misses: ["design system", "component library", "handoff", "adopted"],
+    },
   },
 ] as const;
 
