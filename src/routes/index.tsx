@@ -550,6 +550,19 @@ function TailorStudio() {
   );
 }
 
+function ScoreBar({ score, tone }: { score: number; tone?: "warn" }) {
+  const color =
+    score >= 85 ? "bg-primary" : score >= 75 ? "bg-amber-500" : "bg-destructive";
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+        <div className={`h-full rounded-full ${tone === "warn" ? "bg-amber-500" : color}`} style={{ width: `${score}%` }} />
+      </div>
+      <span className="text-xs font-semibold text-foreground">{score}</span>
+    </div>
+  );
+}
+
 function DraftCard({
   label,
   draft,
@@ -563,6 +576,53 @@ function DraftCard({
         <span className="text-xs font-semibold uppercase tracking-wide text-primary">{label}</span>
         <span className="text-xs text-muted-foreground">{draft.angle}</span>
       </div>
+
+      <div className="mt-4 grid gap-3 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">
+        <div>
+          <Hint tip={draft.ats.note}>
+            <p className="cursor-help text-xs font-medium uppercase tracking-wide text-muted-foreground underline decoration-dotted underline-offset-2">
+              ATS readability
+            </p>
+          </Hint>
+          <div className="mt-1.5">
+            <ScoreBar score={draft.ats.score} />
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {draft.ats.flags.map((f) => (
+              <span key={f} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground">
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+          <Hint tip={draft.keywords.note}>
+            <p className="cursor-help text-xs font-medium uppercase tracking-wide text-muted-foreground underline decoration-dotted underline-offset-2">
+              Keyword coverage
+            </p>
+          </Hint>
+          <div className="mt-1.5">
+            <ScoreBar score={draft.keywords.score} />
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {draft.keywords.hits.map((k) => (
+              <Hint key={k} tip={`"${k}" appears in the posting and in this version.`}>
+                <span className="cursor-help rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                  {k}
+                </span>
+              </Hint>
+            ))}
+            {draft.keywords.misses.map((k) => (
+              <Hint key={k} tip={`"${k}" appears in the posting but is missing from this version.`}>
+                <span className="cursor-help rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">
+                  {k}
+                </span>
+              </Hint>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Rewritten resume summary
       </p>
