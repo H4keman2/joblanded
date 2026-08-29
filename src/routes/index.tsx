@@ -567,8 +567,22 @@ function TailorStudio() {
     setCompare(null);
   };
 
-  const primary = tailorDrafts[versions[selected]!]!;
-  const secondary = compare === null ? null : tailorDrafts[versions[compare]!]!;
+  const optimize = () => {
+    const base = versions[selected]! % 100;
+    const optimized = base + 100;
+    if (versions.includes(optimized)) {
+      setSelected(versions.indexOf(optimized));
+    } else {
+      setVersions((v) => [...v, optimized]);
+      setSelected(versions.length);
+    }
+    setCompare(null);
+  };
+
+  const primary = resolveDraft(versions[selected]!);
+  const secondary = compare === null ? null : resolveDraft(versions[compare]!);
+  const versionLabel = (i: number) =>
+    `v${i + 1}${isOptimized(versions[i]!) ? " · ATS" : ""}`;
 
   return (
     <div>
