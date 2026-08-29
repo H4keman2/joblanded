@@ -473,9 +473,8 @@ const tailorDrafts: TailorDraft[] = [
       misses: ["design system", "component library", "handoff", "adopted"],
     },
   },
-] as const;
+];
 
-type TailorDraft = (typeof tailorDrafts)[number];
 
 // ATS-optimized revisions: same inputs, rewritten to fix the base version's
 // weakest readability flag and work the missing keywords back in.
