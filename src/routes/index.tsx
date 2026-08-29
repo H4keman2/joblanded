@@ -630,7 +630,7 @@ function TailorStudio() {
       </div>
 
       <div className={`mt-5 grid gap-6 ${secondary ? "md:grid-cols-2" : ""}`}>
-        <DraftCard label={`v${selected + 1}`} draft={primary} />
+        <DraftCard label={versionLabel(selected)} draft={primary} />
         {secondary && compare !== null && (
           <div className="border-t border-border pt-6 md:border-l md:border-t-0 md:pt-0 md:pl-6">
             <div className="mb-3 flex flex-wrap gap-2">
@@ -645,12 +645,12 @@ function TailorStudio() {
                         : "bg-background text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    v{i + 1}
+                    {versionLabel(i)}
                   </button>
                 ),
               )}
             </div>
-            <DraftCard label={`v${compare + 1}`} draft={secondary} />
+            <DraftCard label={versionLabel(compare)} draft={secondary} />
           </div>
         )}
       </div>
