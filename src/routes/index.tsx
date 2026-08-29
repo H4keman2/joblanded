@@ -387,7 +387,16 @@ function WorkedExample() {
   );
 }
 
-const tailorDrafts = [
+interface TailorDraft {
+  angle: string;
+  summary: string;
+  cover: string;
+  why: string;
+  ats: { score: number; note: string; flags: string[] };
+  keywords: { score: number; note: string; hits: string[]; misses: string[] };
+}
+
+const tailorDrafts: TailorDraft[] = [
   {
     angle: "Systems & scale",
     summary:
