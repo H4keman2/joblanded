@@ -676,7 +676,7 @@ function DraftCard({
   draft,
 }: {
   label: string;
-  draft: (typeof tailorDrafts)[number];
+  draft: TailorDraft;
 }) {
   return (
     <div>
