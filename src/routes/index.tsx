@@ -466,6 +466,95 @@ const tailorDrafts = [
   },
 ] as const;
 
+type TailorDraft = (typeof tailorDrafts)[number];
+
+// ATS-optimized revisions: same inputs, rewritten to fix the base version's
+// weakest readability flag and work the missing keywords back in.
+const optimizedDrafts: TailorDraft[] = [
+  {
+    angle: "ATS-optimized · Systems & scale",
+    summary:
+      "Product designer with 7 years in B2B software. Built a 60-component design system adopted by four product teams, cutting handoff time by 40%. Designed analytics tooling dashboards used daily by internal teams.",
+    cover:
+      "Northwind's move toward a unified analytics surface is exactly the problem I spent the last two years on — consolidating five inconsistent dashboards into one design system and analytics tooling surface that a small team could actually maintain.",
+    why: "Only change vs. v1: the missing 'analytics tooling' keyword is worked into both the summary and the letter. Readability flags were already clean, so nothing else moved.",
+    ats: {
+      score: 96,
+      note: "Keeps v1's clean structure. Sentence split for scanability; no new formatting risk introduced.",
+      flags: ["Standard headings", "Single column", "No tables/images", "Shorter sentences"],
+    },
+    keywords: {
+      score: 100,
+      note: "Covers all 10 posting keywords. 'Analytics tooling' now appears in both the summary and the cover letter.",
+      hits: ["design system", "component library", "B2B software", "product designer", "handoff", "adopted", "analytics surface", "analytics tooling", "maintain", "teams"],
+      misses: [],
+    },
+  },
+  {
+    angle: "ATS-optimized · Outcome-first",
+    summary:
+      "Product designer who turns messy B2B workflows into measurable wins. Cut design-to-ship handoff time 40%, consolidated five dashboards into one analytics tooling surface, and moved four teams onto a shared design system.",
+    cover:
+      "In my last two years I cut a five-dashboard mess down to one analytics surface that a three-person team maintains without a backlog — the same consolidation Northwind is starting now, built on the design system four teams already ship from.",
+    why: "Fixes v2's two problems: the dense colon-led summary is split into short sentences (readability flag), and the exact-match phrases 'design system' and 'analytics tooling' are restored.",
+    ats: {
+      score: 96,
+      note: "Colon-heavy summary line split into three short sentences — clears the 'slightly dense summary' flag.",
+      flags: ["Standard headings", "Single column", "No tables/images", "Short sentences"],
+    },
+    keywords: {
+      score: 100,
+      note: "Covers all 10 posting keywords. 'Design system' and 'analytics tooling' restored as exact matches.",
+      hits: ["design system", "component library", "B2B workflows", "product designer", "handoff", "dashboards", "analytics surface", "analytics tooling", "maintains", "teams"],
+      misses: [],
+    },
+  },
+  {
+    angle: "ATS-optimized · Collaboration & craft",
+    summary:
+      "Product designer partnering with engineering on B2B tooling. Owned a 60-component design system with four product teams as customers, cutting handoff time 40% and keeping adoption high through analytics tooling review rituals.",
+    cover:
+      "What drew me to Northwind is that the analytics tooling work is cross-team by nature. My last consolidation succeeded because I treated four product teams as customers of the design system, not consumers of a spec — and handoff time dropped 40% as a result.",
+    why: "Keeps v3's collaboration angle but restores the exact phrase 'design system', the dropped 'handoff' keyword, and the missing 'analytics tooling'. Retains the strongest readability score of the set.",
+    ats: {
+      score: 96,
+      note: "v3 was already the cleanest structure; the keyword additions were made without lengthening sentences past parser-safe limits.",
+      flags: ["Standard headings", "Single column", "Short sentences", "No tables/images"],
+    },
+    keywords: {
+      score: 100,
+      note: "Covers all 10 posting keywords. 'Design system', 'handoff', and 'analytics tooling' all restored.",
+      hits: ["design system", "product designer", "B2B tooling", "component library", "product teams", "engineering", "adopted", "cross-team", "handoff", "analytics tooling"],
+      misses: [],
+    },
+  },
+  {
+    angle: "ATS-optimized · Gap-forward",
+    summary:
+      "Product designer with 7 years in B2B software and two years designing analytics tooling — dashboards, filters, and drill-downs built on a shared design system and used daily by internal analytics teams.",
+    cover:
+      "I'll be direct about the analytics-tooling line in your posting: I haven't shipped a BI product, but I've spent two years designing the dashboards and drill-downs analysts live in, inside the same design system that cut our handoff time 40% — and that's where the consolidation work actually happens.",
+    why: "Keeps v4's honest gap framing but pulls 'design system', 'component library' context, 'handoff', and 'adopted' back into the text. The human-first honesty line stays — it's a readability choice, not a parser risk.",
+    ats: {
+      score: 93,
+      note: "Fully parseable. First-person honesty line retained deliberately: it's the version's angle, and it costs nothing at the parser.",
+      flags: ["Standard headings", "Single column", "No tables/images", "Human-first phrasing"],
+    },
+    keywords: {
+      score: 95,
+      note: "Covers 9 of 10 keywords. 'Adopted' is implied by the consolidation story rather than stated — the one deliberate trade-off kept from v4.",
+      hits: ["design system", "product designer", "B2B software", "analytics tooling", "dashboards", "drill-downs", "analytics teams", "handoff", "component library"],
+      misses: ["adopted"],
+    },
+  },
+];
+
+// Version refs: 0..3 are base drafts, 100..103 are their ATS-optimized revisions.
+function resolveDraft(ref: number): TailorDraft {
+  return ref >= 100 ? optimizedDrafts[ref - 100]! : tailorDrafts[ref]!;
+}
+const isOptimized = (ref: number) => ref >= 100;
+
 function TailorStudio() {
   const [versions, setVersions] = useState<number[]>([0]);
   const [selected, setSelected] = useState(0);
