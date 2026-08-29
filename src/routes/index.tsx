@@ -591,7 +591,7 @@ function TailorStudio() {
           Version history
         </span>
         {versions.map((d, i) => (
-          <Hint key={i} tip={`Angle: ${tailorDrafts[d]!.angle}. Same parsed resume and job post — only the framing changes.`}>
+          <Hint key={i} tip={`Angle: ${resolveDraft(d).angle}. Same parsed resume and job post — only the framing changes.`}>
             <button
               onClick={() => setSelected(i)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
@@ -602,13 +602,18 @@ function TailorStudio() {
                     : "bg-background text-muted-foreground hover:text-foreground"
               }`}
             >
-              v{i + 1}
+              {versionLabel(i)}
             </button>
           </Hint>
         ))}
         <Button size="sm" variant="outline" onClick={regenerate} disabled={versions.length >= 4}>
           Regenerate
         </Button>
+        <Hint tip="Rewrites the selected draft to fix its weakest ATS readability flag and work its missing keywords back in — same evidence, higher coverage.">
+          <Button size="sm" onClick={optimize}>
+            ATS-optimize this draft
+          </Button>
+        </Hint>
         {versions.length > 1 && (
           <Button
             size="sm"
