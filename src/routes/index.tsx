@@ -587,6 +587,24 @@ function TailorStudio() {
     setCompare(null);
   };
 
+  const optimizeAll = () => {
+    setVersions((prev) => {
+      const bases = [...new Set(prev.filter((r) => r < 100))];
+      const missing = bases.map((b) => b + 100).filter((o) => !prev.includes(o));
+      return [...prev, ...missing];
+    });
+    // Pair the current base draft with its optimized twin for side-by-side compare.
+    const base = versions[selected]! % 100;
+    const optimizedRef = base + 100;
+    const next = versions.includes(optimizedRef)
+      ? versions
+      : [...versions, ...[...new Set(versions.filter((r) => r < 100))].map((b) => b + 100).filter((o) => !versions.includes(o))];
+    const baseIdx = next.indexOf(base);
+    const optIdx = next.indexOf(optimizedRef);
+    setSelected(baseIdx === -1 ? 0 : baseIdx);
+    setCompare(optIdx === -1 ? null : optIdx);
+  };
+
   const primary = resolveDraft(versions[selected]!);
   const secondary = compare === null ? null : resolveDraft(versions[compare]!);
   const versionLabel = (i: number) =>
@@ -620,6 +638,11 @@ function TailorStudio() {
         <Hint tip="Rewrites the selected draft to fix its weakest ATS readability flag and work its missing keywords back in — same evidence, higher coverage.">
           <Button size="sm" onClick={optimize}>
             ATS-optimize this draft
+          </Button>
+        </Hint>
+        <Hint tip="Creates an ATS-optimized revision of every base version in the history and opens the selected base next to its optimized twin so you can compare side by side.">
+          <Button size="sm" variant="secondary" onClick={optimizeAll}>
+            ATS-optimize all versions
           </Button>
         </Hint>
         {versions.length > 1 && (
