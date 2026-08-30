@@ -640,6 +640,11 @@ function TailorStudio() {
             ATS-optimize this draft
           </Button>
         </Hint>
+        <Hint tip="Creates an ATS-optimized revision of every base version in the history and opens the selected base next to its optimized twin so you can compare side by side.">
+          <Button size="sm" variant="secondary" onClick={optimizeAll}>
+            ATS-optimize all versions
+          </Button>
+        </Hint>
         {versions.length > 1 && (
           <Button
             size="sm"
