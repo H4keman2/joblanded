@@ -764,7 +764,7 @@ function diffWords(base: string, target: string): DiffToken[] {
   return out;
 }
 
-function DiffText({ base, text }: { base?: string; text: string }) {
+function DiffText({ base, text }: { base?: string | undefined; text: string }) {
   if (!base || base === text) return <>{text}</>;
   return (
     <>
@@ -795,7 +795,7 @@ function DraftCard({
 }: {
   label: string;
   draft: TailorDraft;
-  diffAgainst?: TailorDraft;
+  diffAgainst?: TailorDraft | undefined;
 }) {
 
   return (
