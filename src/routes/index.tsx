@@ -658,10 +658,21 @@ function TailorStudio() {
             {compare === null ? "Compare" : "Exit compare"}
           </Button>
         )}
+        {compare !== null && (
+          <Hint tip="Word-level diff between the two drafts: text only in the other version is struck through, text unique to this one is highlighted.">
+            <Button size="sm" variant={showDiff ? "secondary" : "ghost"} onClick={() => setShowDiff((d) => !d)}>
+              {showDiff ? "Hide changes" : "Highlight changes"}
+            </Button>
+          </Hint>
+        )}
       </div>
 
       <div className={`mt-5 grid gap-6 ${secondary ? "md:grid-cols-2" : ""}`}>
-        <DraftCard label={versionLabel(selected)} draft={primary} />
+        <DraftCard
+          label={versionLabel(selected)}
+          draft={primary}
+          diffAgainst={secondary && showDiff ? secondary : undefined}
+        />
         {secondary && compare !== null && (
           <div className="border-t border-border pt-6 md:border-l md:border-t-0 md:pt-0 md:pl-6">
             <div className="mb-3 flex flex-wrap gap-2">
@@ -681,10 +692,15 @@ function TailorStudio() {
                 ),
               )}
             </div>
-            <DraftCard label={versionLabel(compare)} draft={secondary} />
+            <DraftCard
+              label={versionLabel(compare)}
+              draft={secondary}
+              diffAgainst={showDiff ? primary : undefined}
+            />
           </div>
         )}
       </div>
+
     </div>
   );
 }
