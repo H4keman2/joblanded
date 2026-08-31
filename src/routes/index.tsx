@@ -833,18 +833,27 @@ function DraftCard({
         </div>
       </div>
 
-      <p className="mt-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Rewritten resume summary
-      </p>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Rewritten resume summary
+        </p>
+        {diffAgainst && (
+          <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
+            <span className="rounded-sm bg-primary/15 px-1 font-medium text-foreground">added</span>
+            <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">removed</span>
+          </span>
+        )}
+      </div>
       <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-        {draft.summary}
+        <DiffText base={diffAgainst?.summary} text={draft.summary} />
       </blockquote>
       <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Cover letter opener
       </p>
       <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-        {draft.cover}
+        <DiffText base={diffAgainst?.cover} text={draft.cover} />
       </blockquote>
+
       <p className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
         <span className="font-semibold text-foreground">Why this version: </span>
         {draft.why}
