@@ -567,6 +567,8 @@ function TailorStudio() {
   const [versions, setVersions] = useState<number[]>([0]);
   const [selected, setSelected] = useState(0);
   const [compare, setCompare] = useState<number | null>(null);
+  const [showDiff, setShowDiff] = useState(true);
+
 
   const regenerate = () => {
     const next = versions.length % tailorDrafts.length;
