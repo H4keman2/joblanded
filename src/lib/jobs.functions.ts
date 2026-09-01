@@ -130,7 +130,7 @@ export const listDrafts = createServerFn({ method: "GET" })
     return (rows ?? []).map((r) => ({
       id: r.id,
       created_at: r.created_at,
-      draft: JSON.parse(r.content) as Record<string, unknown>,
+      content: r.content,
     }));
   });
 
@@ -244,7 +244,7 @@ ${DRAFT_SHAPE}`;
       .single();
     if (error) throw new Error(error.message);
 
-    return { id: row.id, created_at: row.created_at, draft };
+    return { id: row.id, created_at: row.created_at, content: row.content };
   });
 
 export const deleteDraft = createServerFn({ method: "POST" })

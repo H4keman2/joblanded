@@ -30,9 +30,15 @@ export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
   component: JobDetailPage,
 });
 
-type StoredDraft = { id: string; created_at: string; draft: Record<string, unknown> };
+type StoredDraft = { id: string; created_at: string; content: string };
 
-function normalize(raw: Record<string, unknown>): TailorDraft {
+function normalize(content: string): TailorDraft {
+  let raw: Record<string, unknown> = {};
+  try {
+    raw = JSON.parse(content) as Record<string, unknown>;
+  } catch {
+    raw = {};
+  }
   const s = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? Math.round(v) : 0);
   const arr = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
@@ -89,8 +95,8 @@ function JobDetailPage() {
 
   const primaryEntry = versions[selected];
   const secondaryEntry = compare === null ? undefined : versions[compare];
-  const primary = primaryEntry ? normalize(primaryEntry.draft) : null;
-  const secondary = secondaryEntry ? normalize(secondaryEntry.draft) : null;
+  const primary = primaryEntry ? normalize(primaryEntry.content) : null;
+  const secondary = secondaryEntry ? normalize(secondaryEntry.content) : null;
   const label = (i: number) => `v${i + 1}`;
 
   return (
@@ -132,7 +138,7 @@ function JobDetailPage() {
               Version history
             </span>
             {versions.map((v, i) => (
-              <Hint key={v.id} tip={`Angle: ${normalize(v.draft).angle}. Same resume and posting — only the framing changes.`}>
+              <Hint key={v.id} tip={`Angle: ${normalize(v.content).angle}. Same resume and posting — only the framing changes.`}>
                 <button
                   onClick={() => setSelected(i)}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
