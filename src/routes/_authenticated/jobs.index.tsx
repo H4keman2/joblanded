@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/jobs")({
+export const Route = createFileRoute("/_authenticated/jobs/")({
   head: () => ({
     meta: [
       { title: "Jobs — JobLanded" },
