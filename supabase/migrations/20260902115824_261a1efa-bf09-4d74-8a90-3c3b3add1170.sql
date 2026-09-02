@@ -1,0 +1,2 @@
+ALTER TABLE public.tailored_documents DROP CONSTRAINT tailored_documents_type_check;
+ALTER TABLE public.tailored_documents ADD CONSTRAINT tailored_documents_type_check CHECK (type = ANY (ARRAY['resume'::text, 'cover_letter'::text, 'tailor_version'::text]));
