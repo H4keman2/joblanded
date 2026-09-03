@@ -1,13 +1,21 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Sparkles, Wand2 } from "lucide-react";
-import { generateDraft, getJob, listDrafts } from "@/lib/jobs.functions";
+import { ArrowLeft, Loader2, Layers, Sparkles, Wand2 } from "lucide-react";
+import { generateDraft, getJob, listDrafts, listJobs } from "@/lib/jobs.functions";
 import { DraftCard, Hint, type TailorDraft } from "@/components/tailor/DraftCard";
+
 
 export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
   head: () => ({
@@ -62,7 +70,9 @@ function normalize(content: string): TailorDraft {
 function JobDetailPage() {
   const { jobId } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const fetchJob = useServerFn(getJob);
+  const fetchJobs = useServerFn(listJobs);
   const fetchDrafts = useServerFn(listDrafts);
   const generate = useServerFn(generateDraft);
 
@@ -71,12 +81,31 @@ function JobDetailPage() {
   const [showDiff, setShowDiff] = useState(true);
 
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => fetchJob({ data: { id: jobId } }) });
+  const roles = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
   const drafts = useQuery({
     queryKey: ["drafts", jobId],
     queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
   });
 
   const versions = drafts.data ?? [];
+  const roleOptions = roles.data ?? [];
+
+  const genAll = useMutation({
+    mutationFn: async () => {
+      const targets = roleOptions.filter((r) => r.id !== jobId);
+      for (const r of targets) {
+        await generate({ data: { jobId: r.id } });
+        await qc.invalidateQueries({ queryKey: ["drafts", r.id] });
+      }
+      return targets.length;
+    },
+    onSuccess: (count) =>
+      count === 0
+        ? toast.info("Add more roles on the Jobs page to tailor several at once.")
+        : toast.success(`Tailored a new version for ${count} other role${count === 1 ? "" : "s"}`),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const gen = useMutation({
     mutationFn: (input: { optimizeFromId?: string }) =>
@@ -106,10 +135,40 @@ function JobDetailPage() {
           <Link to="/jobs" className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground">
             <ArrowLeft className="mr-1 h-3.5 w-3.5" /> All jobs
           </Link>
-          <h1 className="mt-3 text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
+            {roleOptions.length > 1 && (
+              <Hint tip="Switch the role you're tailoring against. Each role keeps its own saved versions.">
+                <div className="min-w-56">
+                  <Select
+                    value={jobId}
+                    onValueChange={(id) => {
+                      if (id === jobId) return;
+                      setSelected(0);
+                      setCompare(null);
+                      void navigate({ to: "/jobs/$jobId", params: { jobId: id } });
+                    }}
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Choose a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roleOptions.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.title}
+                          {r.company ? ` · ${r.company}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </Hint>
+            )}
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {[job.data?.company, job.data?.location].filter(Boolean).join(" · ")}
           </p>
+
           {job.data?.source_url && (
             <a
               href={job.data.source_url}
@@ -155,11 +214,30 @@ function JobDetailPage() {
             ))}
 
             <Hint tip="Runs your latest parsed resume against this posting and writes a new tailored version with a different framing angle.">
-              <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending}>
+              <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending || genAll.isPending}>
                 {gen.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
                 {versions.length === 0 ? "Generate first version" : "Regenerate"}
               </Button>
             </Hint>
+
+            {roleOptions.length > 1 && (
+              <Hint tip="Tailors your resume for every other saved role too. Each role's version is saved under that role.">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={gen.isPending || genAll.isPending}
+                  onClick={() => genAll.mutate()}
+                >
+                  {genAll.isPending ? (
+                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Layers className="mr-1.5 h-4 w-4" />
+                  )}
+                  Tailor all roles
+                </Button>
+              </Hint>
+            )}
+
 
             {primaryEntry && (
               <Hint tip="Rewrites the selected version to fix its weakest readability flags and work its missing keywords back in, then opens both side by side.">
