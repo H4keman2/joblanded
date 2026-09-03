@@ -214,11 +214,30 @@ function JobDetailPage() {
             ))}
 
             <Hint tip="Runs your latest parsed resume against this posting and writes a new tailored version with a different framing angle.">
-              <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending}>
+              <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending || genAll.isPending}>
                 {gen.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
                 {versions.length === 0 ? "Generate first version" : "Regenerate"}
               </Button>
             </Hint>
+
+            {roleOptions.length > 1 && (
+              <Hint tip="Tailors your resume for every other saved role too. Each role's version is saved under that role.">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={gen.isPending || genAll.isPending}
+                  onClick={() => genAll.mutate()}
+                >
+                  {genAll.isPending ? (
+                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Layers className="mr-1.5 h-4 w-4" />
+                  )}
+                  Tailor all roles
+                </Button>
+              </Hint>
+            )}
+
 
             {primaryEntry && (
               <Hint tip="Rewrites the selected version to fix its weakest readability flags and work its missing keywords back in, then opens both side by side.">
