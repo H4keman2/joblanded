@@ -70,7 +70,9 @@ function normalize(content: string): TailorDraft {
 function JobDetailPage() {
   const { jobId } = Route.useParams();
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const fetchJob = useServerFn(getJob);
+  const fetchJobs = useServerFn(listJobs);
   const fetchDrafts = useServerFn(listDrafts);
   const generate = useServerFn(generateDraft);
 
@@ -79,12 +81,31 @@ function JobDetailPage() {
   const [showDiff, setShowDiff] = useState(true);
 
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => fetchJob({ data: { id: jobId } }) });
+  const roles = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
   const drafts = useQuery({
     queryKey: ["drafts", jobId],
     queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
   });
 
   const versions = drafts.data ?? [];
+  const roleOptions = roles.data ?? [];
+
+  const genAll = useMutation({
+    mutationFn: async () => {
+      const targets = roleOptions.filter((r) => r.id !== jobId);
+      for (const r of targets) {
+        await generate({ data: { jobId: r.id } });
+        await qc.invalidateQueries({ queryKey: ["drafts", r.id] });
+      }
+      return targets.length;
+    },
+    onSuccess: (count) =>
+      count === 0
+        ? toast.info("Add more roles on the Jobs page to tailor several at once.")
+        : toast.success(`Tailored a new version for ${count} other role${count === 1 ? "" : "s"}`),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
 
   const gen = useMutation({
     mutationFn: (input: { optimizeFromId?: string }) =>
