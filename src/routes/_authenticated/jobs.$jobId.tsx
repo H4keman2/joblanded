@@ -135,10 +135,40 @@ function JobDetailPage() {
           <Link to="/jobs" className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground">
             <ArrowLeft className="mr-1 h-3.5 w-3.5" /> All jobs
           </Link>
-          <h1 className="mt-3 text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
+            {roleOptions.length > 1 && (
+              <Hint tip="Switch the role you're tailoring against. Each role keeps its own saved versions.">
+                <div className="min-w-56">
+                  <Select
+                    value={jobId}
+                    onValueChange={(id) => {
+                      if (id === jobId) return;
+                      setSelected(0);
+                      setCompare(null);
+                      void navigate({ to: "/jobs/$jobId", params: { jobId: id } });
+                    }}
+                  >
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Choose a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roleOptions.map((r) => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.title}
+                          {r.company ? ` · ${r.company}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </Hint>
+            )}
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {[job.data?.company, job.data?.location].filter(Boolean).join(" · ")}
           </p>
+
           {job.data?.source_url && (
             <a
               href={job.data.source_url}
