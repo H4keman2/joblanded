@@ -80,16 +80,42 @@ function JobDetailPage() {
   const [selected, setSelected] = useState(0);
   const [compare, setCompare] = useState<number | null>(null);
   const [showDiff, setShowDiff] = useState(true);
+  const pickedManually = useRef(false);
+  const autoSwitched = useRef(false);
 
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => fetchJob({ data: { id: jobId } }) });
   const roles = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
+  const fits = useQuery({ queryKey: ["role-fit"], queryFn: () => fetchFits() });
   const drafts = useQuery({
     queryKey: ["drafts", jobId],
     queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
   });
 
   const versions = drafts.data ?? [];
-  const roleOptions = roles.data ?? [];
+
+  const fitById = useMemo(() => {
+    const map = new Map<string, { fit: number | null; matched: string[] }>();
+    for (const f of fits.data ?? []) map.set(f.id, { fit: f.fit, matched: f.matched });
+    return map;
+  }, [fits.data]);
+
+  const roleOptions = useMemo(() => {
+    const list = (roles.data ?? []).map((r) => ({ ...r, ...(fitById.get(r.id) ?? { fit: null, matched: [] }) }));
+    return list.sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
+  }, [roles.data, fitById]);
+
+  const bestMatch = roleOptions[0]?.fit != null ? roleOptions[0] : undefined;
+
+  // Preselect the best-matching role when the user hasn't invested in this one yet.
+  useEffect(() => {
+    if (autoSwitched.current || pickedManually.current) return;
+    if (!bestMatch || bestMatch.id === jobId) return;
+    if (!drafts.isSuccess || versions.length > 0) return;
+    autoSwitched.current = true;
+    toast.info(`Switched to your best match: ${bestMatch.title}`);
+    void navigate({ to: "/jobs/$jobId", params: { jobId: bestMatch.id }, replace: true });
+  }, [bestMatch, jobId, drafts.isSuccess, versions.length, navigate]);
+
 
   const genAll = useMutation({
     mutationFn: async () => {
