@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Layers, Sparkles, Wand2 } from "lucide-react";
-import { generateDraft, getJob, listDrafts, listJobs } from "@/lib/jobs.functions";
+import { generateDraft, getJob, listDrafts, listJobs, rankRoles } from "@/lib/jobs.functions";
 import { DraftCard, Hint, type TailorDraft } from "@/components/tailor/DraftCard";
+
 
 
 export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
