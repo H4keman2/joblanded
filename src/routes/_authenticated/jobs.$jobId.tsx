@@ -77,6 +77,15 @@ function normalize(content: string): TailorDraft {
   };
 }
 
+function fileNameFor(jobTitle: string | undefined, versionLabel: string): string {
+  const base = (jobTitle ?? "resume").trim() || "resume";
+  const slug = `${base}-${versionLabel}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "tailored-resume";
+}
+
 function JobDetailPage() {
   const { jobId } = Route.useParams();
   const qc = useQueryClient();
@@ -343,6 +352,7 @@ function JobDetailPage() {
                 label={label(selected)}
                 draft={primary}
                 diffAgainst={secondary && showDiff ? secondary : undefined}
+                fileNameHint={fileNameFor(job.data?.title, label(selected))}
               />
               {secondary && compare !== null && (
                 <div className="border-t border-border pt-6 md:border-l md:border-t-0 md:pt-0 md:pl-6">
@@ -367,6 +377,7 @@ function JobDetailPage() {
                     label={label(compare)}
                     draft={secondary}
                     diffAgainst={showDiff ? primary : undefined}
+                    fileNameHint={fileNameFor(job.data?.title, label(compare))}
                   />
                 </div>
               )}

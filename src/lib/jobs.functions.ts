@@ -66,10 +66,93 @@ export const getJob = createServerFn({ method: "GET" })
     return job;
   });
 
-const addJobInput = z.object({
-  description: z.string().min(80, "Paste the full job description (at least a paragraph)."),
-  sourceUrl: z.string().url().optional().or(z.literal("")),
-});
+function htmlToText(html: string): string {
+  const withoutNonContent = html
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<!--[\s\S]*?-->/g, " ");
+  const withBreaks = withoutNonContent
+    .replace(/<li[^>]*>/gi, "\n• ")
+    .replace(/<(br|\/p|\/div|\/tr|\/h[1-6])\s*\/?>/gi, "\n");
+  const stripped = withBreaks.replace(/<[^>]+>/g, " ");
+  const decoded = stripped
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0?39;/gi, "'");
+  return decoded
+    .split("\n")
+    .map((line) => line.replace(/[ \t]+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
+// Some job boards embed the full posting as JSON-LD (schema.org JobPosting),
+// which reads far cleaner than scraping the visible page markup when it's
+// present, so prefer it before falling back to the rendered HTML.
+function extractJsonLdDescription(html: string): string | null {
+  const blocks = html.matchAll(
+    /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+  );
+  for (const match of blocks) {
+    try {
+      const json = JSON.parse(match[1] ?? "") as unknown;
+      const candidates = Array.isArray(json) ? json : [json];
+      for (const entry of candidates) {
+        const obj = entry as Record<string, unknown>;
+        if (obj?.["@type"] === "JobPosting" && typeof obj["description"] === "string") {
+          return htmlToText(obj["description"]);
+        }
+      }
+    } catch {
+      // Not valid JSON-LD, or not a JobPosting — fall through to HTML scraping.
+    }
+  }
+  return null;
+}
+
+async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; JobLandedBot/1.0; +https://github.com/H4keman2/joblanded)",
+        Accept: "text/html",
+      },
+    });
+  } catch {
+    throw new Error("Could not reach that posting URL. Paste the description instead.");
+  }
+  if (!res.ok) {
+    throw new Error(
+      `Could not load that posting (HTTP ${res.status}). Paste the description instead.`,
+    );
+  }
+
+  const html = await res.text();
+  const text = extractJsonLdDescription(html) ?? htmlToText(html);
+
+  if (text.length < 80) {
+    throw new Error(
+      "Could not read enough text from that page (some sites need JavaScript to show the posting). Paste the description instead.",
+    );
+  }
+  return text.slice(0, 30000);
+}
+
+export const addJobInput = z
+  .object({
+    description: z.string().default(""),
+    sourceUrl: z.string().url().optional().or(z.literal("")),
+  })
+  .refine((v) => v.description.trim().length >= 80 || !!v.sourceUrl, {
+    message: "Paste the full job description (at least a paragraph), or provide a posting URL.",
+    path: ["description"],
+  });
 
 // Shared by the Jobs page (addJob) and the Applications page (add-application flow):
 // extracts metadata from a pasted posting, saves the job, and automatically opens
@@ -80,11 +163,16 @@ export async function createJobForUser(
   userId: string,
   input: { description: string; sourceUrl?: string | undefined },
 ) {
+  const description =
+    input.description.trim().length >= 80
+      ? input.description
+      : await fetchJobDescriptionFromUrl(input.sourceUrl!);
+
   const extracted = await callAI(
     `Extract job posting metadata. Return ONLY JSON:
 {"title": string, "company": string | null, "location": string | null, "pay_min": number | null, "pay_max": number | null}
 Pay values are annual USD numbers when stated, otherwise null. Never invent facts.`,
-    input.description.slice(0, 30000),
+    description.slice(0, 30000),
   );
 
   const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
@@ -100,7 +188,7 @@ Pay values are annual USD numbers when stated, otherwise null. Never invent fact
       pay_min: num(extracted["pay_min"]),
       pay_max: num(extracted["pay_max"]),
       source_url: input.sourceUrl || null,
-      description: input.description,
+      description,
     })
     .select("id, title, company, location, pay_min, pay_max, source_url, date_added")
     .single();

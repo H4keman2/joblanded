@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { createJobForUser } from "@/lib/jobs.functions";
+import { addJobInput, createJobForUser } from "@/lib/jobs.functions";
 
 export const APPLICATION_STATUSES = [
   "saved",
@@ -27,16 +27,13 @@ export const listApplications = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
-// Lets someone add an application straight from this page (paste a posting)
-// instead of going to Jobs first — creates the job and its application together.
-const addInput = z.object({
-  description: z.string().min(80, "Paste the full job description (at least a paragraph)."),
-  sourceUrl: z.string().url().optional().or(z.literal("")),
-});
-
+// Lets someone add an application straight from this page (paste a posting, or
+// just its URL) instead of going to Jobs first — creates the job and its
+// application together. Reuses addJob's validator so both flows accept either
+// pasted text or a URL the same way.
 export const addApplication = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => addInput.parse(input))
+  .inputValidator((input: unknown) => addJobInput.parse(input))
   .handler(async ({ data, context }) => {
     const job = await createJobForUser(context.supabase, context.userId, data);
 

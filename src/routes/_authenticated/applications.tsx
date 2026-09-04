@@ -157,7 +157,7 @@ function ApplicationsPage() {
             }}
           >
             <div>
-              <Label htmlFor="app-description">Job description</Label>
+              <Label htmlFor="app-description">Job description (optional if you add a URL)</Label>
               <Textarea
                 id="app-description"
                 value={description}
@@ -168,7 +168,7 @@ function ApplicationsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="app-sourceUrl">Posting URL (optional)</Label>
+              <Label htmlFor="app-sourceUrl">Posting URL</Label>
               <Input
                 id="app-sourceUrl"
                 value={sourceUrl}
@@ -176,6 +176,9 @@ function ApplicationsPage() {
                 placeholder="https://…"
                 className="mt-1.5"
               />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                No link handy? Leave this blank and paste the posting text below instead.
+              </p>
             </div>
             <Button type="submit" disabled={addMutation.isPending}>
               {addMutation.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}

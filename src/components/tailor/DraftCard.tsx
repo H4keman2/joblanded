@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { downloadResumePdf } from "@/lib/resume-pdf";
 
 export interface TailorDraft {
   angle: string;
@@ -28,7 +29,10 @@ export function ScoreBar({ score }: { score: number }) {
   return (
     <div className="flex items-center gap-2">
       <div className="h-1.5 w-24 overflow-hidden rounded-full bg-border">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.max(0, Math.min(100, score))}%` }} />
+        <div
+          className={`h-full rounded-full ${color}`}
+          style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
+        />
       </div>
       <span className="text-xs font-semibold text-foreground">{score}</span>
     </div>
@@ -86,7 +90,11 @@ type DiffToken = { text: string; type: "same" | "add" | "del" };
 export function diffWords(base: string, target: string): DiffToken[] {
   const a = base.match(/\S+\s*/g) ?? [];
   const b = target.match(/\S+\s*/g) ?? [];
-  const norm = (s: string) => s.trim().toLowerCase().replace(/[.,;:—–-]+$/g, "");
+  const norm = (s: string) =>
+    s
+      .trim()
+      .toLowerCase()
+      .replace(/[.,;:—–-]+$/g, "");
   const n = a.length;
   const m = b.length;
   const table: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
@@ -136,7 +144,10 @@ export function DiffText({ base, text }: { base?: string | undefined; text: stri
             {t.text}
           </span>
         ) : (
-          <span key={i} className="rounded-sm bg-destructive/10 px-0.5 text-destructive/70 line-through">
+          <span
+            key={i}
+            className="rounded-sm bg-destructive/10 px-0.5 text-destructive/70 line-through"
+          >
             {t.text}
           </span>
         ),
@@ -149,10 +160,12 @@ export function DraftCard({
   label,
   draft,
   diffAgainst,
+  fileNameHint,
 }: {
   label: string;
   draft: TailorDraft;
   diffAgainst?: TailorDraft | undefined;
+  fileNameHint?: string | undefined;
 }) {
   return (
     <div>
@@ -177,7 +190,10 @@ export function DraftCard({
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {draft.ats.flags.map((f) => (
-              <span key={f} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground">
+              <span
+                key={f}
+                className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground"
+              >
                 {f}
               </span>
             ))}
@@ -218,18 +234,33 @@ export function DraftCard({
           </p>
           {diffAgainst && (
             <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
-              <span className="rounded-sm bg-primary/15 px-1 font-medium text-foreground">added</span>
-              <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">removed</span>
+              <span className="rounded-sm bg-primary/15 px-1 font-medium text-foreground">
+                added
+              </span>
+              <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">
+                removed
+              </span>
             </span>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => void navigator.clipboard.writeText(draft.resume)}
-          className="text-xs font-medium text-primary hover:underline"
-        >
-          Copy
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void navigator.clipboard.writeText(draft.resume)}
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            Copy
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              downloadResumePdf(draft.resume, `${fileNameHint ?? "tailored-resume"}.pdf`)
+            }
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            Download PDF
+          </button>
+        </div>
       </div>
       <div className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 text-sm leading-relaxed text-foreground">
         <DiffText base={diffAgainst?.resume} text={draft.resume} />

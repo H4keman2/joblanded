@@ -72,7 +72,13 @@ function JobsPage() {
             </p>
           </div>
           <Button onClick={() => setOpen((o) => !o)} variant={open ? "ghost" : "default"}>
-            {open ? "Cancel" : <><Plus className="mr-1.5 h-4 w-4" /> Add job</>}
+            {open ? (
+              "Cancel"
+            ) : (
+              <>
+                <Plus className="mr-1.5 h-4 w-4" /> Add job
+              </>
+            )}
           </Button>
         </div>
 
@@ -96,7 +102,9 @@ function JobsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="sourceUrl">Posting URL (optional)</Label>
+              <Label htmlFor="sourceUrl">
+                Posting URL {description.trim().length < 80 ? "" : "(optional)"}
+              </Label>
               <Input
                 id="sourceUrl"
                 value={sourceUrl}
@@ -104,6 +112,10 @@ function JobsPage() {
                 placeholder="https://…"
                 className="mt-1.5"
               />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                No text to paste? Leave the description blank and drop the posting link here instead
+                — we'll pull the description from the page.
+              </p>
             </div>
             <Button type="submit" disabled={addMutation.isPending}>
               {addMutation.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
@@ -123,7 +135,10 @@ function JobsPage() {
         ) : (
           <ul className="divide-y divide-border">
             {jobs.data!.map((job) => (
-              <li key={job.id} className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0">
+              <li
+                key={job.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
+              >
                 <div>
                   <Link
                     to="/jobs/$jobId"
