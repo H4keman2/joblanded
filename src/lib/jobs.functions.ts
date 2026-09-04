@@ -259,3 +259,58 @@ export const deleteDraft = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// --- Role suggestions: score saved roles against the parsed resume ---
+
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9+#. ]/g, " ").replace(/\s+/g, " ").trim();
+
+export const rankRoles = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+
+    const [{ data: jobs, error: jobsError }, { data: resume, error: resumeError }] = await Promise.all([
+      supabase
+        .from("jobs")
+        .select("id, title, company, description")
+        .eq("user_id", userId)
+        .order("date_added", { ascending: false }),
+      supabase
+        .from("resumes")
+        .select("parsed_json")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
+    if (jobsError) throw new Error(jobsError.message);
+    if (resumeError) throw new Error(resumeError.message);
+
+    const parsed = (resume?.parsed_json ?? {}) as Record<string, unknown>;
+    const strings = (v: unknown) =>
+      Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.trim().length > 1) : [];
+    const skills = strings(parsed["skills"]).concat(strings(parsed["keywords"]));
+    const titles = strings(parsed["titles"]);
+
+    if (!skills.length && !titles.length) {
+      return (jobs ?? []).map((j) => ({ id: j.id, fit: null as number | null, matched: [] as string[] }));
+    }
+
+    const titleWords = new Set(
+      titles.flatMap((t) => norm(t).split(" ")).filter((w) => w.length > 2 && !["the", "and", "for", "senior", "lead"].includes(w)),
+    );
+
+    return (jobs ?? []).map((j) => {
+      const haystack = norm(`${j.title} ${j.company ?? ""} ${j.description}`);
+      const titleHay = norm(j.title);
+
+      const matched = skills.filter((s) => haystack.includes(norm(s))).slice(0, 40);
+      const skillScore = skills.length ? matched.length / skills.length : 0;
+
+      const titleHits = [...titleWords].filter((w) => titleHay.includes(w)).length;
+      const titleScore = titleWords.size ? titleHits / titleWords.size : 0;
+
+      const fit = Math.max(0, Math.min(100, Math.round((skillScore * 0.6 + titleScore * 0.4) * 130)));
+      return { id: j.id, fit, matched: matched.slice(0, 6) };
+    });
+  });
