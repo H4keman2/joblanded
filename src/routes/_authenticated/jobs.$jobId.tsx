@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Layers, Sparkles, Wand2 } from "lucide-react";
-import { generateDraft, getJob, listDrafts, listJobs } from "@/lib/jobs.functions";
+import { generateDraft, getJob, listDrafts, listJobs, rankRoles } from "@/lib/jobs.functions";
 import { DraftCard, Hint, type TailorDraft } from "@/components/tailor/DraftCard";
+
 
 
 export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
@@ -74,21 +75,48 @@ function JobDetailPage() {
   const fetchJob = useServerFn(getJob);
   const fetchJobs = useServerFn(listJobs);
   const fetchDrafts = useServerFn(listDrafts);
+  const fetchFits = useServerFn(rankRoles);
   const generate = useServerFn(generateDraft);
 
   const [selected, setSelected] = useState(0);
   const [compare, setCompare] = useState<number | null>(null);
   const [showDiff, setShowDiff] = useState(true);
+  const pickedManually = useRef(false);
+  const autoSwitched = useRef(false);
 
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => fetchJob({ data: { id: jobId } }) });
   const roles = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
+  const fits = useQuery({ queryKey: ["role-fit"], queryFn: () => fetchFits() });
   const drafts = useQuery({
     queryKey: ["drafts", jobId],
     queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
   });
 
   const versions = drafts.data ?? [];
-  const roleOptions = roles.data ?? [];
+
+  const fitById = useMemo(() => {
+    const map = new Map<string, { fit: number | null; matched: string[] }>();
+    for (const f of fits.data ?? []) map.set(f.id, { fit: f.fit, matched: f.matched });
+    return map;
+  }, [fits.data]);
+
+  const roleOptions = useMemo(() => {
+    const list = (roles.data ?? []).map((r) => ({ ...r, ...(fitById.get(r.id) ?? { fit: null, matched: [] }) }));
+    return list.sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
+  }, [roles.data, fitById]);
+
+  const bestMatch = roleOptions[0]?.fit != null ? roleOptions[0] : undefined;
+
+  // Preselect the best-matching role when the user hasn't invested in this one yet.
+  useEffect(() => {
+    if (autoSwitched.current || pickedManually.current) return;
+    if (!bestMatch || bestMatch.id === jobId) return;
+    if (!drafts.isSuccess || versions.length > 0) return;
+    autoSwitched.current = true;
+    toast.info(`Switched to your best match: ${bestMatch.title}`);
+    void navigate({ to: "/jobs/$jobId", params: { jobId: bestMatch.id }, replace: true });
+  }, [bestMatch, jobId, drafts.isSuccess, versions.length, navigate]);
+
 
   const genAll = useMutation({
     mutationFn: async () => {
@@ -138,12 +166,13 @@ function JobDetailPage() {
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
             {roleOptions.length > 1 && (
-              <Hint tip="Switch the role you're tailoring against. Each role keeps its own saved versions.">
-                <div className="min-w-56">
+              <Hint tip="Roles are ranked by how well your parsed resume titles and skills line up with each posting. Each role keeps its own saved versions.">
+                <div className="min-w-72">
                   <Select
                     value={jobId}
                     onValueChange={(id) => {
                       if (id === jobId) return;
+                      pickedManually.current = true;
                       setSelected(0);
                       setCompare(null);
                       void navigate({ to: "/jobs/$jobId", params: { jobId: id } });
@@ -155,8 +184,22 @@ function JobDetailPage() {
                     <SelectContent>
                       {roleOptions.map((r) => (
                         <SelectItem key={r.id} value={r.id}>
-                          {r.title}
-                          {r.company ? ` · ${r.company}` : ""}
+                          <span className="flex items-center gap-2">
+                            <span>
+                              {r.title}
+                              {r.company ? ` · ${r.company}` : ""}
+                            </span>
+                            {r.fit != null && (
+                              <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                                {r.fit}% fit
+                              </span>
+                            )}
+                            {bestMatch?.id === r.id && (
+                              <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
+                                Best match
+                              </span>
+                            )}
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
