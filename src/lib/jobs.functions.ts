@@ -137,9 +137,26 @@ export const listDrafts = createServerFn({ method: "GET" })
 const DRAFT_SHAPE = `Return ONLY valid JSON with this exact shape:
 {
   "angle": string,               // 3-4 word name for the framing, e.g. "Systems & scale"
+  "match": {
+    "score": number,             // 0-100 overall fit between this candidate and this specific posting
+    "note": string                // 1 sentence explaining the score
+  },
+  "resume": string,              // THE FULL REWRITTEN RESUME as plain text, ready to send. Include every
+                                  // section the original resume has (contact line, summary, skills,
+                                  // work experience with bullet points, education, certifications, etc.),
+                                  // rewritten and reordered to best fit this posting. Use "\\n" for line
+                                  // breaks and plain-text section headers (e.g. "EXPERIENCE"). Do not
+                                  // truncate or summarize sections, this must be a complete, ready-to-send
+                                  // resume the candidate could copy and use as-is.
   "summary": string,             // rewritten 2-3 sentence resume summary, only facts present in the resume
+                                  // (this should also be the summary/objective section inside "resume")
   "cover": string,               // 2-3 sentence cover letter opener addressed to this company
   "why": string,                 // 1-2 sentences explaining why this framing was chosen
+  "insights": {
+    "strengths": string[],       // 3-5 concrete ways this resume already matches what the posting wants
+    "gaps": string[],            // 2-4 things the posting wants that are missing or underrepresented
+    "suggestions": string[]      // 2-4 concrete, actionable edits to close the gaps (no invented facts)
+  },
   "ats": {
     "score": number,             // 0-100 readability/parseability of this text for an ATS
     "note": string,
@@ -210,12 +227,16 @@ export const generateDraft = createServerFn({ method: "POST" })
       : undefined;
 
     const system = optimizeSource
-      ? `You are an ATS optimization editor. You are given a resume, a job posting, and an existing tailored draft.
-Rewrite the draft so it fixes its weakest readability flags and works its missing keywords back in naturally, keeping the same angle and evidence.
+      ? `You are an ATS optimization editor. You are given a resume, a job posting, and an existing tailored draft
+(including its full rewritten resume text).
+Rewrite the full resume so it fixes its weakest readability flags and works its missing keywords back in naturally,
+keeping the same angle, evidence and section order. Recompute the match score and insights for the new version.
 Prefix the "angle" with "ATS-optimized · ".
 ${DRAFT_SHAPE}`
-      : `You are an expert resume and cover letter writer.
-Write ONE tailored draft for this candidate and job posting, using a distinct framing angle.
+      : `You are an expert resume writer and career coach.
+Write ONE tailored, complete resume for this candidate and job posting, using a distinct framing angle: reorder and
+re-emphasize sections, rewrite bullet points around this posting's language, and surface the most relevant
+experience first. Then score how well the result matches the posting and explain the comparison.
 ${previousAngles.length ? `Angles already produced (choose a genuinely different one): ${previousAngles.join("; ")}.` : ""}
 ${DRAFT_SHAPE}`;
 

@@ -2,9 +2,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 export interface TailorDraft {
   angle: string;
+  match: { score: number; note: string };
+  resume: string;
   summary: string;
   cover: string;
   why: string;
+  insights: { strengths: string[]; gaps: string[]; suggestions: string[] };
   ats: { score: number; note: string; flags: string[] };
   keywords: { score: number; note: string; hits: string[]; misses: string[] };
 }
@@ -28,6 +31,51 @@ export function ScoreBar({ score }: { score: number }) {
         <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.max(0, Math.min(100, score))}%` }} />
       </div>
       <span className="text-xs font-semibold text-foreground">{score}</span>
+    </div>
+  );
+}
+
+export function MatchScore({ score, note }: { score: number; note: string }) {
+  const tone =
+    score >= 85
+      ? "text-primary border-primary/30 bg-primary/10"
+      : score >= 65
+        ? "text-amber-600 border-amber-500/30 bg-amber-500/10"
+        : "text-destructive border-destructive/30 bg-destructive/10";
+  return (
+    <div className={`flex items-center gap-3 rounded-lg border p-3 ${tone}`}>
+      <span className="text-2xl font-bold leading-none">{Math.max(0, Math.min(100, score))}%</span>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide">Match score</p>
+        <p className="text-xs opacity-90">{note}</p>
+      </div>
+    </div>
+  );
+}
+
+function InsightList({
+  title,
+  items,
+  tone,
+}: {
+  title: string;
+  items: string[];
+  tone: "positive" | "negative" | "neutral";
+}) {
+  if (!items.length) return null;
+  const dot =
+    tone === "positive" ? "bg-primary" : tone === "negative" ? "bg-destructive" : "bg-amber-500";
+  return (
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
+      <ul className="mt-2 space-y-1.5">
+        {items.map((item, i) => (
+          <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+            <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -113,7 +161,11 @@ export function DraftCard({
         <span className="text-xs text-muted-foreground">{draft.angle}</span>
       </div>
 
-      <div className="mt-4 grid gap-3 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">
+      <div className="mt-4">
+        <MatchScore score={draft.match.score} note={draft.match.note} />
+      </div>
+
+      <div className="mt-3 grid gap-3 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">
         <div>
           <Hint tip={draft.ats.note}>
             <p className="cursor-help text-xs font-medium uppercase tracking-wide text-muted-foreground underline decoration-dotted underline-offset-2">
@@ -159,20 +211,36 @@ export function DraftCard({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Rewritten resume summary
-        </p>
-        {diffAgainst && (
-          <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
-            <span className="rounded-sm bg-primary/15 px-1 font-medium text-foreground">added</span>
-            <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">removed</span>
-          </span>
-        )}
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Full tailored resume
+          </p>
+          {diffAgainst && (
+            <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
+              <span className="rounded-sm bg-primary/15 px-1 font-medium text-foreground">added</span>
+              <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">removed</span>
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => void navigator.clipboard.writeText(draft.resume)}
+          className="text-xs font-medium text-primary hover:underline"
+        >
+          Copy
+        </button>
       </div>
-      <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-        <DiffText base={diffAgainst?.summary} text={draft.summary} />
-      </blockquote>
+      <div className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 text-sm leading-relaxed text-foreground">
+        <DiffText base={diffAgainst?.resume} text={draft.resume} />
+      </div>
+
+      <div className="mt-5 grid gap-4 rounded-lg border border-border bg-background p-3 sm:grid-cols-3">
+        <InsightList title="Strengths" items={draft.insights.strengths} tone="positive" />
+        <InsightList title="Gaps" items={draft.insights.gaps} tone="negative" />
+        <InsightList title="Suggestions" items={draft.insights.suggestions} tone="neutral" />
+      </div>
+
       <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Cover letter opener
       </p>

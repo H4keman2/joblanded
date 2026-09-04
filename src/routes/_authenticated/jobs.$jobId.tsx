@@ -53,11 +53,20 @@ function normalize(content: string): TailorDraft {
   const arr = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
   const ats = (raw["ats"] ?? {}) as Record<string, unknown>;
   const kw = (raw["keywords"] ?? {}) as Record<string, unknown>;
+  const match = (raw["match"] ?? {}) as Record<string, unknown>;
+  const insights = (raw["insights"] ?? {}) as Record<string, unknown>;
   return {
     angle: s(raw["angle"], "Tailored draft"),
+    match: { score: n(match["score"]), note: s(match["note"]) },
+    resume: s(raw["resume"]),
     summary: s(raw["summary"]),
     cover: s(raw["cover"]),
     why: s(raw["why"]),
+    insights: {
+      strengths: arr(insights["strengths"]),
+      gaps: arr(insights["gaps"]),
+      suggestions: arr(insights["suggestions"]),
+    },
     ats: { score: n(ats["score"]), note: s(ats["note"]), flags: arr(ats["flags"]) },
     keywords: {
       score: n(kw["score"]),
