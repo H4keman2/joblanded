@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
 
 const MODEL = "google/gemini-3.5-flash";
@@ -69,38 +71,53 @@ const addJobInput = z.object({
   sourceUrl: z.string().url().optional().or(z.literal("")),
 });
 
+// Shared by the Jobs page (addJob) and the Applications page (add-application flow):
+// extracts metadata from a pasted posting, saves the job, and automatically opens
+// an application for it (status "saved") so every saved job shows up on the
+// Applications page immediately, without a second manual step.
+export async function createJobForUser(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  input: { description: string; sourceUrl?: string | undefined },
+) {
+  const extracted = await callAI(
+    `Extract job posting metadata. Return ONLY JSON:
+{"title": string, "company": string | null, "location": string | null, "pay_min": number | null, "pay_max": number | null}
+Pay values are annual USD numbers when stated, otherwise null. Never invent facts.`,
+    input.description.slice(0, 30000),
+  );
+
+  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 200) : null);
+
+  const { data: job, error: jobError } = await supabase
+    .from("jobs")
+    .insert({
+      user_id: userId,
+      title: str(extracted["title"]) ?? "Untitled role",
+      company: str(extracted["company"]),
+      location: str(extracted["location"]),
+      pay_min: num(extracted["pay_min"]),
+      pay_max: num(extracted["pay_max"]),
+      source_url: input.sourceUrl || null,
+      description: input.description,
+    })
+    .select("id, title, company, location, pay_min, pay_max, source_url, date_added")
+    .single();
+  if (jobError) throw new Error(jobError.message);
+
+  const { error: appError } = await supabase
+    .from("applications")
+    .insert({ user_id: userId, job_id: job.id, status: "saved" });
+  if (appError) throw new Error(appError.message);
+
+  return job;
+}
+
 export const addJob = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => addJobInput.parse(input))
-  .handler(async ({ data, context }) => {
-    const extracted = await callAI(
-      `Extract job posting metadata. Return ONLY JSON:
-{"title": string, "company": string | null, "location": string | null, "pay_min": number | null, "pay_max": number | null}
-Pay values are annual USD numbers when stated, otherwise null. Never invent facts.`,
-      data.description.slice(0, 30000),
-    );
-
-    const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
-    const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 200) : null);
-
-    const { data: row, error } = await context.supabase
-      .from("jobs")
-      .insert({
-        user_id: context.userId,
-        title: str(extracted["title"]) ?? "Untitled role",
-        company: str(extracted["company"]),
-        location: str(extracted["location"]),
-        pay_min: num(extracted["pay_min"]),
-        pay_max: num(extracted["pay_max"]),
-        source_url: data.sourceUrl || null,
-        description: data.description,
-      })
-      .select("id, title, company, location, pay_min, pay_max, source_url, date_added")
-      .single();
-
-    if (error) throw new Error(error.message);
-    return row;
-  });
+  .handler(async ({ data, context }) => createJobForUser(context.supabase, context.userId, data));
 
 export const deleteJob = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
