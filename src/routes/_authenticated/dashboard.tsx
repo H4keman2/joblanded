@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLatestResume } from "@/lib/resume.functions";
-import { getActiveApplications } from "@/lib/account.functions";
+import { getActiveApplications, getDashboardStats } from "@/lib/account.functions";
 import { Button } from "@/components/ui/button";
 import { FileText, Briefcase, ClipboardList } from "lucide-react";
 
@@ -24,10 +24,16 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 const statusLabels: Record<string, string> = {
+  saved: "In process",
   applied: "Applied",
   interviewing: "Interviewing",
   offer: "Offer",
+  rejected: "Rejected",
 };
+
+// Order to display the status breakdown pills in, roughly following how a
+// role progresses — rejected is last since it's an end state either way.
+const statusOrder = ["saved", "applied", "interviewing", "offer", "rejected"] as const;
 
 function formatDate(value: string | null) {
   if (!value) return null;
@@ -39,6 +45,7 @@ function formatDate(value: string | null) {
 function Dashboard() {
   const fetchResume = useServerFn(getLatestResume);
   const fetchActive = useServerFn(getActiveApplications);
+  const fetchStats = useServerFn(getDashboardStats);
 
   const { data: resume, isLoading } = useQuery({
     queryKey: ["latest-resume"],
@@ -48,6 +55,11 @@ function Dashboard() {
   const { data: applications, isLoading: loadingApps } = useQuery({
     queryKey: ["active-applications"],
     queryFn: () => fetchActive(),
+  });
+
+  const { data: stats, isLoading: loadingStats } = useQuery({
+    queryKey: ["dashboard-stats"],
+    queryFn: () => fetchStats(),
   });
 
   return (
@@ -70,6 +82,53 @@ function Dashboard() {
           <Button asChild>
             <Link to="/resume">Add resume</Link>
           </Button>
+        </div>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          icon={FileText}
+          label="Resume"
+          value={
+            loadingStats
+              ? "…"
+              : stats && stats.resumesCount > 0
+                ? `${stats.resumesCount} uploaded`
+                : "Not added"
+          }
+          sublabel={
+            !loadingStats && stats && stats.tailoredVersionsCount > 0
+              ? `${stats.tailoredVersionsCount} tailored version${stats.tailoredVersionsCount === 1 ? "" : "s"} created`
+              : undefined
+          }
+          to="/resume"
+        />
+        <StatCard
+          icon={Briefcase}
+          label="Jobs"
+          value={loadingStats ? "…" : `${stats?.jobsCount ?? 0} saved`}
+          to="/jobs"
+        />
+        <StatCard
+          icon={ClipboardList}
+          label="Applications"
+          value={loadingStats ? "…" : `${stats?.applications.total ?? 0} total`}
+          to="/applications"
+        />
+      </div>
+
+      {!loadingStats && stats && stats.applications.total > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {statusOrder
+            .filter((status) => stats.applications[status] > 0)
+            .map((status) => (
+              <span
+                key={status}
+                className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
+              >
+                {stats.applications[status]} {statusLabels[status]}
+              </span>
+            ))}
         </div>
       )}
 
@@ -123,22 +182,6 @@ function Dashboard() {
           </div>
         )}
       </section>
-
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          icon={FileText}
-          label="Resume"
-          value={isLoading ? "…" : resume ? "Parsed" : "Not added"}
-          to="/resume"
-        />
-        <StatCard icon={Briefcase} label="Jobs" value="Coming next" to="/jobs" />
-        <StatCard
-          icon={ClipboardList}
-          label="Applications"
-          value={loadingApps ? "…" : `${applications?.length ?? 0} active`}
-          to="/applications"
-        />
-      </div>
     </div>
   );
 }
@@ -147,11 +190,13 @@ function StatCard({
   icon: Icon,
   label,
   value,
+  sublabel,
   to,
 }: {
   icon: typeof FileText;
   label: string;
   value: string;
+  sublabel?: string | undefined;
   to: string;
 }) {
   return (
@@ -159,6 +204,7 @@ function StatCard({
       <Icon className="size-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="text-lg font-semibold">{value}</p>
+      {sublabel && <p className="mt-0.5 text-xs text-muted-foreground">{sublabel}</p>}
     </Link>
   );
 }
