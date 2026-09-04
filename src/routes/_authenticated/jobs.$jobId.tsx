@@ -75,6 +75,7 @@ function JobDetailPage() {
   const fetchJob = useServerFn(getJob);
   const fetchJobs = useServerFn(listJobs);
   const fetchDrafts = useServerFn(listDrafts);
+  const fetchFits = useServerFn(rankRoles);
   const generate = useServerFn(generateDraft);
 
   const [selected, setSelected] = useState(0);
@@ -165,12 +166,13 @@ function JobDetailPage() {
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
             {roleOptions.length > 1 && (
-              <Hint tip="Switch the role you're tailoring against. Each role keeps its own saved versions.">
-                <div className="min-w-56">
+              <Hint tip="Roles are ranked by how well your parsed resume titles and skills line up with each posting. Each role keeps its own saved versions.">
+                <div className="min-w-72">
                   <Select
                     value={jobId}
                     onValueChange={(id) => {
                       if (id === jobId) return;
+                      pickedManually.current = true;
                       setSelected(0);
                       setCompare(null);
                       void navigate({ to: "/jobs/$jobId", params: { jobId: id } });
@@ -182,8 +184,22 @@ function JobDetailPage() {
                     <SelectContent>
                       {roleOptions.map((r) => (
                         <SelectItem key={r.id} value={r.id}>
-                          {r.title}
-                          {r.company ? ` · ${r.company}` : ""}
+                          <span className="flex items-center gap-2">
+                            <span>
+                              {r.title}
+                              {r.company ? ` · ${r.company}` : ""}
+                            </span>
+                            {r.fit != null && (
+                              <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                                {r.fit}% fit
+                              </span>
+                            )}
+                            {bestMatch?.id === r.id && (
+                              <span className="rounded-full bg-primary px-2 py-0.5 text-[11px] font-medium text-primary-foreground">
+                                Best match
+                              </span>
+                            )}
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
