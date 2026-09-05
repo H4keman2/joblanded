@@ -124,16 +124,32 @@ function JobDetailPage() {
   }, [roles.data, fitById]);
 
   const bestMatch = roleOptions[0]?.fit != null ? roleOptions[0] : undefined;
+  const runnerUpFit = roleOptions[1]?.fit ?? null;
+  // High confidence = a strong fit that is also clearly ahead of the next role.
+  const confident =
+    !!bestMatch &&
+    (bestMatch.fit ?? 0) >= 70 &&
+    (runnerUpFit === null || (bestMatch.fit ?? 0) - runnerUpFit >= 10);
 
-  // Preselect the best-matching role when the user hasn't invested in this one yet.
+  // Preselect the best-matching role only when we're confident about it.
   useEffect(() => {
     if (autoSwitched.current || pickedManually.current) return;
-    if (!bestMatch || bestMatch.id === jobId) return;
+    if (!bestMatch || bestMatch.id === jobId || !confident) return;
     if (!drafts.isSuccess || versions.length > 0) return;
     autoSwitched.current = true;
     toast.info(`Switched to your best match: ${bestMatch.title}`);
     void navigate({ to: "/jobs/$jobId", params: { jobId: bestMatch.id }, replace: true });
-  }, [bestMatch, jobId, drafts.isSuccess, versions.length, navigate]);
+  }, [bestMatch, confident, jobId, drafts.isSuccess, versions.length, navigate]);
+
+  // When confidence is low, ask the user to confirm the role before generating.
+  const needsConfirm =
+    !confident &&
+    roleOptions.length > 1 &&
+    !confirmedRole &&
+    !pickedManually.current &&
+    drafts.isSuccess &&
+    versions.length === 0;
+
 
 
   const genAll = useMutation({
