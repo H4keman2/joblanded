@@ -410,6 +410,23 @@ function titleWordsFrom(titles: string[]): Set<string> {
   );
 }
 
+// Word-boundary-aware "does haystack contain this token" check. A plain
+// haystack.includes(token) lets short skills/keywords (e.g. "AI", "PM", "BI")
+// false-positive match as substrings of ordinary words — "ai" inside
+// "training", "maintain", "certain" — which was flooding recommendations
+// (especially "any title" mode's much larger, unfiltered pool) with
+// completely unrelated postings that just happened to contain those letters.
+function containsToken(haystack: string, token: string): boolean {
+  if (!token) return false;
+  const isWordChar = (c: string | undefined) => !!c && /[a-z0-9]/.test(c);
+  let idx = haystack.indexOf(token);
+  while (idx !== -1) {
+    if (!isWordChar(haystack[idx - 1]) && !isWordChar(haystack[idx + token.length])) return true;
+    idx = haystack.indexOf(token, idx + 1);
+  }
+  return false;
+}
+
 // Shared skills/title overlap scorer: no AI call, so it's fast and free enough
 // to run against every result of an external job search, not just the handful
 // of postings a user has manually saved.
@@ -424,10 +441,10 @@ function scoreAgainstResume(
   const haystack = norm(haystackRaw);
   const titleHay = norm(titleRaw);
 
-  const matched = skills.filter((s) => haystack.includes(norm(s))).slice(0, 40);
+  const matched = skills.filter((s) => containsToken(haystack, norm(s))).slice(0, 40);
   const skillScore = skills.length ? matched.length / skills.length : 0;
 
-  const titleHits = [...titleWords].filter((w) => titleHay.includes(w)).length;
+  const titleHits = [...titleWords].filter((w) => containsToken(titleHay, w)).length;
   const titleScore = titleWords.size ? titleHits / titleWords.size : 0;
 
   const fit = Math.max(0, Math.min(100, Math.round((skillScore * 0.6 + titleScore * 0.4) * 130)));
@@ -583,6 +600,15 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
       (savedJobs ?? []).map((j) => j.source_url).filter((u): u is string => !!u),
     );
 
+    // A minimum bar for what counts as a "recommendation" rather than noise.
+    // Without a keyword to search on (anyTitle mode), Adzuna returns a large,
+    // industry-unfiltered pool, and the old code always padded out to
+    // RECOMMEND_RESULTS regardless of how weak the score was — which is how a
+    // 3%-match OB/GYN posting ended up sitting in someone's "best matches"
+    // list. Better to show fewer, honestly-relevant roles than pad with
+    // scraps just to hit a round number.
+    const MIN_FIT = 15;
+
     return (payload.results ?? [])
       .filter((r) => r.redirect_url && !savedUrls.has(r.redirect_url))
       .map((r) => {
@@ -614,6 +640,7 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
           reason,
         };
       })
+      .filter((job) => (skills.length || titleWords.size ? (job.fit ?? 0) >= MIN_FIT : true))
       .sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1))
       .slice(0, RECOMMEND_RESULTS);
   });
