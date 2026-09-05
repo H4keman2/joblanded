@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   addApplication,
   listApplications,
+  updateApplicationFollowUp,
   updateApplicationStatus,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
@@ -66,6 +67,7 @@ type ApplicationRow = {
   status: string;
   date_applied: string | null;
   follow_up_date: string | null;
+  follow_up_sent: boolean;
   notes: string | null;
   created_at: string;
   job_id: string;
@@ -88,11 +90,21 @@ function payLine(job: JobInfo | null) {
   return parts + pay;
 }
 
+function formatDate(value: string | null) {
+  if (!value) return null;
+  const d = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
 function ApplicationsPage() {
   const qc = useQueryClient();
   const fetchApplications = useServerFn(listApplications);
   const create = useServerFn(addApplication);
   const setStatus = useServerFn(updateApplicationStatus);
+  const setFollowUp = useServerFn(updateApplicationFollowUp);
 
   const [description, setDescription] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -123,6 +135,13 @@ function ApplicationsPage() {
 
   const statusMutation = useMutation({
     mutationFn: (input: { id: string; status: ApplicationStatus }) => setStatus({ data: input }),
+    onSuccess: invalidateAll,
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const followUpMutation = useMutation({
+    mutationFn: (input: { id: string; follow_up_date?: string | null; follow_up_sent?: boolean }) =>
+      setFollowUp({ data: input }),
     onSuccess: invalidateAll,
     onError: (e: Error) => toast.error(e.message),
   });
@@ -205,57 +224,102 @@ function ApplicationsPage() {
             {applications.data!.map((app) => {
               const job = jobOf(app);
               const submitted = app.status !== "saved";
+              const overdue =
+                !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < todayStr();
               return (
-                <li
-                  key={app.id}
-                  className="flex flex-wrap items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
-                >
-                  <div>
-                    <Link
-                      to="/jobs/$jobId"
-                      params={{ jobId: app.job_id }}
-                      className="font-medium hover:text-primary"
-                    >
-                      {job?.title ?? "Untitled role"}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">{payLine(job)}</p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    {submitted && (
-                      <Select
-                        value={app.status}
-                        onValueChange={(value) =>
-                          statusMutation.mutate({ id: app.id, status: value as ApplicationStatus })
-                        }
+                <li key={app.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <Link
+                        to="/jobs/$jobId"
+                        params={{ jobId: app.job_id }}
+                        className="font-medium hover:text-primary"
                       >
-                        <SelectTrigger className="h-8 w-40 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="applied">Applied</SelectItem>
-                          <SelectItem value="interviewing">Interviewing</SelectItem>
-                          <SelectItem value="offer">Offer</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                    <Hint tip="Toggle on once you've actually submitted this application to start tracking its status.">
-                      <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                        <Switch
-                          checked={submitted}
-                          disabled={statusMutation.isPending}
-                          onCheckedChange={(checked) =>
+                        {job?.title ?? "Untitled role"}
+                      </Link>
+                      <p className="text-xs text-muted-foreground">{payLine(job)}</p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {submitted && (
+                        <Select
+                          value={app.status}
+                          onValueChange={(value) =>
                             statusMutation.mutate({
                               id: app.id,
-                              status: checked ? "applied" : "saved",
+                              status: value as ApplicationStatus,
                             })
                           }
-                        />
-                        {statusLabels[app.status as ApplicationStatus] ?? app.status}
-                      </label>
-                    </Hint>
+                        >
+                          <SelectTrigger className="h-8 w-40 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="applied">Applied</SelectItem>
+                            <SelectItem value="interviewing">Interviewing</SelectItem>
+                            <SelectItem value="offer">Offer</SelectItem>
+                            <SelectItem value="rejected">Rejected</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                      <Hint tip="Toggle on once you've actually submitted this application to start tracking its status.">
+                        <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                          <Switch
+                            checked={submitted}
+                            disabled={statusMutation.isPending}
+                            onCheckedChange={(checked) =>
+                              statusMutation.mutate({
+                                id: app.id,
+                                status: checked ? "applied" : "saved",
+                              })
+                            }
+                          />
+                          {statusLabels[app.status as ApplicationStatus] ?? app.status}
+                        </label>
+                      </Hint>
+                    </div>
                   </div>
+
+                  {submitted && (app.date_applied || app.follow_up_date) && (
+                    <div className="flex flex-wrap items-center gap-3 rounded-md bg-secondary/40 px-3 py-2 text-xs">
+                      {app.date_applied && (
+                        <span className="text-muted-foreground">
+                          Applied {formatDate(app.date_applied)}
+                        </span>
+                      )}
+                      {app.follow_up_date && (
+                        <>
+                          <span
+                            className={
+                              app.follow_up_sent
+                                ? "text-muted-foreground"
+                                : overdue
+                                  ? "font-medium text-destructive"
+                                  : "font-medium text-amber-600"
+                            }
+                          >
+                            {app.follow_up_sent
+                              ? `Follow-up sent for ${formatDate(app.follow_up_date)} check-in`
+                              : overdue
+                                ? `Follow-up overdue — was due ${formatDate(app.follow_up_date)}`
+                                : `Follow up by ${formatDate(app.follow_up_date)}`}
+                          </span>
+                          <Hint tip="Recommended 2 business days after you applied. Toggle on once you've actually sent the follow-up email.">
+                            <label className="flex items-center gap-1.5 font-medium text-muted-foreground">
+                              <Switch
+                                checked={app.follow_up_sent}
+                                disabled={followUpMutation.isPending}
+                                onCheckedChange={(checked) =>
+                                  followUpMutation.mutate({ id: app.id, follow_up_sent: checked })
+                                }
+                              />
+                              {app.follow_up_sent ? "Sent" : "Mark sent"}
+                            </label>
+                          </Hint>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </li>
               );
             })}

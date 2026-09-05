@@ -119,7 +119,7 @@ export const getActiveApplications = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("applications")
-      .select("id, status, follow_up_date, date_applied, jobs(title, company)")
+      .select("id, status, follow_up_date, follow_up_sent, date_applied, jobs(title, company)")
       .eq("user_id", context.userId)
       // "saved" (in process) counts as active too — every saved job opens one
       // automatically now, so excluding it made the dashboard look empty even
@@ -135,21 +135,39 @@ export const getDashboardStats = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
-    const [resumes, tailored, jobs, applications] = await Promise.all([
-      supabase.from("resumes").select("id", { count: "exact", head: true }).eq("user_id", userId),
-      supabase
-        .from("tailored_documents")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId)
-        .eq("type", "tailor_version"),
-      supabase.from("jobs").select("id", { count: "exact", head: true }).eq("user_id", userId),
-      supabase.from("applications").select("status").eq("user_id", userId),
-    ]);
+    // "This week" = the last 7 calendar days including today — gives the
+    // dashboard something to say about recent momentum, not just totals.
+    const sevenDaysAgo = new Date(Date.now() - 6 * 86_400_000).toISOString().slice(0, 10);
+
+    const [resumes, tailored, jobs, applications, jobsThisWeek, applicationsThisWeek] =
+      await Promise.all([
+        supabase.from("resumes").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        supabase
+          .from("tailored_documents")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .eq("type", "tailor_version"),
+        supabase.from("jobs").select("id", { count: "exact", head: true }).eq("user_id", userId),
+        supabase.from("applications").select("status").eq("user_id", userId),
+        supabase
+          .from("jobs")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .gte("date_added", sevenDaysAgo),
+        supabase
+          .from("applications")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId)
+          .neq("status", "saved")
+          .gte("date_applied", sevenDaysAgo),
+      ]);
 
     if (resumes.error) throw new Error(resumes.error.message);
     if (tailored.error) throw new Error(tailored.error.message);
     if (jobs.error) throw new Error(jobs.error.message);
     if (applications.error) throw new Error(applications.error.message);
+    if (jobsThisWeek.error) throw new Error(jobsThisWeek.error.message);
+    if (applicationsThisWeek.error) throw new Error(applicationsThisWeek.error.message);
 
     const byStatus = { saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0 };
     for (const row of applications.data ?? []) {
@@ -161,6 +179,8 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       resumesCount: resumes.count ?? 0,
       tailoredVersionsCount: tailored.count ?? 0,
       jobsCount: jobs.count ?? 0,
+      jobsAddedThisWeek: jobsThisWeek.count ?? 0,
+      applicationsThisWeek: applicationsThisWeek.count ?? 0,
       applications: { ...byStatus, total: (applications.data ?? []).length },
     };
   });

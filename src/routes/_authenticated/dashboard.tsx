@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLatestResume } from "@/lib/resume.functions";
 import { getActiveApplications, getDashboardStats } from "@/lib/account.functions";
+import { updateApplicationFollowUp } from "@/lib/applications.functions";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Hint } from "@/components/ui/hint";
+import { toast } from "sonner";
 import { FileText, Briefcase, ClipboardList } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -31,9 +35,15 @@ const statusLabels: Record<string, string> = {
   rejected: "Rejected",
 };
 
-// Order to display the status breakdown pills in, roughly following how a
-// role progresses — rejected is last since it's an end state either way.
-const statusOrder = ["saved", "applied", "interviewing", "offer", "rejected"] as const;
+// The application funnel bar — saved → applied → interviewing → offer, in the
+// order a role actually progresses. Rejected is shown as a separate count
+// instead of a stage, since it's an exit rather than a step forward.
+const FUNNEL_STAGES = [
+  { key: "saved", label: "Saved", barClass: "bg-secondary-foreground/20" },
+  { key: "applied", label: "Applied", barClass: "bg-primary/50" },
+  { key: "interviewing", label: "Interviewing", barClass: "bg-amber-500" },
+  { key: "offer", label: "Offer", barClass: "bg-primary" },
+] as const;
 
 function formatDate(value: string | null) {
   if (!value) return null;
@@ -42,10 +52,14 @@ function formatDate(value: string | null) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
 function Dashboard() {
+  const qc = useQueryClient();
   const fetchResume = useServerFn(getLatestResume);
   const fetchActive = useServerFn(getActiveApplications);
   const fetchStats = useServerFn(getDashboardStats);
+  const setFollowUp = useServerFn(updateApplicationFollowUp);
 
   const { data: resume, isLoading } = useQuery({
     queryKey: ["latest-resume"],
@@ -62,13 +76,33 @@ function Dashboard() {
     queryFn: () => fetchStats(),
   });
 
+  const followUpMutation = useMutation({
+    mutationFn: (input: { id: string; follow_up_sent: boolean }) => setFollowUp({ data: input }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["active-applications"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const funnelTotal = stats
+    ? FUNNEL_STAGES.reduce((sum, s) => sum + stats.applications[s.key], 0)
+    : 0;
+
+  const heroLine = !stats
+    ? "Your job search at a glance."
+    : stats.applications.offer > 0
+      ? "You've got an offer on the table — congratulations."
+      : stats.applications.interviewing > 0
+        ? `${stats.applications.interviewing} interview${stats.applications.interviewing === 1 ? "" : "s"} in motion. Keep the momentum going.`
+        : stats.applications.applied > 0
+          ? `${stats.applications.applied} application${stats.applications.applied === 1 ? "" : "s"} out there. Add more roles to improve your odds.`
+          : stats.jobsCount > 0
+            ? "Roles saved and ready — tailor a resume and apply to get moving."
+            : "Start with your resume — everything else builds on it.";
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-semibold">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Start with your resume — everything else builds on it.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{heroLine}</p>
       </div>
 
       {!isLoading && !resume && (
@@ -107,28 +141,60 @@ function Dashboard() {
           icon={Briefcase}
           label="Jobs"
           value={loadingStats ? "…" : `${stats?.jobsCount ?? 0} saved`}
+          sublabel={
+            !loadingStats && stats && stats.jobsAddedThisWeek > 0
+              ? `+${stats.jobsAddedThisWeek} this week`
+              : undefined
+          }
           to="/jobs"
         />
         <StatCard
           icon={ClipboardList}
           label="Applications"
           value={loadingStats ? "…" : `${stats?.applications.total ?? 0} total`}
+          sublabel={
+            !loadingStats && stats && stats.applicationsThisWeek > 0
+              ? `+${stats.applicationsThisWeek} this week`
+              : undefined
+          }
           to="/applications"
         />
       </div>
 
       {!loadingStats && stats && stats.applications.total > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {statusOrder
-            .filter((status) => stats.applications[status] > 0)
-            .map((status) => (
-              <span
-                key={status}
-                className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground"
-              >
-                {stats.applications[status]} {statusLabels[status]}
+        <div className="panel space-y-3 p-5">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Application funnel
+            </h2>
+            {stats.applications.rejected > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {stats.applications.rejected} rejected
+              </span>
+            )}
+          </div>
+
+          {funnelTotal > 0 && (
+            <div className="flex h-3 w-full overflow-hidden rounded-full bg-secondary">
+              {FUNNEL_STAGES.filter((s) => stats.applications[s.key] > 0).map((s) => (
+                <div
+                  key={s.key}
+                  className={s.barClass}
+                  style={{ width: `${(stats.applications[s.key] / funnelTotal) * 100}%` }}
+                  title={`${s.label}: ${stats.applications[s.key]}`}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs">
+            {FUNNEL_STAGES.map((s) => (
+              <span key={s.key} className="flex items-center gap-1.5 text-muted-foreground">
+                <span className={`size-2 rounded-full ${s.barClass}`} />
+                {stats.applications[s.key]} {s.label}
               </span>
             ))}
+          </div>
         </div>
       )}
 
@@ -146,24 +212,51 @@ function Dashboard() {
           <ul className="space-y-3">
             {applications.map((app) => {
               const job = app.jobs as { title: string; company: string | null } | null;
-              const followUp = formatDate(app.follow_up_date);
+              const overdue =
+                !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < todayStr();
               return (
-                <li
-                  key={app.id}
-                  className="panel flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="font-medium">{job?.title ?? "Untitled role"}</p>
-                    <p className="text-sm text-muted-foreground">{job?.company ?? "—"}</p>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <span className="rounded-full bg-secondary px-3 py-1 text-secondary-foreground">
+                <li key={app.id} className="panel flex flex-col gap-3 p-5">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="font-medium">{job?.title ?? "Untitled role"}</p>
+                      <p className="text-sm text-muted-foreground">{job?.company ?? "—"}</p>
+                    </div>
+                    <span className="w-fit rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
                       {statusLabels[app.status] ?? app.status}
                     </span>
-                    <span className="text-muted-foreground">
-                      {followUp ? `Follow up ${followUp}` : "No follow-up set"}
-                    </span>
                   </div>
+
+                  {app.follow_up_date && (
+                    <div className="flex flex-wrap items-center gap-3 rounded-md bg-secondary/40 px-3 py-2 text-xs">
+                      <span
+                        className={
+                          app.follow_up_sent
+                            ? "text-muted-foreground"
+                            : overdue
+                              ? "font-medium text-destructive"
+                              : "font-medium text-amber-600"
+                        }
+                      >
+                        {app.follow_up_sent
+                          ? "Follow-up sent"
+                          : overdue
+                            ? `Follow-up overdue — was due ${formatDate(app.follow_up_date)}`
+                            : `Follow up by ${formatDate(app.follow_up_date)}`}
+                      </span>
+                      <Hint tip="Recommended 2 business days after you applied. Toggle on once you've actually sent the follow-up email.">
+                        <label className="flex items-center gap-1.5 font-medium text-muted-foreground">
+                          <Switch
+                            checked={app.follow_up_sent}
+                            disabled={followUpMutation.isPending}
+                            onCheckedChange={(checked) =>
+                              followUpMutation.mutate({ id: app.id, follow_up_sent: checked })
+                            }
+                          />
+                          {app.follow_up_sent ? "Sent" : "Mark sent"}
+                        </label>
+                      </Hint>
+                    </div>
+                  )}
                 </li>
               );
             })}
