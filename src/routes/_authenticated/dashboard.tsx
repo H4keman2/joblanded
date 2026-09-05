@@ -66,7 +66,13 @@ function Dashboard() {
     queryFn: () => fetchResume(),
   });
 
-  const { data: applications, isLoading: loadingApps } = useQuery({
+  const {
+    data: applications,
+    isLoading: loadingApps,
+    isError: applicationsErrored,
+    error: applicationsError,
+    refetch: refetchApplications,
+  } = useQuery({
     queryKey: ["active-applications"],
     queryFn: () => fetchActive(),
   });
@@ -208,6 +214,18 @@ function Dashboard() {
 
         {loadingApps ? (
           <div className="panel p-6 text-sm text-muted-foreground">Loading…</div>
+        ) : applicationsErrored ? (
+          <div className="panel space-y-3 p-6">
+            <p className="text-sm text-destructive">
+              Couldn't load your active applications:{" "}
+              {applicationsError instanceof Error
+                ? applicationsError.message
+                : "something went wrong."}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => void refetchApplications()}>
+              Try again
+            </Button>
+          </div>
         ) : applications && applications.length > 0 ? (
           <ul className="space-y-3">
             {applications.map((app) => {

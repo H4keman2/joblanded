@@ -211,6 +211,18 @@ function ApplicationsPage() {
       <div className="panel p-8">
         {applications.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading your applications…</p>
+        ) : applications.isError ? (
+          <div className="space-y-3">
+            <p className="text-sm text-destructive">
+              Couldn't load your applications:{" "}
+              {applications.error instanceof Error
+                ? applications.error.message
+                : "something went wrong."}
+            </p>
+            <Button size="sm" variant="outline" onClick={() => void applications.refetch()}>
+              Try again
+            </Button>
+          </div>
         ) : (applications.data?.length ?? 0) === 0 ? (
           <p className="text-sm text-muted-foreground">
             No applications yet. Save a job on the{" "}
