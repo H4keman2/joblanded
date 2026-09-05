@@ -97,10 +97,15 @@ function ResumePage() {
     if (!file) return;
     setExtracting(true);
     try {
-      const text = file.type === "application/pdf" ? await extractPdfText(file) : await file.text();
+      const isPdf = file.type === "application/pdf";
+      const text = isPdf ? await extractPdfText(file) : await file.text();
       if (text.trim().length < 30) throw new Error("Couldn't read enough text from that file.");
       setRawText(text);
-      toast.success("Text extracted — now parse it.");
+      if (isPdf) {
+        parseMutation.mutate(text);
+      } else {
+        toast.success("Text extracted — now parse it.");
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not read that file");
     } finally {
@@ -108,6 +113,7 @@ function ResumePage() {
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+
 
   function update<K extends keyof Parsed>(key: K, value: Parsed[K]) {
     setDraft((d) => ({ ...(d ?? {}), [key]: value }));
