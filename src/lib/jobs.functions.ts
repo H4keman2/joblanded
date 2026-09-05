@@ -484,6 +484,11 @@ const RECOMMEND_RESULTS = 12;
 
 const recommendInput = z.object({
   keyword: z.string().trim().max(200).optional(),
+  // When true, ignore keyword entirely (both the caller's and the resume's
+  // top title) and browse broadly by location/salary only, ranking purely
+  // on fit score — for "don't make me pick a title, just show my best
+  // matches" rather than searching one role at a time.
+  anyTitle: z.boolean().optional(),
   location: z.string().trim().max(200).optional(),
   salaryMin: z.number().int().positive().max(10_000_000).optional(),
   salaryMax: z.number().int().positive().max(10_000_000).optional(),
@@ -535,16 +540,22 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
     const parsedLocation =
       typeof parsed["location"] === "string" ? (parsed["location"] as string) : "";
 
-    const keyword = data.keyword || titles[0] || "";
+    const keyword = data.anyTitle ? "" : data.keyword || titles[0] || "";
     const location = data.location || parsedLocation;
+
+    // Without a keyword, Adzuna's own relevance ranking has nothing to go
+    // on, so pull a bigger, freshness-sorted pool and lean entirely on our
+    // own fit score to pick the winners out of it.
+    const pageSize = data.anyTitle ? RECOMMEND_RESULTS * 4 : RECOMMEND_RESULTS * 2;
 
     const params = new URLSearchParams({
       app_id: appId,
       app_key: appKey,
       "content-type": "application/json",
-      results_per_page: String(RECOMMEND_RESULTS * 2), // fetch extra — some get filtered out as already-saved
+      results_per_page: String(pageSize), // fetch extra — some get filtered out as already-saved
     });
     if (keyword) params.set("what", keyword);
+    if (!keyword) params.set("sort_by", "date");
     if (location) {
       params.set("where", location);
       params.set("distance", "50"); // km — "relatively close" rather than an exact city match only

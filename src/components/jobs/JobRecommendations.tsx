@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Hint } from "@/components/ui/hint";
 import { toast } from "sonner";
 import { ExternalLink, Loader2, Plus, Search } from "lucide-react";
@@ -49,6 +50,7 @@ export function JobRecommendations() {
   const resume = useQuery({ queryKey: ["latest-resume"], queryFn: () => fetchResume() });
 
   const [keyword, setKeyword] = useState("");
+  const [anyTitle, setAnyTitle] = useState(true);
   const [location, setLocation] = useState("");
   const [salaryMin, setSalaryMin] = useState("");
   const [salaryMax, setSalaryMax] = useState("");
@@ -58,6 +60,7 @@ export function JobRecommendations() {
   const search = useMutation({
     mutationFn: (input: {
       keyword?: string | undefined;
+      anyTitle?: boolean | undefined;
       location?: string | undefined;
       salaryMin?: number | undefined;
       salaryMax?: number | undefined;
@@ -69,9 +72,11 @@ export function JobRecommendations() {
     },
   });
 
-  // Prefill the search fields from the resume once (title + location), then
-  // run the first search automatically so the row isn't empty on load. Only
-  // runs once resume.data has settled (success with a resume, or null).
+  // Prefill the location from the resume once, then run the first search
+  // automatically so the row isn't empty on load — with "any title" on by
+  // default, since the point of this panel is to surface your best fit
+  // across roles, not just re-run a single title. Only runs once
+  // resume.data has settled (success with a resume, or null).
   useEffect(() => {
     if (primed.current || resume.isLoading) return;
     primed.current = true;
@@ -81,7 +86,7 @@ export function JobRecommendations() {
     setKeyword(defaultKeyword);
     setLocation(defaultLocation);
     search.mutate({
-      keyword: defaultKeyword || undefined,
+      anyTitle: true,
       location: defaultLocation || undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -91,7 +96,8 @@ export function JobRecommendations() {
     const min = salaryMin.trim() ? Number(salaryMin) : undefined;
     const max = salaryMax.trim() ? Number(salaryMax) : undefined;
     search.mutate({
-      keyword: keyword.trim() || undefined,
+      keyword: anyTitle ? undefined : keyword.trim() || undefined,
+      anyTitle,
       location: location.trim() || undefined,
       salaryMin: min && Number.isFinite(min) ? min : undefined,
       salaryMax: max && Number.isFinite(max) ? max : undefined,
@@ -133,7 +139,17 @@ export function JobRecommendations() {
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="e.g. Senior Product Manager"
             className="mt-1.5"
+            disabled={anyTitle}
           />
+          <Hint tip="Skip the title entirely and rank every nearby posting by how well it fits your resume, instead of searching one role at a time.">
+            <label className="mt-1.5 flex w-fit cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox
+                checked={anyTitle}
+                onCheckedChange={(checked) => setAnyTitle(checked === true)}
+              />
+              Any title — just show my best matches
+            </label>
+          </Hint>
         </div>
         <div>
           <Label htmlFor="rec-location">Location (optional)</Label>
