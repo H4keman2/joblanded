@@ -46,7 +46,7 @@ export async function extractPdfText(file: File): Promise<string> {
     for (const run of sortedByY) {
       const last = lines[lines.length - 1];
       const tolerance = Math.max(2, run.height * 0.4);
-      if (last && Math.abs(last[0].y - run.y) <= tolerance) {
+      if (last && last[0] && Math.abs(last[0].y - run.y) <= tolerance) {
         last.push(run);
       } else {
         lines.push([run]);
