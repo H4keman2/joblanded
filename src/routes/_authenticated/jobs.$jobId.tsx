@@ -334,7 +334,7 @@ function JobDetailPage() {
                 <Button
                   size="sm"
                   variant="secondary"
-                  disabled={gen.isPending || genAll.isPending}
+                  disabled={gen.isPending || genAll.isPending || needsConfirm}
                   onClick={() => genAll.mutate()}
                 >
                   {genAll.isPending ? (
