@@ -98,6 +98,7 @@ function JobDetailPage() {
 
   const [selected, setSelected] = useState(0);
   const [compare, setCompare] = useState<number | null>(null);
+  const [confirmedRole, setConfirmedRole] = useState<string | null>(null);
   const [showDiff, setShowDiff] = useState(true);
   const pickedManually = useRef(false);
   const autoSwitched = useRef(false);
@@ -124,16 +125,32 @@ function JobDetailPage() {
   }, [roles.data, fitById]);
 
   const bestMatch = roleOptions[0]?.fit != null ? roleOptions[0] : undefined;
+  const runnerUpFit = roleOptions[1]?.fit ?? null;
+  // High confidence = a strong fit that is also clearly ahead of the next role.
+  const confident =
+    !!bestMatch &&
+    (bestMatch.fit ?? 0) >= 70 &&
+    (runnerUpFit === null || (bestMatch.fit ?? 0) - runnerUpFit >= 10);
 
-  // Preselect the best-matching role when the user hasn't invested in this one yet.
+  // Preselect the best-matching role only when we're confident about it.
   useEffect(() => {
     if (autoSwitched.current || pickedManually.current) return;
-    if (!bestMatch || bestMatch.id === jobId) return;
+    if (!bestMatch || bestMatch.id === jobId || !confident) return;
     if (!drafts.isSuccess || versions.length > 0) return;
     autoSwitched.current = true;
     toast.info(`Switched to your best match: ${bestMatch.title}`);
     void navigate({ to: "/jobs/$jobId", params: { jobId: bestMatch.id }, replace: true });
-  }, [bestMatch, jobId, drafts.isSuccess, versions.length, navigate]);
+  }, [bestMatch, confident, jobId, drafts.isSuccess, versions.length, navigate]);
+
+  // When confidence is low, ask the user to confirm the role before generating.
+  const needsConfirm =
+    !confident &&
+    roleOptions.length > 1 &&
+    confirmedRole !== jobId &&
+    !pickedManually.current &&
+    drafts.isSuccess &&
+    versions.length === 0;
+
 
 
   const genAll = useMutation({
@@ -253,6 +270,36 @@ function JobDetailPage() {
         </div>
 
         <div className="panel p-8">
+          {needsConfirm && (
+            <div className="mb-5 rounded-lg border border-border bg-secondary/40 p-4">
+              <p className="text-sm font-medium">Confirm the role before generating</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {bestMatch && bestMatch.id !== jobId
+                  ? `Your resume doesn't clearly favour one posting — ${bestMatch.title} scores ${bestMatch.fit}% fit, close to the others. Tailor for this role or switch?`
+                  : "Your resume doesn't clearly favour one posting. Confirm you want to tailor for this role."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => setConfirmedRole(jobId)}>
+                  Yes, tailor for {job.data?.title ?? "this role"}
+                </Button>
+                {bestMatch && bestMatch.id !== jobId && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => {
+                      pickedManually.current = true;
+                      setConfirmedRole(bestMatch.id);
+                      setSelected(0);
+                      setCompare(null);
+                      void navigate({ to: "/jobs/$jobId", params: { jobId: bestMatch.id } });
+                    }}
+                  >
+                    Use {bestMatch.title} instead
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Version history
@@ -274,19 +321,20 @@ function JobDetailPage() {
               </Hint>
             ))}
 
-            <Hint tip="Runs your latest parsed resume against this posting and writes a new tailored version with a different framing angle.">
-              <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending || genAll.isPending}>
+            <Hint tip={needsConfirm ? "Confirm the role above first." : "Runs your latest parsed resume against this posting and writes a new tailored version with a different framing angle."}>
+              <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending || genAll.isPending || needsConfirm}>
                 {gen.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
                 {versions.length === 0 ? "Generate first version" : "Regenerate"}
               </Button>
             </Hint>
+
 
             {roleOptions.length > 1 && (
               <Hint tip="Tailors your resume for every other saved role too. Each role's version is saved under that role.">
                 <Button
                   size="sm"
                   variant="secondary"
-                  disabled={gen.isPending || genAll.isPending}
+                  disabled={gen.isPending || genAll.isPending || needsConfirm}
                   onClick={() => genAll.mutate()}
                 >
                   {genAll.isPending ? (
