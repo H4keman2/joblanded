@@ -146,7 +146,7 @@ function JobDetailPage() {
   const needsConfirm =
     !confident &&
     roleOptions.length > 1 &&
-    !confirmedRole &&
+    confirmedRole !== jobId &&
     !pickedManually.current &&
     drafts.isSuccess &&
     versions.length === 0;
