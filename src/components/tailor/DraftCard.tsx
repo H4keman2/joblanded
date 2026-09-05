@@ -1,5 +1,7 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 import { downloadResumePdf } from "@/lib/resume-pdf";
+import { Copy, Download } from "lucide-react";
 
 export interface TailorDraft {
   angle: string;
@@ -243,23 +245,27 @@ export function DraftCard({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <button
+        <div className="flex items-center gap-2">
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => void navigator.clipboard.writeText(draft.resume)}
-            className="text-xs font-medium text-primary hover:underline"
           >
+            <Copy className="size-4" />
             Copy
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="default"
+            size="sm"
             onClick={() =>
               downloadResumePdf(draft.resume, `${fileNameHint ?? "tailored-resume"}.pdf`)
             }
-            className="text-xs font-medium text-primary hover:underline"
           >
+            <Download className="size-4" />
             Download PDF
-          </button>
+          </Button>
         </div>
       </div>
       <div className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 text-sm leading-relaxed text-foreground">
