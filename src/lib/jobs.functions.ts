@@ -287,26 +287,28 @@ export const generateDraft = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 
-    const [{ data: job, error: jobError }, { data: resume, error: resumeError }] = await Promise.all([
-      supabase
-        .from("jobs")
-        .select("id, title, company, description")
-        .eq("id", data.jobId)
-        .eq("user_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("resumes")
-        .select("id, raw_text, parsed_json")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+    const [{ data: job, error: jobError }, { data: resume, error: resumeError }] =
+      await Promise.all([
+        supabase
+          .from("jobs")
+          .select("id, title, company, description")
+          .eq("id", data.jobId)
+          .eq("user_id", userId)
+          .maybeSingle(),
+        supabase
+          .from("resumes")
+          .select("id, raw_text, parsed_json")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
     if (jobError) throw new Error(jobError.message);
     if (resumeError) throw new Error(resumeError.message);
     if (!job) throw new Error("Job not found");
-    if (!resume) throw new Error("Upload and parse your resume first, then come back to tailor it.");
+    if (!resume)
+      throw new Error("Upload and parse your resume first, then come back to tailor it.");
 
     const { data: existing, error: existingError } = await supabase
       .from("tailored_documents")
@@ -386,57 +388,221 @@ export const deleteDraft = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// --- Role suggestions: score saved roles against the parsed resume ---
+// --- Role suggestions: score jobs (saved or fetched) against the parsed resume ---
 
-const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9+#. ]/g, " ").replace(/\s+/g, " ").trim();
+const norm = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9+#. ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const strings = (v: unknown) =>
+  Array.isArray(v)
+    ? v.filter((x): x is string => typeof x === "string" && x.trim().length > 1)
+    : [];
+
+function titleWordsFrom(titles: string[]): Set<string> {
+  return new Set(
+    titles
+      .flatMap((t) => norm(t).split(" "))
+      .filter((w) => w.length > 2 && !["the", "and", "for", "senior", "lead"].includes(w)),
+  );
+}
+
+// Shared skills/title overlap scorer: no AI call, so it's fast and free enough
+// to run against every result of an external job search, not just the handful
+// of postings a user has manually saved.
+function scoreAgainstResume(
+  haystackRaw: string,
+  titleRaw: string,
+  skills: string[],
+  titleWords: Set<string>,
+): { fit: number | null; matched: string[] } {
+  if (!skills.length && !titleWords.size) return { fit: null, matched: [] };
+
+  const haystack = norm(haystackRaw);
+  const titleHay = norm(titleRaw);
+
+  const matched = skills.filter((s) => haystack.includes(norm(s))).slice(0, 40);
+  const skillScore = skills.length ? matched.length / skills.length : 0;
+
+  const titleHits = [...titleWords].filter((w) => titleHay.includes(w)).length;
+  const titleScore = titleWords.size ? titleHits / titleWords.size : 0;
+
+  const fit = Math.max(0, Math.min(100, Math.round((skillScore * 0.6 + titleScore * 0.4) * 130)));
+  return { fit, matched: matched.slice(0, 6) };
+}
 
 export const rankRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
-    const [{ data: jobs, error: jobsError }, { data: resume, error: resumeError }] = await Promise.all([
-      supabase
-        .from("jobs")
-        .select("id, title, company, description")
-        .eq("user_id", userId)
-        .order("date_added", { ascending: false }),
-      supabase
-        .from("resumes")
-        .select("parsed_json")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
+    const [{ data: jobs, error: jobsError }, { data: resume, error: resumeError }] =
+      await Promise.all([
+        supabase
+          .from("jobs")
+          .select("id, title, company, description")
+          .eq("user_id", userId)
+          .order("date_added", { ascending: false }),
+        supabase
+          .from("resumes")
+          .select("parsed_json")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
     if (jobsError) throw new Error(jobsError.message);
     if (resumeError) throw new Error(resumeError.message);
 
     const parsed = (resume?.parsed_json ?? {}) as Record<string, unknown>;
-    const strings = (v: unknown) =>
-      Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x.trim().length > 1) : [];
     const skills = strings(parsed["skills"]).concat(strings(parsed["keywords"]));
     const titles = strings(parsed["titles"]);
-
-    if (!skills.length && !titles.length) {
-      return (jobs ?? []).map((j) => ({ id: j.id, fit: null as number | null, matched: [] as string[] }));
-    }
-
-    const titleWords = new Set(
-      titles.flatMap((t) => norm(t).split(" ")).filter((w) => w.length > 2 && !["the", "and", "for", "senior", "lead"].includes(w)),
-    );
+    const titleWords = titleWordsFrom(titles);
 
     return (jobs ?? []).map((j) => {
-      const haystack = norm(`${j.title} ${j.company ?? ""} ${j.description}`);
-      const titleHay = norm(j.title);
-
-      const matched = skills.filter((s) => haystack.includes(norm(s))).slice(0, 40);
-      const skillScore = skills.length ? matched.length / skills.length : 0;
-
-      const titleHits = [...titleWords].filter((w) => titleHay.includes(w)).length;
-      const titleScore = titleWords.size ? titleHits / titleWords.size : 0;
-
-      const fit = Math.max(0, Math.min(100, Math.round((skillScore * 0.6 + titleScore * 0.4) * 130)));
-      return { id: j.id, fit, matched: matched.slice(0, 6) };
+      const { fit, matched } = scoreAgainstResume(
+        `${j.title} ${j.company ?? ""} ${j.description}`,
+        j.title,
+        skills,
+        titleWords,
+      );
+      return { id: j.id, fit, matched };
     });
+  });
+
+// --- Recommendations: pull live postings from the Adzuna job search API and
+// rank them against the resume. Requires ADZUNA_APP_ID / ADZUNA_APP_KEY —
+// free at https://developer.adzuna.com — set as secrets in the Lovable
+// project (not committed to .env). Crawling job boards directly isn't done
+// here: it violates most boards' terms of service and breaks constantly
+// against bot detection, so a proper aggregator API is used instead.
+
+const RECOMMEND_RESULTS = 12;
+
+const recommendInput = z.object({
+  keyword: z.string().trim().max(200).optional(),
+  location: z.string().trim().max(200).optional(),
+  salaryMin: z.number().int().positive().max(10_000_000).optional(),
+  salaryMax: z.number().int().positive().max(10_000_000).optional(),
+});
+
+interface AdzunaResult {
+  id?: string;
+  title?: string;
+  company?: { display_name?: string };
+  location?: { display_name?: string };
+  salary_min?: number;
+  salary_max?: number;
+  description?: string;
+  redirect_url?: string;
+}
+
+export const getRecommendedJobs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => recommendInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    const appId = process.env["ADZUNA_APP_ID"];
+    const appKey = process.env["ADZUNA_APP_KEY"];
+    if (!appId || !appKey) {
+      throw new Error(
+        "Job recommendations aren't set up yet. Add ADZUNA_APP_ID and ADZUNA_APP_KEY (free at developer.adzuna.com) as secrets in your Lovable project, then reload this page.",
+      );
+    }
+
+    const [{ data: resume, error: resumeError }, { data: savedJobs, error: savedError }] =
+      await Promise.all([
+        supabase
+          .from("resumes")
+          .select("parsed_json")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase.from("jobs").select("source_url").eq("user_id", userId),
+      ]);
+    if (resumeError) throw new Error(resumeError.message);
+    if (savedError) throw new Error(savedError.message);
+
+    const parsed = (resume?.parsed_json ?? {}) as Record<string, unknown>;
+    const skills = strings(parsed["skills"]).concat(strings(parsed["keywords"]));
+    const titles = strings(parsed["titles"]);
+    const titleWords = titleWordsFrom(titles);
+    const parsedLocation =
+      typeof parsed["location"] === "string" ? (parsed["location"] as string) : "";
+
+    const keyword = data.keyword || titles[0] || "";
+    const location = data.location || parsedLocation;
+
+    const params = new URLSearchParams({
+      app_id: appId,
+      app_key: appKey,
+      "content-type": "application/json",
+      results_per_page: String(RECOMMEND_RESULTS * 2), // fetch extra — some get filtered out as already-saved
+    });
+    if (keyword) params.set("what", keyword);
+    if (location) {
+      params.set("where", location);
+      params.set("distance", "50"); // km — "relatively close" rather than an exact city match only
+    }
+    if (data.salaryMin) params.set("salary_min", String(data.salaryMin));
+    if (data.salaryMax) params.set("salary_max", String(data.salaryMax));
+
+    let res: Response;
+    try {
+      res = await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/1?${params.toString()}`);
+    } catch {
+      throw new Error("Could not reach the job search service. Try again in a moment.");
+    }
+    if (!res.ok) {
+      console.error("Adzuna error", res.status, await res.text());
+      throw new Error(
+        res.status === 401
+          ? "Job recommendations are misconfigured (Adzuna rejected the API credentials)."
+          : "The job search service could not complete this request.",
+      );
+    }
+
+    const payload = (await res.json()) as { results?: AdzunaResult[] };
+    const savedUrls = new Set(
+      (savedJobs ?? []).map((j) => j.source_url).filter((u): u is string => !!u),
+    );
+
+    return (payload.results ?? [])
+      .filter((r) => r.redirect_url && !savedUrls.has(r.redirect_url))
+      .map((r) => {
+        const title = r.title?.trim() || "Untitled role";
+        const company = r.company?.display_name?.trim() || null;
+        const snippet = (r.description ?? "").trim();
+        const { fit, matched } = scoreAgainstResume(
+          `${title} ${company ?? ""} ${snippet}`,
+          title,
+          skills,
+          titleWords,
+        );
+        const reason = matched.length
+          ? `Overlaps on ${matched.slice(0, 3).join(", ")}`
+          : fit && fit > 0
+            ? "Similar title to your resume"
+            : "Based on your search";
+
+        return {
+          id: r.id ?? r.redirect_url!,
+          title,
+          company,
+          location: r.location?.display_name?.trim() || null,
+          salaryMin: typeof r.salary_min === "number" ? Math.round(r.salary_min) : null,
+          salaryMax: typeof r.salary_max === "number" ? Math.round(r.salary_max) : null,
+          snippet: snippet.slice(0, 220),
+          url: r.redirect_url!,
+          fit,
+          reason,
+        };
+      })
+      .sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1))
+      .slice(0, RECOMMEND_RESULTS);
   });

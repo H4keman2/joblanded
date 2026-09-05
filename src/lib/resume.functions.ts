@@ -13,6 +13,9 @@ Return ONLY valid JSON matching this shape:
   "full_name": string | null,
   "email": string | null,
   "phone": string | null,
+  "location": string | null,   // candidate's city and state/region as written on the resume,
+                                 // e.g. "Smithtown, NY" — used to find nearby job postings.
+                                 // null if no location is stated.
   "skills": string[],
   "titles": string[],
   "years_experience": number | null,

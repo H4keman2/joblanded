@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { addJob, deleteJob, listJobs } from "@/lib/jobs.functions";
+import { JobRecommendations } from "@/components/jobs/JobRecommendations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -124,6 +125,8 @@ function JobsPage() {
           </form>
         )}
       </div>
+
+      <JobRecommendations />
 
       <div className="panel p-8">
         {jobs.isLoading ? (

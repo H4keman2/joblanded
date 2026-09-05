@@ -38,6 +38,7 @@ type Parsed = {
   full_name?: string | null;
   email?: string | null;
   phone?: string | null;
+  location?: string | null;
   skills?: string[];
   titles?: string[];
   years_experience?: number | null;
@@ -84,7 +85,8 @@ function ResumePage() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: () => runSave({ data: { id: resumeId!, parsed: (draft ?? {}) as Record<string, unknown> } }),
+    mutationFn: () =>
+      runSave({ data: { id: resumeId!, parsed: (draft ?? {}) as Record<string, unknown> } }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["latest-resume"] });
       toast.success("Profile saved.");
@@ -113,7 +115,6 @@ function ResumePage() {
       if (fileRef.current) fileRef.current.value = "";
     }
   }
-
 
   function update<K extends keyof Parsed>(key: K, value: Parsed[K]) {
     setDraft((d) => ({ ...(d ?? {}), [key]: value }));
@@ -145,7 +146,11 @@ function ResumePage() {
             onChange={onFile}
           />
           <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={extracting}>
-            {extracting ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+            {extracting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Upload className="size-4" />
+            )}
             Upload PDF
           </Button>
           <span className="text-sm text-muted-foreground">or paste the text below</span>
@@ -198,7 +203,6 @@ function ResumePage() {
             </Button>
           </>
         )}
-
       </section>
 
       {isLoading && <p className="text-sm text-muted-foreground">Loading your profile…</p>}
@@ -234,6 +238,16 @@ function ResumePage() {
             </Field>
             <Field label="Phone">
               <Input value={draft.phone ?? ""} onChange={(e) => update("phone", e.target.value)} />
+            </Field>
+            <Field label="Location">
+              <Input
+                value={draft.location ?? ""}
+                onChange={(e) => update("location", e.target.value)}
+                placeholder="City, State"
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Used to find nearby job recommendations on the Jobs page.
+              </p>
             </Field>
           </div>
 
