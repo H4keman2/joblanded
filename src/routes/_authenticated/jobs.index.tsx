@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Hint } from "@/components/ui/hint";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -165,14 +166,16 @@ function JobsPage() {
                       Tailor & compare
                     </Link>
                   </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    aria-label={`Delete ${job.title}`}
-                    onClick={() => deleteMutation.mutate(job.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Hint tip="Delete this saved job and its tailored versions.">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      aria-label={`Delete ${job.title}`}
+                      onClick={() => deleteMutation.mutate(job.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </Hint>
                 </div>
               </li>
             ))}

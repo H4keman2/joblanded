@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Hint } from "@/components/ui/hint";
 import { toast } from "sonner";
 import { ExternalLink, Loader2, Plus, Search } from "lucide-react";
 
@@ -201,11 +202,13 @@ export function JobRecommendations() {
                   </p>
                 </div>
                 {job.fit != null && (
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${fitTone(job.fit)}`}
-                  >
-                    {job.fit}%
-                  </span>
+                  <Hint tip="How closely this posting matches your resume's skills and job titles.">
+                    <span
+                      className={`shrink-0 cursor-help rounded-full px-2 py-0.5 text-xs font-semibold ${fitTone(job.fit)}`}
+                    >
+                      {job.fit}%
+                    </span>
+                  </Hint>
                 )}
               </div>
 
@@ -230,15 +233,17 @@ export function JobRecommendations() {
                 >
                   View posting <ExternalLink className="size-3" />
                 </a>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => add.mutate(job)}
-                  disabled={add.isPending}
-                >
-                  <Plus className="size-4" />
-                  Add job
-                </Button>
+                <Hint tip="Save this posting to your Jobs list so you can tailor a resume against it.">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => add.mutate(job)}
+                    disabled={add.isPending}
+                  >
+                    <Plus className="size-4" />
+                    Add job
+                  </Button>
+                </Hint>
               </div>
             </Card>
           ))}

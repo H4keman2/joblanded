@@ -1,7 +1,9 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { Hint } from "@/components/ui/hint";
 import { downloadResumePdf } from "@/lib/resume-pdf";
 import { Copy, Download } from "lucide-react";
+
+export { Hint };
 
 export interface TailorDraft {
   angle: string;
@@ -13,17 +15,6 @@ export interface TailorDraft {
   insights: { strengths: string[]; gaps: string[]; suggestions: string[] };
   ats: { score: number; note: string; flags: string[] };
   keywords: { score: number; note: string; hits: string[]; misses: string[] };
-}
-
-export function Hint({ children, tip }: { children: React.ReactNode; tip: string }) {
-  return (
-    <Tooltip delayDuration={100}>
-      <TooltipTrigger asChild>
-        <span className="inline-flex">{children}</span>
-      </TooltipTrigger>
-      <TooltipContent className="max-w-xs text-xs leading-relaxed">{tip}</TooltipContent>
-    </Tooltip>
-  );
 }
 
 export function ScoreBar({ score }: { score: number }) {
@@ -246,26 +237,30 @@ export function DraftCard({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => void navigator.clipboard.writeText(draft.resume)}
-          >
-            <Copy className="size-4" />
-            Copy
-          </Button>
-          <Button
-            type="button"
-            variant="default"
-            size="sm"
-            onClick={() =>
-              downloadResumePdf(draft.resume, `${fileNameHint ?? "tailored-resume"}.pdf`)
-            }
-          >
-            <Download className="size-4" />
-            Download PDF
-          </Button>
+          <Hint tip="Copy this version's full resume text to your clipboard.">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => void navigator.clipboard.writeText(draft.resume)}
+            >
+              <Copy className="size-4" />
+              Copy
+            </Button>
+          </Hint>
+          <Hint tip="Download this version as a formatted PDF, ready to submit.">
+            <Button
+              type="button"
+              variant="default"
+              size="sm"
+              onClick={() =>
+                downloadResumePdf(draft.resume, `${fileNameHint ?? "tailored-resume"}.pdf`)
+              }
+            >
+              <Download className="size-4" />
+              Download PDF
+            </Button>
+          </Hint>
         </div>
       </div>
       <div className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 text-sm leading-relaxed text-foreground">

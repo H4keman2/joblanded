@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Hint } from "@/components/ui/hint";
 import {
   Select,
   SelectContent,
@@ -239,19 +240,21 @@ function ApplicationsPage() {
                         </SelectContent>
                       </Select>
                     )}
-                    <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                      <Switch
-                        checked={submitted}
-                        disabled={statusMutation.isPending}
-                        onCheckedChange={(checked) =>
-                          statusMutation.mutate({
-                            id: app.id,
-                            status: checked ? "applied" : "saved",
-                          })
-                        }
-                      />
-                      {statusLabels[app.status as ApplicationStatus] ?? app.status}
-                    </label>
+                    <Hint tip="Toggle on once you've actually submitted this application to start tracking its status.">
+                      <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                        <Switch
+                          checked={submitted}
+                          disabled={statusMutation.isPending}
+                          onCheckedChange={(checked) =>
+                            statusMutation.mutate({
+                              id: app.id,
+                              status: checked ? "applied" : "saved",
+                            })
+                          }
+                        />
+                        {statusLabels[app.status as ApplicationStatus] ?? app.status}
+                      </label>
+                    </Hint>
                   </div>
                 </li>
               );
