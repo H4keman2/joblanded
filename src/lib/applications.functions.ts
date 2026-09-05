@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
 import { addJobInput, createJobForUser } from "@/lib/jobs.functions";
 
@@ -29,6 +31,44 @@ export function addBusinessDays(dateStr: string, days: number): string {
 const APPLICATION_COLUMNS =
   "id, status, date_applied, follow_up_date, follow_up_sent, notes, created_at, job_id";
 
+type FollowUpBackfillRow = {
+  id: string;
+  status: string;
+  date_applied: string | null;
+  follow_up_date: string | null;
+};
+
+// updateApplicationStatus only stamps follow_up_date at the moment a role
+// first moves past "saved" — so any application that was already marked
+// applied before that logic existed (or before the follow_up_date column
+// itself did) is stuck with date_applied set and follow_up_date null
+// forever, which hides the whole follow-up section on that row. Rather than
+// asking the user to run another manual SQL backfill, self-heal it lazily on
+// every read: any row that's past "saved", has an applied date, and is
+// missing a follow-up date gets one computed and persisted right here.
+export async function backfillFollowUpDates<T extends FollowUpBackfillRow>(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+  rows: T[],
+): Promise<T[]> {
+  const stale = rows.filter((r) => r.status !== "saved" && r.date_applied && !r.follow_up_date);
+  if (!stale.length) return rows;
+
+  const computed = new Map(stale.map((r) => [r.id, addBusinessDays(r.date_applied!, 2)]));
+
+  await Promise.all(
+    stale.map((r) =>
+      supabase
+        .from("applications")
+        .update({ follow_up_date: computed.get(r.id)! })
+        .eq("id", r.id)
+        .eq("user_id", userId),
+    ),
+  );
+
+  return rows.map((r) => (computed.has(r.id) ? { ...r, follow_up_date: computed.get(r.id)! } : r));
+}
+
 export const listApplications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -40,7 +80,7 @@ export const listApplications = createServerFn({ method: "GET" })
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return backfillFollowUpDates(context.supabase, context.userId, data ?? []);
   });
 
 // Lets someone add an application straight from this page (paste a posting, or

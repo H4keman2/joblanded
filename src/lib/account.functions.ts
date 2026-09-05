@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { backfillFollowUpDates } from "@/lib/applications.functions";
 import { z } from "zod";
 
 export const getProfile = createServerFn({ method: "GET" })
@@ -127,7 +128,7 @@ export const getActiveApplications = createServerFn({ method: "GET" })
       .in("status", ["saved", "applied", "interviewing", "offer"])
       .order("follow_up_date", { ascending: true, nullsFirst: false });
     if (error) throw new Error(error.message);
-    return data ?? [];
+    return backfillFollowUpDates(context.supabase, context.userId, data ?? []);
   });
 
 export const getDashboardStats = createServerFn({ method: "GET" })
