@@ -402,6 +402,20 @@ const strings = (v: unknown) =>
     ? v.filter((x): x is string => typeof x === "string" && x.trim().length > 1)
     : [];
 
+// Resume parsing sometimes lists the same skill under both "skills" and
+// "keywords" (or a resume just repeats one), which — before matched results
+// were deduped too — showed up as "Overlaps on Python, Python" and also
+// quietly inflated the score denominator. Dedupe once, at the source.
+function dedupeSkills(skills: string[]): string[] {
+  const seen = new Set<string>();
+  return skills.filter((s) => {
+    const key = norm(s);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function titleWordsFrom(titles: string[]): Set<string> {
   return new Set(
     titles
@@ -441,7 +455,20 @@ function scoreAgainstResume(
   const haystack = norm(haystackRaw);
   const titleHay = norm(titleRaw);
 
-  const matched = skills.filter((s) => containsToken(haystack, norm(s))).slice(0, 40);
+  // Resume parsing sometimes lists the same skill twice (once under
+  // "skills", once under "keywords" — the two lists are concatenated above),
+  // so dedupe by normalized form or a match reason ends up reading
+  // "Overlaps on Python, Python".
+  const matchedSeen = new Set<string>();
+  const matched = skills
+    .filter((s) => containsToken(haystack, norm(s)))
+    .filter((s) => {
+      const key = norm(s);
+      if (matchedSeen.has(key)) return false;
+      matchedSeen.add(key);
+      return true;
+    })
+    .slice(0, 40);
   const skillScore = skills.length ? matched.length / skills.length : 0;
 
   const titleHits = [...titleWords].filter((w) => containsToken(titleHay, w)).length;
@@ -475,7 +502,7 @@ export const rankRoles = createServerFn({ method: "GET" })
     if (resumeError) throw new Error(resumeError.message);
 
     const parsed = (resume?.parsed_json ?? {}) as Record<string, unknown>;
-    const skills = strings(parsed["skills"]).concat(strings(parsed["keywords"]));
+    const skills = dedupeSkills(strings(parsed["skills"]).concat(strings(parsed["keywords"])));
     const titles = strings(parsed["titles"]);
     const titleWords = titleWordsFrom(titles);
 
@@ -551,54 +578,83 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
     if (savedError) throw new Error(savedError.message);
 
     const parsed = (resume?.parsed_json ?? {}) as Record<string, unknown>;
-    const skills = strings(parsed["skills"]).concat(strings(parsed["keywords"]));
+    const skills = dedupeSkills(strings(parsed["skills"]).concat(strings(parsed["keywords"])));
     const titles = strings(parsed["titles"]);
     const titleWords = titleWordsFrom(titles);
     const parsedLocation =
       typeof parsed["location"] === "string" ? (parsed["location"] as string) : "";
 
-    const keyword = data.anyTitle ? "" : data.keyword || titles[0] || "";
     const location = data.location || parsedLocation;
 
-    // Without a keyword, Adzuna's own relevance ranking has nothing to go
-    // on, so pull a bigger, freshness-sorted pool and lean entirely on our
-    // own fit score to pick the winners out of it.
-    const pageSize = data.anyTitle ? RECOMMEND_RESULTS * 4 : RECOMMEND_RESULTS * 2;
+    // In "any title" mode, searching with no keyword at all handed Adzuna's
+    // own relevance ranking nothing to go on — it just returned the newest
+    // postings across every industry nationwide, sorted by date. Local
+    // scoring then had to pick "best matches" out of what was essentially a
+    // random draw, which is how an Azure DevOps posting or a Databricks
+    // Architect role ended up ranked above genuine product-management roles:
+    // a long, generic job description has more chances to incidentally
+    // share a buzzword or two than a shorter, more specific one does. Using
+    // the resume's own recent titles as the search terms instead keeps the
+    // candidate pool itself occupation-relevant, and local scoring still
+    // picks the best of *that* — rather than the best of everything.
+    // Falls back to the old broad, date-sorted search only when the resume
+    // has no parsed titles to search with at all.
+    const recentTitles = titles.slice(0, 2).filter(Boolean);
+    const queryTerms = data.anyTitle
+      ? recentTitles.length
+        ? recentTitles
+        : [""]
+      : [data.keyword || titles[0] || ""];
 
-    const params = new URLSearchParams({
-      app_id: appId,
-      app_key: appKey,
-      "content-type": "application/json",
-      results_per_page: String(pageSize), // fetch extra — some get filtered out as already-saved
-    });
-    if (keyword) params.set("what", keyword);
-    if (!keyword) params.set("sort_by", "date");
-    if (location) {
-      params.set("where", location);
-      params.set("distance", "50"); // km — "relatively close" rather than an exact city match only
-    }
-    if (data.salaryMin) params.set("salary_min", String(data.salaryMin));
-    if (data.salaryMax) params.set("salary_max", String(data.salaryMax));
+    const pageSize = data.anyTitle ? RECOMMEND_RESULTS * 3 : RECOMMEND_RESULTS * 2;
 
-    let res: Response;
-    try {
-      res = await fetch(`https://api.adzuna.com/v1/api/jobs/us/search/1?${params.toString()}`);
-    } catch {
-      throw new Error("Could not reach the job search service. Try again in a moment.");
-    }
-    if (!res.ok) {
-      console.error("Adzuna error", res.status, await res.text());
-      throw new Error(
-        res.status === 401
-          ? "Job recommendations are misconfigured (Adzuna rejected the API credentials)."
-          : "The job search service could not complete this request.",
-      );
-    }
+    const buildParams = (term: string) => {
+      const params = new URLSearchParams({
+        app_id: appId,
+        app_key: appKey,
+        "content-type": "application/json",
+        results_per_page: String(pageSize), // fetch extra — some get filtered out as already-saved
+      });
+      if (term) params.set("what", term);
+      else params.set("sort_by", "date");
+      if (location) {
+        params.set("where", location);
+        params.set("distance", "50"); // km — "relatively close" rather than an exact city match only
+      }
+      if (data.salaryMin) params.set("salary_min", String(data.salaryMin));
+      if (data.salaryMax) params.set("salary_max", String(data.salaryMax));
+      return params;
+    };
 
-    const payload = (await res.json()) as { results?: AdzunaResult[] };
+    const fetchPage = async (term: string): Promise<AdzunaResult[]> => {
+      let res: Response;
+      try {
+        res = await fetch(
+          `https://api.adzuna.com/v1/api/jobs/us/search/1?${buildParams(term).toString()}`,
+        );
+      } catch {
+        throw new Error("Could not reach the job search service. Try again in a moment.");
+      }
+      if (!res.ok) {
+        console.error("Adzuna error", res.status, await res.text());
+        throw new Error(
+          res.status === 401
+            ? "Job recommendations are misconfigured (Adzuna rejected the API credentials)."
+            : "The job search service could not complete this request.",
+        );
+      }
+      const payload = (await res.json()) as { results?: AdzunaResult[] };
+      return payload.results ?? [];
+    };
+
+    const pages = await Promise.all(queryTerms.map(fetchPage));
+    const rawResults = pages.flat();
+
     const savedUrls = new Set(
       (savedJobs ?? []).map((j) => j.source_url).filter((u): u is string => !!u),
     );
+    // Two title-based queries can return the same posting twice.
+    const seenUrls = new Set<string>();
 
     // A soft bar for what counts as a strong "recommendation" rather than
     // noise. Preferred, but never enforced so hard that it can zero out the
@@ -612,8 +668,13 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
     // postings get fetched, without ever showing up in the match itself.
     const FILTER_BONUS = 8;
 
-    const scored = (payload.results ?? [])
-      .filter((r) => r.redirect_url && !savedUrls.has(r.redirect_url))
+    const scored = rawResults
+      .filter((r) => {
+        if (!r.redirect_url || savedUrls.has(r.redirect_url)) return false;
+        if (seenUrls.has(r.redirect_url)) return false;
+        seenUrls.add(r.redirect_url);
+        return true;
+      })
       .map((r) => {
         const title = r.title?.trim() || "Untitled role";
         const company = r.company?.display_name?.trim() || null;
