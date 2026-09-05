@@ -600,38 +600,61 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
       (savedJobs ?? []).map((j) => j.source_url).filter((u): u is string => !!u),
     );
 
-    // A minimum bar for what counts as a "recommendation" rather than noise.
-    // Without a keyword to search on (anyTitle mode), Adzuna returns a large,
-    // industry-unfiltered pool, and the old code always padded out to
-    // RECOMMEND_RESULTS regardless of how weak the score was — which is how a
-    // 3%-match OB/GYN posting ended up sitting in someone's "best matches"
-    // list. Better to show fewer, honestly-relevant roles than pad with
-    // scraps just to hit a round number.
+    // A soft bar for what counts as a strong "recommendation" rather than
+    // noise. Preferred, but never enforced so hard that it can zero out the
+    // whole panel — a search with no strong overlap should still surface its
+    // best available matches (ranked honestly) rather than "No matches
+    // found", so a hard floor is applied only when something actually clears
+    // it further down.
     const MIN_FIT = 15;
+    // Bonus weight for a posting that aligns with filters the user actually
+    // set — otherwise adding a location or salary range only narrows which
+    // postings get fetched, without ever showing up in the match itself.
+    const FILTER_BONUS = 8;
 
-    return (payload.results ?? [])
+    const scored = (payload.results ?? [])
       .filter((r) => r.redirect_url && !savedUrls.has(r.redirect_url))
       .map((r) => {
         const title = r.title?.trim() || "Untitled role";
         const company = r.company?.display_name?.trim() || null;
         const snippet = (r.description ?? "").trim();
-        const { fit, matched } = scoreAgainstResume(
+        const jobLocation = r.location?.display_name?.trim() || null;
+        const { fit: baseFit, matched } = scoreAgainstResume(
           `${title} ${company ?? ""} ${snippet}`,
           title,
           skills,
           titleWords,
         );
-        const reason = matched.length
-          ? `Overlaps on ${matched.slice(0, 3).join(", ")}`
-          : fit && fit > 0
-            ? "Similar title to your resume"
-            : "Based on your search";
+
+        const locationMatched = !!(
+          location &&
+          jobLocation &&
+          (norm(jobLocation).includes(norm(location)) || norm(location).includes(norm(jobLocation)))
+        );
+        const jobMin = r.salary_min ?? r.salary_max;
+        const jobMax = r.salary_max ?? r.salary_min;
+        const salaryMatched =
+          (!!data.salaryMin || !!data.salaryMax) &&
+          typeof jobMin === "number" &&
+          typeof jobMax === "number" &&
+          jobMax >= (data.salaryMin ?? 0) &&
+          jobMin <= (data.salaryMax ?? Number.MAX_SAFE_INTEGER);
+
+        const bonus = (locationMatched ? FILTER_BONUS : 0) + (salaryMatched ? FILTER_BONUS : 0);
+        const fit = baseFit === null ? bonus || null : Math.min(100, baseFit + bonus);
+
+        const reasonParts: string[] = [];
+        if (matched.length) reasonParts.push(`Overlaps on ${matched.slice(0, 3).join(", ")}`);
+        else if (baseFit && baseFit > 0) reasonParts.push("Similar title to your resume");
+        if (locationMatched) reasonParts.push("matches your location");
+        if (salaryMatched) reasonParts.push("fits your salary range");
+        const reason = reasonParts.length ? reasonParts.join(" · ") : "Based on your search";
 
         return {
           id: r.id ?? r.redirect_url!,
           title,
           company,
-          location: r.location?.display_name?.trim() || null,
+          location: jobLocation,
           salaryMin: typeof r.salary_min === "number" ? Math.round(r.salary_min) : null,
           salaryMax: typeof r.salary_max === "number" ? Math.round(r.salary_max) : null,
           snippet: snippet.slice(0, 220),
@@ -640,7 +663,8 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
           reason,
         };
       })
-      .filter((job) => (skills.length || titleWords.size ? (job.fit ?? 0) >= MIN_FIT : true))
-      .sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1))
-      .slice(0, RECOMMEND_RESULTS);
+      .sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
+
+    const strongMatches = scored.filter((job) => (job.fit ?? 0) >= MIN_FIT);
+    return (strongMatches.length ? strongMatches : scored).slice(0, RECOMMEND_RESULTS);
   });
