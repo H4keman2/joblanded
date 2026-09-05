@@ -98,6 +98,7 @@ function JobDetailPage() {
 
   const [selected, setSelected] = useState(0);
   const [compare, setCompare] = useState<number | null>(null);
+  const [confirmedRole, setConfirmedRole] = useState<string | null>(null);
   const [showDiff, setShowDiff] = useState(true);
   const pickedManually = useRef(false);
   const autoSwitched = useRef(false);
