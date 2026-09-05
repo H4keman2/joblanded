@@ -97,10 +97,15 @@ function ResumePage() {
     if (!file) return;
     setExtracting(true);
     try {
-      const text = file.type === "application/pdf" ? await extractPdfText(file) : await file.text();
+      const isPdf = file.type === "application/pdf";
+      const text = isPdf ? await extractPdfText(file) : await file.text();
       if (text.trim().length < 30) throw new Error("Couldn't read enough text from that file.");
       setRawText(text);
-      toast.success("Text extracted — now parse it.");
+      if (isPdf) {
+        parseMutation.mutate(text);
+      } else {
+        toast.success("Text extracted — now parse it.");
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not read that file");
     } finally {
@@ -108,6 +113,7 @@ function ResumePage() {
       if (fileRef.current) fileRef.current.value = "";
     }
   }
+
 
   function update<K extends keyof Parsed>(key: K, value: Parsed[K]) {
     setDraft((d) => ({ ...(d ?? {}), [key]: value }));
@@ -145,24 +151,54 @@ function ResumePage() {
           <span className="text-sm text-muted-foreground">or paste the text below</span>
         </div>
 
-        <Textarea
-          value={rawText}
-          onChange={(e) => setRawText(e.target.value)}
-          placeholder="Paste your resume text here…"
-          className="min-h-56 font-mono text-xs"
-        />
+        {draft ? (
+          <details className="rounded-md border border-border/60 p-3">
+            <summary className="cursor-pointer text-sm text-muted-foreground">
+              View extracted text
+            </summary>
+            <div className="mt-3 space-y-3">
+              <Textarea
+                value={rawText}
+                onChange={(e) => setRawText(e.target.value)}
+                placeholder="Paste your resume text here…"
+                className="min-h-56 text-sm leading-relaxed"
+              />
+              <Button
+                onClick={() => parseMutation.mutate(rawText)}
+                disabled={parseMutation.isPending || rawText.trim().length < 30}
+              >
+                {parseMutation.isPending ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Sparkles className="size-4" />
+                )}
+                {parseMutation.isPending ? "Parsing…" : "Parse resume again"}
+              </Button>
+            </div>
+          </details>
+        ) : (
+          <>
+            <Textarea
+              value={rawText}
+              onChange={(e) => setRawText(e.target.value)}
+              placeholder="Paste your resume text here…"
+              className="min-h-56 text-sm leading-relaxed"
+            />
 
-        <Button
-          onClick={() => parseMutation.mutate(rawText)}
-          disabled={parseMutation.isPending || rawText.trim().length < 30}
-        >
-          {parseMutation.isPending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Sparkles className="size-4" />
-          )}
-          {parseMutation.isPending ? "Parsing…" : "Parse resume"}
-        </Button>
+            <Button
+              onClick={() => parseMutation.mutate(rawText)}
+              disabled={parseMutation.isPending || rawText.trim().length < 30}
+            >
+              {parseMutation.isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Sparkles className="size-4" />
+              )}
+              {parseMutation.isPending ? "Parsing…" : "Parse resume"}
+            </Button>
+          </>
+        )}
+
       </section>
 
       {isLoading && <p className="text-sm text-muted-foreground">Loading your profile…</p>}
