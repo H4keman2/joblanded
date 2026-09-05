@@ -23,9 +23,14 @@ export async function extractPdfText(file: File): Promise<string> {
     const runs: Run[] = [];
     for (const item of content.items) {
       if (!("str" in item) || !item.str) continue;
-      const [, , c, d, e, f] = item.transform as number[];
+      const t = item.transform as number[];
+      const c = t[2] ?? 0;
+      const d = t[3] ?? 0;
+      const e = t[4] ?? 0;
+      const f = t[5] ?? 0;
       const height = Math.hypot(c, d) || item.height || 10;
       runs.push({ str: item.str, x: e, y: f, endX: e + (item.width ?? 0), height });
+
     }
 
     if (runs.length === 0) {
