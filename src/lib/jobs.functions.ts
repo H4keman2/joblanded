@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
+import { fetchPublicUrl, UnsafeUrlError } from "@/lib/safe-fetch";
 
 const MODEL = "google/gemini-3.5-flash";
 
@@ -115,16 +116,19 @@ function extractJsonLdDescription(html: string): string | null {
 }
 
 async function fetchJobDescriptionFromUrl(url: string): Promise<string> {
-  let res: Response;
+  let res: Awaited<ReturnType<typeof fetchPublicUrl>>;
   try {
-    res = await fetch(url, {
+    res = await fetchPublicUrl(url, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (compatible; JobLandedBot/1.0; +https://github.com/H4keman2/joblanded)",
         Accept: "text/html",
       },
     });
-  } catch {
+  } catch (err) {
+    if (err instanceof UnsafeUrlError) {
+      throw new Error("That posting URL isn't reachable. Paste the description instead.");
+    }
     throw new Error("Could not reach that posting URL. Paste the description instead.");
   }
   if (!res.ok) {
