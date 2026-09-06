@@ -176,13 +176,13 @@ export type Database = {
         Insert: {
           bucket: string
           created_at?: string
-          id?: number
+          id?: never
           user_id: string
         }
         Update: {
           bucket?: string
           created_at?: string
-          id?: number
+          id?: never
           user_id?: string
         }
         Relationships: []
