@@ -383,7 +383,7 @@ const strings = (v: unknown) =>
 // "keywords" (or a resume just repeats one), which — before matched results
 // were deduped too — showed up as "Overlaps on Python, Python" and also
 // quietly inflated the score denominator. Dedupe once, at the source.
-function dedupeSkills(skills: string[]): string[] {
+export function dedupeSkills(skills: string[]): string[] {
   const seen = new Set<string>();
   return skills.filter((s) => {
     const key = norm(s);
@@ -393,7 +393,7 @@ function dedupeSkills(skills: string[]): string[] {
   });
 }
 
-function titleWordsFrom(titles: string[]): Set<string> {
+export function titleWordsFrom(titles: string[]): Set<string> {
   return new Set(
     titles
       .flatMap((t) => norm(t).split(" "))
@@ -407,7 +407,7 @@ function titleWordsFrom(titles: string[]): Set<string> {
 // "training", "maintain", "certain" — which was flooding recommendations
 // (especially "any title" mode's much larger, unfiltered pool) with
 // completely unrelated postings that just happened to contain those letters.
-function containsToken(haystack: string, token: string): boolean {
+export function containsToken(haystack: string, token: string): boolean {
   if (!token) return false;
   const isWordChar = (c: string | undefined) => !!c && /[a-z0-9]/.test(c);
   let idx = haystack.indexOf(token);
@@ -421,7 +421,7 @@ function containsToken(haystack: string, token: string): boolean {
 // Shared skills/title overlap scorer: no AI call, so it's fast and free enough
 // to run against every result of an external job search, not just the handful
 // of postings a user has manually saved.
-function scoreAgainstResume(
+export function scoreAgainstResume(
   haystackRaw: string,
   titleRaw: string,
   skills: string[],
