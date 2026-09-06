@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authenticated/applications'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedPostingSearchRouteImport } from './routes/_authenticated/posting-search'
 import { Route as AuthenticatedResumeRouteImport } from './routes/_authenticated/resume'
 import { Route as AuthenticatedJobsIndexRouteImport } from './routes/_authenticated/jobs.index'
 import { Route as AuthenticatedJobsJobIdRouteImport } from './routes/_authenticated/jobs.$jobId'
@@ -49,6 +50,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPostingSearchRoute =
+  AuthenticatedPostingSearchRouteImport.update({
+    id: '/posting-search',
+    path: '/posting-search',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedResumeRoute = AuthenticatedResumeRouteImport.update({
   id: '/resume',
   path: '/resume',
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AuthenticatedAccountRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/posting-search': typeof AuthenticatedPostingSearchRoute
   '/resume': typeof AuthenticatedResumeRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/jobs/': typeof AuthenticatedJobsIndexRoute
@@ -81,6 +89,7 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/posting-search': typeof AuthenticatedPostingSearchRoute
   '/resume': typeof AuthenticatedResumeRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/jobs': typeof AuthenticatedJobsIndexRoute
@@ -93,6 +102,7 @@ export interface FileRoutesById {
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/applications': typeof AuthenticatedApplicationsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/posting-search': typeof AuthenticatedPostingSearchRoute
   '/_authenticated/resume': typeof AuthenticatedResumeRoute
   '/_authenticated/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/_authenticated/jobs/': typeof AuthenticatedJobsIndexRoute
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/applications'
     | '/dashboard'
+    | '/posting-search'
     | '/resume'
     | '/jobs/$jobId'
     | '/jobs/'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/applications'
     | '/dashboard'
+    | '/posting-search'
     | '/resume'
     | '/jobs/$jobId'
     | '/jobs'
@@ -126,6 +138,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account'
     | '/_authenticated/applications'
     | '/_authenticated/dashboard'
+    | '/_authenticated/posting-search'
     | '/_authenticated/resume'
     | '/_authenticated/jobs/$jobId'
     | '/_authenticated/jobs/'
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/posting-search': {
+      id: '/_authenticated/posting-search'
+      path: '/posting-search'
+      fullPath: '/posting-search'
+      preLoaderRoute: typeof AuthenticatedPostingSearchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/resume': {
       id: '/_authenticated/resume'
       path: '/resume'
@@ -209,6 +229,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedApplicationsRoute: typeof AuthenticatedApplicationsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedPostingSearchRoute: typeof AuthenticatedPostingSearchRoute
   AuthenticatedResumeRoute: typeof AuthenticatedResumeRoute
   AuthenticatedJobsJobIdRoute: typeof AuthenticatedJobsJobIdRoute
   AuthenticatedJobsIndexRoute: typeof AuthenticatedJobsIndexRoute
@@ -218,6 +239,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedApplicationsRoute: AuthenticatedApplicationsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedPostingSearchRoute: AuthenticatedPostingSearchRoute,
   AuthenticatedResumeRoute: AuthenticatedResumeRoute,
   AuthenticatedJobsJobIdRoute: AuthenticatedJobsJobIdRoute,
   AuthenticatedJobsIndexRoute: AuthenticatedJobsIndexRoute,

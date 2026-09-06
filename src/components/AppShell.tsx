@@ -14,6 +14,12 @@ const nav = [
     tip: "Save postings, get resume-matched recommendations, and generate tailored versions.",
   },
   {
+    to: "/posting-search",
+    label: "Posting search",
+    tip: "Paste several postings at once and see which roles each resume section matches best.",
+  },
+  {
+
     to: "/resume",
     label: "Resume",
     tip: "Upload or paste your resume and review the skills, titles and details we extracted.",
