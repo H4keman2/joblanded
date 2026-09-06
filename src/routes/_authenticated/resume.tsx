@@ -33,6 +33,11 @@ export const Route = createFileRoute("/_authenticated/resume")({
   component: ResumePage,
 });
 
+// Generous for a resume (even a heavily-formatted one rarely exceeds a
+// couple MB), but caps how much a single upload can force the browser tab
+// to hold in memory and run through pdf.js before we know it's readable.
+const MAX_RESUME_FILE_BYTES = 8_000_000;
+
 type Education = { school?: string; degree?: string; year?: string | null };
 type Parsed = {
   full_name?: string | null;
@@ -97,6 +102,13 @@ function ResumePage() {
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_RESUME_FILE_BYTES) {
+      toast.error(
+        `That file is too large (${(file.size / 1_000_000).toFixed(1)} MB). Resumes should be under ${MAX_RESUME_FILE_BYTES / 1_000_000} MB — try exporting a smaller PDF or paste the text instead.`,
+      );
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
     setExtracting(true);
     try {
       const isPdf = file.type === "application/pdf";
