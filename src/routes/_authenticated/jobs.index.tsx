@@ -9,6 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Hint } from "@/components/ui/hint";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -166,16 +177,40 @@ function JobsPage() {
                       Tailor & compare
                     </Link>
                   </Button>
-                  <Hint tip="Delete this saved job and its tailored versions.">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      aria-label={`Delete ${job.title}`}
-                      onClick={() => deleteMutation.mutate(job.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </Hint>
+                  <AlertDialog>
+                    <Hint tip="Delete this saved job and its tailored versions.">
+                      <AlertDialogTrigger asChild>
+                        <Button size="icon" variant="ghost" aria-label={`Delete ${job.title}`}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                    </Hint>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This removes "{job.title}"
+                          {job.company ? ` at ${job.company}` : ""} along with every tailored
+                          resume and cover letter generated for it. This can't be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteMutation.isPending}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          disabled={deleteMutation.isPending}
+                          onClick={() => deleteMutation.mutate(job.id)}
+                        >
+                          {deleteMutation.isPending ? (
+                            <Loader2 className="mr-1.5 size-4 animate-spin" />
+                          ) : null}
+                          Delete job
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </li>
             ))}
