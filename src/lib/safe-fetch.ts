@@ -91,13 +91,11 @@ export async function fetchPublicUrl(
   for (let redirects = 0; ; redirects++) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), init.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+    const requestInit: RequestInit = { redirect: "manual", signal: controller.signal };
+    if (init.headers) requestInit.headers = init.headers;
     let res: Response;
     try {
-      res = await fetch(current.toString(), {
-        headers: init.headers,
-        redirect: "manual",
-        signal: controller.signal,
-      });
+      res = await fetch(current.toString(), requestInit);
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {
         throw new Error("That page took too long to respond.");

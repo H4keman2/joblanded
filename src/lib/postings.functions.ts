@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { callAI } from "@/lib/ai";
 
-const MODEL = "google/gemini-3.5-flash";
 const MAX_POSTINGS = 8;
 
 const matchInput = z.object({
@@ -91,9 +91,6 @@ export const matchPostings = createServerFn({ method: "POST" })
       resume.raw_text,
     );
 
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("AI is not configured");
-
     const system = `You compare a candidate's resume, section by section, against several job postings.
 Score how well EACH resume section supports EACH posting (0-100). Never invent facts.
 Return ONLY JSON:
@@ -110,33 +107,11 @@ ${sections.map((s) => `### ${s.name}\n${s.content.slice(0, 4000)}`).join("\n\n")
 JOB POSTINGS:
 ${postings.map((p, i) => `### POSTING ${i}\n${p.slice(0, 6000)}`).join("\n\n")}`;
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-        response_format: { type: "json_object" },
-      }),
+    const parsed = await callAI(context.supabase, context.userId, system, user, {
+      bucket: "match-postings",
+      limit: 15,
+      windowMinutes: 60,
     });
-
-    if (res.status === 429) throw new Error("Too many requests, please try again in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted. Please top up to continue.");
-    if (!res.ok) {
-      console.error("AI gateway error", res.status, await res.text());
-      throw new Error("The AI service could not complete this request.");
-    }
-
-    const payload = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    let parsed: Record<string, unknown>;
-    try {
-      parsed = JSON.parse(payload.choices?.[0]?.message?.content ?? "{}") as Record<string, unknown>;
-    } catch {
-      throw new Error("The AI returned an unexpected response. Please try again.");
-    }
 
     const clamp = (v: unknown) =>
       typeof v === "number" && Number.isFinite(v) ? Math.max(0, Math.min(100, Math.round(v))) : 0;

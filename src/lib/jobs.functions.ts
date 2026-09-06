@@ -4,41 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
 import { fetchPublicUrl, UnsafeUrlError } from "@/lib/safe-fetch";
-
-const MODEL = "google/gemini-3.5-flash";
-
-async function callAI(system: string, user: string) {
-  const apiKey = process.env["LOVABLE_API_KEY"];
-  if (!apiKey) throw new Error("AI is not configured");
-
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
-
-  if (res.status === 429) throw new Error("Too many requests, please try again in a moment.");
-  if (res.status === 402) throw new Error("AI credits exhausted. Please top up to continue.");
-  if (!res.ok) {
-    console.error("AI gateway error", res.status, await res.text());
-    throw new Error("The AI service could not complete this request.");
-  }
-
-  const payload = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const content = payload.choices?.[0]?.message?.content ?? "{}";
-  try {
-    return JSON.parse(content) as Record<string, unknown>;
-  } catch {
-    throw new Error("The AI returned an unexpected response. Please try again.");
-  }
-}
+import { callAI } from "@/lib/ai";
 
 export const listJobs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -173,10 +139,13 @@ export async function createJobForUser(
       : await fetchJobDescriptionFromUrl(input.sourceUrl!);
 
   const extracted = await callAI(
+    supabase,
+    userId,
     `Extract job posting metadata. Return ONLY JSON:
 {"title": string, "company": string | null, "location": string | null, "pay_min": number | null, "pay_max": number | null}
 Pay values are annual USD numbers when stated, otherwise null. Never invent facts.`,
     description.slice(0, 30000),
+    { bucket: "add-job", limit: 20, windowMinutes: 60 },
   );
 
   const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
@@ -361,7 +330,11 @@ ${DRAFT_SHAPE}`;
       .filter(Boolean)
       .join("\n\n---\n\n");
 
-    const draft = await callAI(system, user);
+    const draft = await callAI(supabase, userId, system, user, {
+      bucket: "generate-draft",
+      limit: 20,
+      windowMinutes: 60,
+    });
 
     const { data: row, error } = await supabase
       .from("tailored_documents")
