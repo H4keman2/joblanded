@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { backfillFollowUpDates } from "@/lib/applications.functions";
 import { z } from "zod";
 
 export const getProfile = createServerFn({ method: "GET" })
@@ -115,29 +114,13 @@ export const deleteAccount = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const getActiveApplications = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const { data, error } = await context.supabase
-      .from("applications")
-      .select("id, status, follow_up_date, follow_up_sent, date_applied, jobs(title, company)")
-      .eq("user_id", context.userId)
-      // "saved" (in process) counts as active too — every saved job opens one
-      // automatically now, so excluding it made the dashboard look empty even
-      // when there was a real, just-not-submitted-yet application to show.
-      .in("status", ["saved", "applied", "interviewing", "offer"])
-      .order("follow_up_date", { ascending: true, nullsFirst: false });
-    if (error) throw new Error(error.message);
-    return backfillFollowUpDates(context.supabase, context.userId, data ?? []);
-  });
-
-export const getDashboardStats = createServerFn({ method: "GET" })
+export const getApplicationStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 
     // "This week" = the last 7 calendar days including today — gives the
-    // dashboard something to say about recent momentum, not just totals.
+    // stats strip something to say about recent momentum, not just totals.
     const sevenDaysAgo = new Date(Date.now() - 6 * 86_400_000).toISOString().slice(0, 10);
 
     const [resumes, tailored, jobs, applications, jobsThisWeek, applicationsThisWeek] =

@@ -9,6 +9,8 @@ import {
   updateApplicationStatus,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
+import { getApplicationStats } from "@/lib/account.functions";
+import { getLatestResume } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, FileText, Briefcase, ClipboardList } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/applications")({
   head: () => ({
@@ -31,12 +33,13 @@ export const Route = createFileRoute("/_authenticated/applications")({
       { title: "Applications — JobLanded" },
       {
         name: "description",
-        content: "Track application status, notes and follow-up dates for every role you pursue.",
+        content:
+          "Your job search at a glance: resume status, saved jobs, application status and follow-ups due.",
       },
       { property: "og:title", content: "Applications — JobLanded" },
       {
         property: "og:description",
-        content: "Status, notes and follow-ups for every application.",
+        content: "Stats, status, notes and follow-ups for every application.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -52,6 +55,16 @@ const statusLabels: Record<ApplicationStatus, string> = {
   offer: "Offer",
   rejected: "Rejected",
 };
+
+// The application funnel bar — saved → applied → interviewing → offer, in the
+// order a role actually progresses. Rejected is shown as a separate count
+// instead of a stage, since it's an exit rather than a step forward.
+const FUNNEL_STAGES = [
+  { key: "saved", label: "Saved", barClass: "bg-secondary-foreground/20" },
+  { key: "applied", label: "Applied", barClass: "bg-primary/50" },
+  { key: "interviewing", label: "Interviewing", barClass: "bg-amber-500" },
+  { key: "offer", label: "Offer", barClass: "bg-primary" },
+] as const;
 
 type JobInfo = {
   title: string;
@@ -102,6 +115,8 @@ const todayStr = () => new Date().toISOString().slice(0, 10);
 function ApplicationsPage() {
   const qc = useQueryClient();
   const fetchApplications = useServerFn(listApplications);
+  const fetchStats = useServerFn(getApplicationStats);
+  const fetchResume = useServerFn(getLatestResume);
   const create = useServerFn(addApplication);
   const setStatus = useServerFn(updateApplicationStatus);
   const setFollowUp = useServerFn(updateApplicationFollowUp);
@@ -115,10 +130,20 @@ function ApplicationsPage() {
     queryFn: async () => (await fetchApplications()) as unknown as ApplicationRow[],
   });
 
+  const { data: stats, isLoading: loadingStats } = useQuery({
+    queryKey: ["application-stats"],
+    queryFn: () => fetchStats(),
+  });
+
+  const { data: resume, isLoading: loadingResume } = useQuery({
+    queryKey: ["latest-resume"],
+    queryFn: () => fetchResume(),
+  });
+
   const invalidateAll = () => {
     void qc.invalidateQueries({ queryKey: ["applications"] });
     void qc.invalidateQueries({ queryKey: ["jobs"] });
-    void qc.invalidateQueries({ queryKey: ["active-applications"] });
+    void qc.invalidateQueries({ queryKey: ["application-stats"] });
   };
 
   const addMutation = useMutation({
@@ -146,16 +171,29 @@ function ApplicationsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const funnelTotal = stats
+    ? FUNNEL_STAGES.reduce((sum, s) => sum + stats.applications[s.key], 0)
+    : 0;
+
+  const heroLine = !stats
+    ? "Every job you save opens an application automatically — track status and follow-ups here."
+    : stats.applications.offer > 0
+      ? "You've got an offer on the table — congratulations."
+      : stats.applications.interviewing > 0
+        ? `${stats.applications.interviewing} interview${stats.applications.interviewing === 1 ? "" : "s"} in motion. Keep the momentum going.`
+        : stats.applications.applied > 0
+          ? `${stats.applications.applied} application${stats.applications.applied === 1 ? "" : "s"} out there. Add more roles to improve your odds.`
+          : stats.jobsCount > 0
+            ? "Roles saved and ready — tailor a resume and apply to get moving."
+            : "Start with your resume — everything else builds on it.";
+
   return (
     <div className="space-y-6">
       <div className="panel p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Applications</h1>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-              Every job you save opens an application automatically. Toggle it on once you've
-              submitted, and refine the status as things move along.
-            </p>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">{heroLine}</p>
           </div>
           <Button onClick={() => setOpen((o) => !o)} variant={open ? "ghost" : "default"}>
             {open ? (
@@ -207,6 +245,98 @@ function ApplicationsPage() {
           </form>
         )}
       </div>
+
+      {!loadingResume && !resume && (
+        <div className="panel flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Upload your resume</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              We&apos;ll extract your skills, titles and experience so jobs can be matched.
+            </p>
+          </div>
+          <Button asChild>
+            <Link to="/resume">Add resume</Link>
+          </Button>
+        </div>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          icon={FileText}
+          label="Resume"
+          value={
+            loadingStats
+              ? "…"
+              : stats && stats.resumesCount > 0
+                ? `${stats.resumesCount} uploaded`
+                : "Not added"
+          }
+          sublabel={
+            !loadingStats && stats && stats.tailoredVersionsCount > 0
+              ? `${stats.tailoredVersionsCount} tailored version${stats.tailoredVersionsCount === 1 ? "" : "s"} created`
+              : undefined
+          }
+          to="/resume"
+        />
+        <StatCard
+          icon={Briefcase}
+          label="Jobs"
+          value={loadingStats ? "…" : `${stats?.jobsCount ?? 0} saved`}
+          sublabel={
+            !loadingStats && stats && stats.jobsAddedThisWeek > 0
+              ? `+${stats.jobsAddedThisWeek} this week`
+              : undefined
+          }
+          to="/jobs"
+        />
+        <StatCard
+          icon={ClipboardList}
+          label="Applications"
+          value={loadingStats ? "…" : `${stats?.applications.total ?? 0} total`}
+          sublabel={
+            !loadingStats && stats && stats.applicationsThisWeek > 0
+              ? `+${stats.applicationsThisWeek} this week`
+              : undefined
+          }
+        />
+      </div>
+
+      {!loadingStats && stats && stats.applications.total > 0 && (
+        <div className="panel space-y-3 p-5">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+              Application funnel
+            </h2>
+            {stats.applications.rejected > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {stats.applications.rejected} rejected
+              </span>
+            )}
+          </div>
+
+          {funnelTotal > 0 && (
+            <div className="flex h-3 w-full overflow-hidden rounded-full bg-secondary">
+              {FUNNEL_STAGES.filter((s) => stats.applications[s.key] > 0).map((s) => (
+                <div
+                  key={s.key}
+                  className={s.barClass}
+                  style={{ width: `${(stats.applications[s.key] / funnelTotal) * 100}%` }}
+                  title={`${s.label}: ${stats.applications[s.key]}`}
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs">
+            {FUNNEL_STAGES.map((s) => (
+              <span key={s.key} className="flex items-center gap-1.5 text-muted-foreground">
+                <span className={`size-2 rounded-full ${s.barClass}`} />
+                {stats.applications[s.key]} {s.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="panel p-8">
         {applications.isLoading ? (
@@ -339,5 +469,38 @@ function ApplicationsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  sublabel,
+  to,
+}: {
+  icon: typeof FileText;
+  label: string;
+  value: string;
+  sublabel?: string | undefined;
+  to?: string | undefined;
+}) {
+  const body = (
+    <>
+      <Icon className="size-5 text-primary" />
+      <p className="mt-3 text-sm text-muted-foreground">{label}</p>
+      <p className="text-lg font-semibold">{value}</p>
+      {sublabel && <p className="mt-0.5 text-xs text-muted-foreground">{sublabel}</p>}
+    </>
+  );
+
+  if (!to) {
+    return <div className="panel p-5">{body}</div>;
+  }
+
+  return (
+    <Link to={to} className="panel block p-5 transition-colors hover:border-primary/40">
+      {body}
+    </Link>
   );
 }

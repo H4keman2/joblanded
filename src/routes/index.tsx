@@ -61,7 +61,7 @@ const outcomes = [
   },
   {
     title: "Follow up before it's too late",
-    body: "Set a follow-up date when you apply, or let JobLanded suggest one. It shows up on your dashboard the day it's due.",
+    body: "Set a follow-up date when you apply, or let JobLanded suggest one. It shows up on your applications list the day it's due.",
   },
 ];
 
@@ -283,12 +283,12 @@ const exampleSteps = [
     key: "followup",
     label: "Follow up",
     step: "Step 4",
-    caption: "She marks it applied and sets a date. It surfaces on her dashboard the day it's due.",
-    why: "The follow-up date is the only thing that decides what your dashboard shows. Applications with a date due today or earlier rise to the top; everything else stays out of the way.",
+    caption: "She marks it applied and sets a date. It surfaces at the top of her applications list the day it's due.",
+    why: "The follow-up date is the only thing that decides what rises to the top of your applications list. Applications with a date due today or earlier rise to the top; everything else stays out of the way.",
     render: () => (
       <>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <Hint tip="Status drives visibility: applied and interviewing stay on the dashboard, saved and rejected don't.">
+          <Hint tip="Status drives visibility: applied and interviewing stay prominent in the list, saved and rejected don't.">
             <span className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
               Applied
             </span>
@@ -298,7 +298,7 @@ const exampleSteps = [
           </Hint>
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          On Mar 11 the application moves to the top of her dashboard. If she hears back, she flips
+          On Mar 11 the application moves to the top of her applications list. If she hears back, she flips
           the status to Interviewing and sets the next date.
         </p>
       </>
