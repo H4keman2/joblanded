@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Hint } from "@/components/ui/hint";
+import { PASSWORD_HINT, passwordIssue } from "@/lib/password";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -140,8 +141,9 @@ function AccountPage() {
 
   function onSubmitPassword(e: React.FormEvent) {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+    const issue = passwordIssue(newPassword);
+    if (issue) {
+      toast.error(issue);
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -308,6 +310,7 @@ function AccountPage() {
                 placeholder="New password"
                 autoComplete="new-password"
               />
+              <p className="text-xs text-muted-foreground">{PASSWORD_HINT}</p>
               <Input
                 type="password"
                 value={confirmPassword}
