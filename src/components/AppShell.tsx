@@ -1,6 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import { Menu } from "lucide-react";
 import { Hint } from "@/components/ui/hint";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const nav = [
   {
@@ -37,6 +46,8 @@ const nav = [
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur">
@@ -44,7 +55,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Link to="/dashboard" className="font-display text-lg font-semibold text-primary">
             JobLanded
           </Link>
-          <nav className="flex flex-1 items-center gap-1 overflow-x-auto">
+
+          {/* Full nav — hidden below md, where it would otherwise become a
+              horizontally-scrolling strip rather than a real menu. */}
+          <nav className="hidden flex-1 items-center gap-1 overflow-x-auto md:flex">
             {nav.map(({ to, label, tip }) => (
               <Hint key={to} tip={tip}>
                 <Link
@@ -57,6 +71,35 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Hint>
             ))}
           </nav>
+
+          {/* Mobile nav — a slide-out drawer instead of a scrolling tab strip. */}
+          <div className="ml-auto md:hidden">
+            <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Open menu">
+                  <Menu className="size-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72">
+                <SheetHeader>
+                  <SheetTitle className="font-display text-primary">JobLanded</SheetTitle>
+                </SheetHeader>
+                <nav className="mt-4 flex flex-col gap-1">
+                  {nav.map(({ to, label }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={() => setMobileNavOpen(false)}
+                      className="rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                      activeProps={{ className: "bg-secondary text-foreground" }}
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
