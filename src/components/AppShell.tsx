@@ -13,6 +13,11 @@ import {
 
 const nav = [
   {
+    to: "/dashboard",
+    label: "Dashboard",
+    tip: "All your saved postings with one-click resume matching.",
+  },
+  {
     to: "/jobs",
     label: "Jobs",
     tip: "Save postings, get resume-matched recommendations, and generate tailored versions.",
