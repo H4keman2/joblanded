@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-type SaveSearch = { url?: string; text?: string };
+type SaveSearch = { url?: string | undefined; text?: string | undefined };
 
 export const Route = createFileRoute("/_authenticated/save")({
   validateSearch: (search: Record<string, unknown>): SaveSearch => ({
