@@ -17,6 +17,7 @@ import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authent
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPostingSearchRouteImport } from './routes/_authenticated/posting-search'
 import { Route as AuthenticatedResumeRouteImport } from './routes/_authenticated/resume'
+import { Route as AuthenticatedSaveRouteImport } from './routes/_authenticated/save'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AuthenticatedJobsIndexRouteImport } from './routes/_authenticated/jobs.index'
 import { Route as AuthenticatedJobsJobIdRouteImport } from './routes/_authenticated/jobs.$jobId'
@@ -62,6 +63,11 @@ const AuthenticatedResumeRoute = AuthenticatedResumeRouteImport.update({
   path: '/resume',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSaveRoute = AuthenticatedSaveRouteImport.update({
+  id: '/save',
+  path: '/save',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthResetRoute = AuthResetRouteImport.update({
   id: '/reset',
   path: '/reset',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/posting-search': typeof AuthenticatedPostingSearchRoute
   '/resume': typeof AuthenticatedResumeRoute
+  '/save': typeof AuthenticatedSaveRoute
   '/auth/reset': typeof AuthResetRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/jobs/': typeof AuthenticatedJobsIndexRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/posting-search': typeof AuthenticatedPostingSearchRoute
   '/resume': typeof AuthenticatedResumeRoute
+  '/save': typeof AuthenticatedSaveRoute
   '/auth/reset': typeof AuthResetRoute
   '/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/jobs': typeof AuthenticatedJobsIndexRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/posting-search': typeof AuthenticatedPostingSearchRoute
   '/_authenticated/resume': typeof AuthenticatedResumeRoute
+  '/_authenticated/save': typeof AuthenticatedSaveRoute
   '/auth/reset': typeof AuthResetRoute
   '/_authenticated/jobs/$jobId': typeof AuthenticatedJobsJobIdRoute
   '/_authenticated/jobs/': typeof AuthenticatedJobsIndexRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/posting-search'
     | '/resume'
+    | '/save'
     | '/auth/reset'
     | '/jobs/$jobId'
     | '/jobs/'
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/posting-search'
     | '/resume'
+    | '/save'
     | '/auth/reset'
     | '/jobs/$jobId'
     | '/jobs'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/posting-search'
     | '/_authenticated/resume'
+    | '/_authenticated/save'
     | '/auth/reset'
     | '/_authenticated/jobs/$jobId'
     | '/_authenticated/jobs/'
@@ -220,6 +232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedResumeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/save': {
+      id: '/_authenticated/save'
+      path: '/save'
+      fullPath: '/save'
+      preLoaderRoute: typeof AuthenticatedSaveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/auth/reset': {
       id: '/auth/reset'
       path: '/reset'
@@ -250,6 +269,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPostingSearchRoute: typeof AuthenticatedPostingSearchRoute
   AuthenticatedResumeRoute: typeof AuthenticatedResumeRoute
+  AuthenticatedSaveRoute: typeof AuthenticatedSaveRoute
   AuthenticatedJobsJobIdRoute: typeof AuthenticatedJobsJobIdRoute
   AuthenticatedJobsIndexRoute: typeof AuthenticatedJobsIndexRoute
 }
@@ -260,6 +280,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPostingSearchRoute: AuthenticatedPostingSearchRoute,
   AuthenticatedResumeRoute: AuthenticatedResumeRoute,
+  AuthenticatedSaveRoute: AuthenticatedSaveRoute,
   AuthenticatedJobsJobIdRoute: AuthenticatedJobsJobIdRoute,
   AuthenticatedJobsIndexRoute: AuthenticatedJobsIndexRoute,
 }
