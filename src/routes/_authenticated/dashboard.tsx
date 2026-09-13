@@ -28,12 +28,20 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="panel p-8">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-          Every posting you've saved, in one place. Pick a role and we'll open its workspace with
-          the best-fit role for your resume already suggested.
-        </p>
+      <div className="panel p-6 sm:p-8">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold">Dashboard</h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+              Every posting you've saved, in one place — saved on your phone, waiting on your
+              laptop. Pick a role and we'll open its workspace with the best-fit role for your
+              resume already suggested.
+            </p>
+          </div>
+          <Button asChild variant="secondary">
+            <Link to="/save">Quick save a posting</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="panel p-8">
