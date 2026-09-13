@@ -18,6 +18,11 @@ const nav = [
     tip: "All your saved postings with one-click resume matching.",
   },
   {
+    to: "/save",
+    label: "Quick save",
+    tip: "Save a posting in one step from your phone — it appears on every device.",
+  },
+  {
     to: "/jobs",
     label: "Jobs",
     tip: "Save postings, get resume-matched recommendations, and generate tailored versions.",
