@@ -11,7 +11,9 @@ export const listJobs = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("jobs")
-      .select("id, title, company, location, pay_min, pay_max, source_url, date_added")
+      .select(
+        "id, title, company, location, pay_min, pay_max, source_url, date_added, archived_at",
+      )
       .eq("user_id", context.userId)
       .order("date_added", { ascending: false });
     if (error) throw new Error(error.message);
