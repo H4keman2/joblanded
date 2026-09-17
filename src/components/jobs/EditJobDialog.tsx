@@ -56,7 +56,15 @@ export function EditJobDialog({
   }, [job]);
 
   const mutation = useMutation({
-    mutationFn: (input: Parameters<typeof save>[0]["data"]) => save({ data: input }),
+    mutationFn: (input: {
+      id: string;
+      title: string;
+      company: string;
+      location: string;
+      pay_min: number | null;
+      pay_max: number | null;
+      source_url: string;
+    }) => save({ data: input }),
     onSuccess: () => {
       toast.success("Posting updated");
       onOpenChange(false);
