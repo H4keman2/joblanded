@@ -115,9 +115,14 @@ function DashboardPage() {
       .sort((a, b) => (a.follow_up_date! < b.follow_up_date! ? -1 : 1));
   }, [applications.data, today]);
 
+  const activeJobs = useMemo(
+    () => (jobs.data ?? []).filter((job) => !job.archived_at),
+    [jobs.data],
+  );
+
   const visibleJobs = useMemo(() => {
     const term = search.trim().toLowerCase();
-    const rows = (jobs.data ?? []).filter((job) =>
+    const rows = activeJobs.filter((job) =>
       term
         ? [job.title, job.company, job.location]
             .filter(Boolean)
@@ -129,10 +134,10 @@ function DashboardPage() {
     if (sort === "company")
       sorted.sort((a, b) => (a.company ?? "").localeCompare(b.company ?? ""));
     return sorted;
-  }, [jobs.data, search, sort]);
+  }, [activeJobs, search, sort]);
 
   const hasResume = Boolean(resume.data);
-  const hasJobs = (jobs.data?.length ?? 0) > 0;
+  const hasJobs = activeJobs.length > 0;
   const hasApplications = (applications.data?.length ?? 0) > 0;
   const setupDone = hasResume && hasJobs && hasApplications;
   const setupLoaded = !resume.isLoading && !jobs.isLoading && !applications.isLoading;
