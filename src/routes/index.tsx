@@ -116,7 +116,7 @@ function Landing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-5xl px-4 pb-16">
+      <section id="how" className="mx-auto max-w-5xl scroll-mt-20 px-4 pb-16">
         <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           How JobLanded works
         </h2>
@@ -143,7 +143,13 @@ function Landing() {
         <MatchPreviewCard />
       </section>
 
+      <SampleOutput />
+
       <WorkedExample />
+
+      <Faq />
+
+      <Footer />
     </div>
   );
 }
@@ -312,7 +318,7 @@ function WorkedExample() {
 
   return (
     <TooltipProvider delayDuration={100}>
-    <section className="border-t border-border bg-secondary/30">
+    <section id="example" className="scroll-mt-20 border-t border-border bg-secondary/30">
       <div className="mx-auto max-w-5xl px-4 py-20">
         <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
           A worked example
@@ -1207,5 +1213,151 @@ function MatchPreviewCard() {
         <span className="text-xs text-muted-foreground">Follow up in 4 days</span>
       </div>
     </div>
+  );
+}
+
+// Static, non-interactive sample of a tailored draft. Reuses the worked
+// example's Maya content so the page never shows more than one story.
+function SampleOutput() {
+  const d = tailorDrafts[0]!;
+  return (
+    <section className="mx-auto max-w-4xl px-4 pb-20" aria-labelledby="sample-heading">
+      <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+        What a tailored draft looks like
+      </h2>
+      <div className="panel mt-8 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-medium">Senior Product Designer · Northwind Labs</p>
+          <div className="flex items-center gap-4">
+            <Hint tip={d.ats.note}>
+              <span className="text-xs text-muted-foreground">
+                ATS readability{" "}
+                <span className="font-semibold text-foreground">{d.ats.score}</span>
+              </span>
+            </Hint>
+            <Hint tip={d.keywords.note}>
+              <span className="text-xs text-muted-foreground">
+                Keyword coverage{" "}
+                <span className="font-semibold text-foreground">{d.keywords.score}</span>
+              </span>
+            </Hint>
+          </div>
+        </div>
+        <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Rewritten resume summary
+        </p>
+        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+          {d.summary}
+        </blockquote>
+        <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Cover letter opener
+        </p>
+        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+          {d.cover}
+        </blockquote>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Every claim traces to a line in the resume. The full worked example below shows the
+          scores, evidence, and version diffs behind this draft.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+const faqs = [
+  {
+    q: "Will it invent experience I don't have?",
+    a: "No. Every tailored line traces back to something in your parsed resume — a bullet, a metric, a skill. The goal is to reframe and re-weight what's real, not fabricate. If a posting's key requirement isn't on your resume, the match score tells you that instead of papering over it.",
+  },
+  {
+    q: "How is the match score calculated?",
+    a: "Four weighted inputs: required skills covered (50%), your years of experience against the posting's minimum (20%), title similarity (20%), and preferred-but-optional extras (10%). Each score comes with a breakdown showing which line in your resume and which line in the posting earned every point.",
+  },
+  {
+    q: "Will tailored resumes survive ATS filters?",
+    a: "Drafts keep standard headings and a single-column layout, and each version gets an ATS readability score that flags anything a parser might trip on — tables, graphics, dense phrasing. One click rewrites a draft to fix its weakest flag and work missing posting keywords back in.",
+  },
+  {
+    q: "Where do job postings come from?",
+    a: "From you. Paste the description, drop a link, or use Quick save from your phone the moment you spot a role. JobLanded doesn't scrape job boards — it works on the postings you actually care about.",
+  },
+  {
+    q: "Who can see my resume and drafts?",
+    a: "Only you. Your resume, saved postings, and tailored drafts are stored under your account and are never visible to other users or shown anywhere public.",
+  },
+];
+
+function Faq() {
+  return (
+    <section id="faq" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-20" aria-labelledby="faq-heading">
+      <h2 id="faq-heading" className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+        Questions worth asking
+      </h2>
+      <div className="mt-8 divide-y divide-border border-y border-border">
+        {faqs.map(({ q, a }) => (
+          <details key={q} className="group py-4">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium [&::-webkit-details-marker]:hidden">
+              {q}
+              <span
+                className="shrink-0 text-muted-foreground transition-transform group-open:rotate-45"
+                aria-hidden="true"
+              >
+                +
+              </span>
+            </summary>
+            <p className="mt-2 text-sm text-muted-foreground">{a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="border-t border-border bg-secondary/30">
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        <div className="flex flex-wrap items-start justify-between gap-8">
+          <div className="max-w-xs">
+            <p className="font-display text-lg font-semibold text-primary">JobLanded</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              From saved posting to tailored application to on-time follow-up — one workspace for
+              the whole search.
+            </p>
+          </div>
+          <nav aria-label="On this page" className="flex flex-col gap-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              On this page
+            </p>
+            <a href="#how" className="text-muted-foreground transition-colors hover:text-foreground">
+              How it works
+            </a>
+            <a
+              href="#example"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              A worked example
+            </a>
+            <a href="#faq" className="text-muted-foreground transition-colors hover:text-foreground">
+              FAQ
+            </a>
+          </nav>
+          <nav aria-label="Get started" className="flex flex-col gap-2 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Get started
+            </p>
+            <Link to="/auth" className="text-muted-foreground transition-colors hover:text-foreground">
+              Create an account
+            </Link>
+            <Link to="/auth" className="text-muted-foreground transition-colors hover:text-foreground">
+              Sign in
+            </Link>
+          </nav>
+        </div>
+        <p className="mt-10 border-t border-border pt-6 text-xs text-muted-foreground">
+          © {new Date().getFullYear()} JobLanded. Built for people mid-search.
+        </p>
+      </div>
+    </footer>
   );
 }
