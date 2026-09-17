@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { addJob, deleteJob, listJobs } from "@/lib/jobs.functions";
+import { addJob, deleteJob, listJobs, setJobArchived } from "@/lib/jobs.functions";
 import { JobRecommendations } from "@/components/jobs/JobRecommendations";
+import { EditJobDialog, type EditableJob } from "@/components/jobs/EditJobDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/jobs/")({
   head: () => ({
