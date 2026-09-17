@@ -46,12 +46,33 @@ function JobsPage() {
   const fetchJobs = useServerFn(listJobs);
   const create = useServerFn(addJob);
   const remove = useServerFn(deleteJob);
+  const archive = useServerFn(setJobArchived);
 
   const [description, setDescription] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [open, setOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [editing, setEditing] = useState<EditableJob | null>(null);
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
+
+  const archivedCount = useMemo(
+    () => (jobs.data ?? []).filter((j) => j.archived_at).length,
+    [jobs.data],
+  );
+  const visibleJobs = useMemo(
+    () => (jobs.data ?? []).filter((j) => (showArchived ? j.archived_at : !j.archived_at)),
+    [jobs.data, showArchived],
+  );
+
+  const archiveMutation = useMutation({
+    mutationFn: (input: { id: string; archived: boolean }) => archive({ data: input }),
+    onSuccess: (_r, v) => {
+      toast.success(v.archived ? "Posting archived" : "Posting restored");
+      void qc.invalidateQueries({ queryKey: ["jobs"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const addMutation = useMutation({
     mutationFn: (input: { description: string; sourceUrl: string }) => create({ data: input }),
