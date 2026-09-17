@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { addJob, deleteJob, listJobs } from "@/lib/jobs.functions";
+import { addJob, deleteJob, listJobs, setJobArchived } from "@/lib/jobs.functions";
 import { JobRecommendations } from "@/components/jobs/JobRecommendations";
+import { EditJobDialog, type EditableJob } from "@/components/jobs/EditJobDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/jobs/")({
   head: () => ({
@@ -45,12 +46,33 @@ function JobsPage() {
   const fetchJobs = useServerFn(listJobs);
   const create = useServerFn(addJob);
   const remove = useServerFn(deleteJob);
+  const archive = useServerFn(setJobArchived);
 
   const [description, setDescription] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [open, setOpen] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [editing, setEditing] = useState<EditableJob | null>(null);
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
+
+  const archivedCount = useMemo(
+    () => (jobs.data ?? []).filter((j) => j.archived_at).length,
+    [jobs.data],
+  );
+  const visibleJobs = useMemo(
+    () => (jobs.data ?? []).filter((j) => (showArchived ? j.archived_at : !j.archived_at)),
+    [jobs.data, showArchived],
+  );
+
+  const archiveMutation = useMutation({
+    mutationFn: (input: { id: string; archived: boolean }) => archive({ data: input }),
+    onSuccess: (_r, v) => {
+      toast.success(v.archived ? "Posting archived" : "Posting restored");
+      void qc.invalidateQueries({ queryKey: ["jobs"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const addMutation = useMutation({
     mutationFn: (input: { description: string; sourceUrl: string }) => create({ data: input }),
@@ -141,82 +163,139 @@ function JobsPage() {
       <JobRecommendations />
 
       <div className="panel p-8">
-        {jobs.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading your jobs…</p>
-        ) : (jobs.data?.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No jobs saved yet. Paste your first posting above to start tailoring against it.
-          </p>
-        ) : (
-          <ul className="divide-y divide-border">
-            {jobs.data!.map((job) => (
-              <li
-                key={job.id}
-                className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
-              >
-                <div>
-                  <Link
-                    to="/jobs/$jobId"
-                    params={{ jobId: job.id }}
-                    className="font-medium hover:text-primary"
-                  >
-                    {job.title}
-                  </Link>
-                  <p className="text-xs text-muted-foreground">
-                    {[job.company, job.location].filter(Boolean).join(" · ") || "No company listed"}
-                    {job.pay_min || job.pay_max
-                      ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
-                          job.pay_max && job.pay_min ? `–$${job.pay_max.toLocaleString()}` : ""
-                        }`
-                      : ""}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button asChild size="sm" variant="secondary">
-                    <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
-                      Tailor & compare
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold">
+            {showArchived ? "Archived postings" : "Saved postings"}
+          </h2>
+          {archivedCount > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => setShowArchived((v) => !v)}>
+              {showArchived ? "Back to active" : `Archived (${archivedCount})`}
+            </Button>
+          )}
+        </div>
+
+        <div className="mt-5">
+          {jobs.isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading your jobs…</p>
+          ) : visibleJobs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              {showArchived
+                ? "Nothing archived."
+                : "No jobs saved yet. Paste your first posting above to start tailoring against it."}
+            </p>
+          ) : (
+            <ul className="divide-y divide-border">
+              {visibleJobs.map((job) => (
+                <li
+                  key={job.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
+                >
+                  <div>
+                    <Link
+                      to="/jobs/$jobId"
+                      params={{ jobId: job.id }}
+                      className="font-medium hover:text-primary"
+                    >
+                      {job.title}
                     </Link>
-                  </Button>
-                  <AlertDialog>
-                    <Hint tip="Delete this saved job and its tailored versions.">
-                      <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="ghost" aria-label={`Delete ${job.title}`}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
+                    <p className="text-xs text-muted-foreground">
+                      {[job.company, job.location].filter(Boolean).join(" · ") ||
+                        "No company listed"}
+                      {job.pay_min || job.pay_max
+                        ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
+                            job.pay_max && job.pay_min ? `–$${job.pay_max.toLocaleString()}` : ""
+                          }`
+                        : ""}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!job.archived_at && (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
+                          Tailor & compare
+                        </Link>
+                      </Button>
+                    )}
+                    <Hint tip="Fix the title, company, pay or link we read from this posting.">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label={`Edit ${job.title}`}
+                        onClick={() => setEditing(job)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                     </Hint>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this job?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This removes "{job.title}"
-                          {job.company ? ` at ${job.company}` : ""} along with every tailored
-                          resume and cover letter generated for it. This can't be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteMutation.isPending}>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          disabled={deleteMutation.isPending}
-                          onClick={() => deleteMutation.mutate(job.id)}
-                        >
-                          {deleteMutation.isPending ? (
-                            <Loader2 className="mr-1.5 size-4 animate-spin" />
-                          ) : null}
-                          Delete job
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+                    <Hint
+                      tip={
+                        job.archived_at
+                          ? "Put this posting back in your active list."
+                          : "Hide this posting from your active list. Nothing is deleted."
+                      }
+                    >
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label={`${job.archived_at ? "Restore" : "Archive"} ${job.title}`}
+                        disabled={archiveMutation.isPending}
+                        onClick={() =>
+                          archiveMutation.mutate({ id: job.id, archived: !job.archived_at })
+                        }
+                      >
+                        {job.archived_at ? (
+                          <ArchiveRestore className="h-4 w-4" />
+                        ) : (
+                          <Archive className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </Hint>
+                    <AlertDialog>
+                      <Hint tip="Delete this saved job and its tailored versions.">
+                        <AlertDialogTrigger asChild>
+                          <Button size="icon" variant="ghost" aria-label={`Delete ${job.title}`}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                      </Hint>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This removes "{job.title}"
+                            {job.company ? ` at ${job.company}` : ""} along with every tailored
+                            resume and cover letter generated for it. This can't be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel disabled={deleteMutation.isPending}>
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            disabled={deleteMutation.isPending}
+                            onClick={() => deleteMutation.mutate(job.id)}
+                          >
+                            {deleteMutation.isPending ? (
+                              <Loader2 className="mr-1.5 size-4 animate-spin" />
+                            ) : null}
+                            Delete job
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
+
+      <EditJobDialog
+        job={editing}
+        open={Boolean(editing)}
+        onOpenChange={(o) => !o && setEditing(null)}
+      />
     </div>
   );
 }
