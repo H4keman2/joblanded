@@ -11,16 +11,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+// Primary destinations only. Quick save and Posting search are tasks you start
+// from Dashboard or Jobs, so they'd only dilute a seven-item menu; they stay
+// one tap away in the mobile drawer, where phone saving actually happens.
 const nav = [
   {
     to: "/dashboard",
     label: "Dashboard",
-    tip: "All your saved postings with one-click resume matching.",
-  },
-  {
-    to: "/save",
-    label: "Quick save",
-    tip: "Save a posting in one step from your phone — it appears on every device.",
+    tip: "Follow-ups due today plus every saved posting, with one-click resume matching.",
   },
   {
     to: "/jobs",
@@ -28,12 +26,6 @@ const nav = [
     tip: "Save postings, get resume-matched recommendations, and generate tailored versions.",
   },
   {
-    to: "/posting-search",
-    label: "Posting search",
-    tip: "Paste several postings at once and see which roles each resume section matches best.",
-  },
-  {
-
     to: "/resume",
     label: "Resume",
     tip: "Upload or paste your resume and review the skills, titles and details we extracted.",
@@ -48,6 +40,11 @@ const nav = [
     label: "Account",
     tip: "Update your contact details or sign out.",
   },
+] as const;
+
+const secondaryNav = [
+  { to: "/save", label: "Quick save a posting" },
+  { to: "/posting-search", label: "Posting search" },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
