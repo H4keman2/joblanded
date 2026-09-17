@@ -52,9 +52,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-          <Link to="/applications" className="font-display text-lg font-semibold text-primary">
+          <Link to="/dashboard" className="font-display text-lg font-semibold text-primary">
             JobLanded
           </Link>
 
@@ -98,13 +104,27 @@ export function AppShell({ children }: { children: ReactNode }) {
                       {label}
                     </Link>
                   ))}
+                  <div className="my-3 border-t border-border" />
+                  {secondaryNav.map(({ to, label }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={() => setMobileNavOpen(false)}
+                      className="rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                      activeProps={{ className: "bg-secondary text-foreground" }}
+                    >
+                      {label}
+                    </Link>
+                  ))}
                 </nav>
               </SheetContent>
             </Sheet>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-8">
+        {children}
+      </main>
     </div>
   );
 }
