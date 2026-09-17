@@ -195,6 +195,60 @@ export const deleteJob = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const emptyToNull = (v: string | undefined) => {
+  const t = (v ?? "").trim();
+  return t ? t.slice(0, 200) : null;
+};
+
+export const updateJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        title: z.string().trim().min(1, "Give the role a title").max(200),
+        company: z.string().max(200).optional(),
+        location: z.string().max(200).optional(),
+        pay_min: z.number().nonnegative().nullable().optional(),
+        pay_max: z.number().nonnegative().nullable().optional(),
+        source_url: z.string().url().optional().or(z.literal("")),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("jobs")
+      .update({
+        title: data.title.trim().slice(0, 200),
+        company: emptyToNull(data.company),
+        location: emptyToNull(data.location),
+        pay_min: data.pay_min ?? null,
+        pay_max: data.pay_max ?? null,
+        source_url: emptyToNull(data.source_url),
+      })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setJobArchived = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid(), archived: z.boolean() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("jobs")
+      .update({ archived_at: data.archived ? new Date().toISOString() : null })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+
+
 export const listDrafts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ jobId: z.string().uuid() }).parse(input))
