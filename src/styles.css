@@ -145,6 +145,14 @@
     font-family: var(--font-display);
     letter-spacing: -0.015em;
   }
+
+  /* A single, always-visible keyboard focus ring. Without this, tabbing
+     through the app gives no reliable indication of where you are. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
 }
 
 @utility panel {

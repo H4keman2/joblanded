@@ -11,16 +11,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+// Primary destinations only. Quick save and Posting search are tasks you start
+// from Dashboard or Jobs, so they'd only dilute a seven-item menu; they stay
+// one tap away in the mobile drawer, where phone saving actually happens.
 const nav = [
   {
     to: "/dashboard",
     label: "Dashboard",
-    tip: "All your saved postings with one-click resume matching.",
-  },
-  {
-    to: "/save",
-    label: "Quick save",
-    tip: "Save a posting in one step from your phone — it appears on every device.",
+    tip: "Follow-ups due today plus every saved posting, with one-click resume matching.",
   },
   {
     to: "/jobs",
@@ -28,12 +26,6 @@ const nav = [
     tip: "Save postings, get resume-matched recommendations, and generate tailored versions.",
   },
   {
-    to: "/posting-search",
-    label: "Posting search",
-    tip: "Paste several postings at once and see which roles each resume section matches best.",
-  },
-  {
-
     to: "/resume",
     label: "Resume",
     tip: "Upload or paste your resume and review the skills, titles and details we extracted.",
@@ -50,14 +42,25 @@ const nav = [
   },
 ] as const;
 
+const secondaryNav = [
+  { to: "/save", label: "Quick save a posting" },
+  { to: "/posting-search", label: "Posting search" },
+] as const;
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
       <header className="sticky top-0 z-20 border-b border-border bg-card/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-          <Link to="/applications" className="font-display text-lg font-semibold text-primary">
+          <Link to="/dashboard" className="font-display text-lg font-semibold text-primary">
             JobLanded
           </Link>
 
@@ -101,13 +104,27 @@ export function AppShell({ children }: { children: ReactNode }) {
                       {label}
                     </Link>
                   ))}
+                  <div className="my-3 border-t border-border" />
+                  {secondaryNav.map(({ to, label }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      onClick={() => setMobileNavOpen(false)}
+                      className="rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                      activeProps={{ className: "bg-secondary text-foreground" }}
+                    >
+                      {label}
+                    </Link>
+                  ))}
                 </nav>
               </SheetContent>
             </Sheet>
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main id="main-content" className="mx-auto max-w-6xl px-4 py-8">
+        {children}
+      </main>
     </div>
   );
 }
