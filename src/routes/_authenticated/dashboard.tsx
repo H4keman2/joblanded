@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listJobs } from "@/lib/jobs.functions";
+import { listJobs, listTailoredJobIds } from "@/lib/jobs.functions";
 import { listApplications } from "@/lib/applications.functions";
 import { getLatestResume } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
