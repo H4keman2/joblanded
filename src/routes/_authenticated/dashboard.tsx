@@ -141,6 +141,56 @@ function DashboardPage() {
     return sorted;
   }, [activeJobs, search, sort]);
 
+  // One next step per saved posting: tailor it, apply to it, or follow up.
+  const needs = useMemo(() => {
+    const tailoredIds = new Set(tailored.data ?? []);
+    const appByJob = new Map((applications.data ?? []).map((a) => [a.job_id, a]));
+
+    return activeJobs
+      .map((job) => {
+        const app = appByJob.get(job.id);
+        const status = app?.status ?? "saved";
+        if (status === "rejected" || status === "offer") return null;
+
+        if (!tailoredIds.has(job.id)) {
+          return {
+            job,
+            step: "Tailor your resume",
+            hint: "No tailored version yet — start one for this role.",
+            cta: "Tailor",
+            to: "job" as const,
+            urgent: false,
+          };
+        }
+        if (status === "saved") {
+          return {
+            job,
+            step: "Apply",
+            hint: "Your tailored version is ready — send it and mark it applied.",
+            cta: "Mark applied",
+            to: "applications" as const,
+            urgent: false,
+          };
+        }
+        if (app && !app.follow_up_sent && app.follow_up_date) {
+          const due = app.follow_up_date <= today;
+          return {
+            job,
+            step: "Follow up",
+            hint: due
+              ? `Follow-up due ${formatDate(app.follow_up_date)}`
+              : `Follow up on ${formatDate(app.follow_up_date)}`,
+            cta: "Follow up",
+            to: "applications" as const,
+            urgent: due,
+          };
+        }
+        return null;
+      })
+      .filter((n): n is NonNullable<typeof n> => n !== null)
+      .sort((a, b) => Number(b.urgent) - Number(a.urgent));
+  }, [activeJobs, applications.data, tailored.data, today]);
+
   const hasResume = Boolean(resume.data);
   const hasJobs = activeJobs.length > 0;
   const hasApplications = (applications.data?.length ?? 0) > 0;
