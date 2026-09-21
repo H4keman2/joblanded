@@ -86,6 +86,7 @@ function DashboardPage() {
   const fetchJobs = useServerFn(listJobs);
   const fetchApplications = useServerFn(listApplications);
   const fetchResume = useServerFn(getLatestResume);
+  const fetchTailoredJobIds = useServerFn(listTailoredJobIds);
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
   const applications = useQuery({
