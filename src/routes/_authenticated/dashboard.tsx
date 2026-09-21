@@ -93,6 +93,10 @@ function DashboardPage() {
     queryFn: () => fetchApplications(),
   });
   const resume = useQuery({ queryKey: ["resume", "latest"], queryFn: () => fetchResume() });
+  const tailored = useQuery({
+    queryKey: ["tailored", "job-ids"],
+    queryFn: () => fetchTailoredJobIds(),
+  });
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"recent" | "title" | "company">("recent");
