@@ -249,6 +249,20 @@ export const setJobArchived = createServerFn({ method: "POST" })
 
 
 
+// Which postings already have at least one tailored version, so the Dashboard
+// can tell "still needs tailoring" apart from "ready to send".
+export const listTailoredJobIds = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("tailored_documents")
+      .select("job_id")
+      .eq("user_id", context.userId)
+      .eq("type", "tailor_version");
+    if (error) throw new Error(error.message);
+    return Array.from(new Set((data ?? []).map((r) => r.job_id)));
+  });
+
 export const listDrafts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ jobId: z.string().uuid() }).parse(input))
