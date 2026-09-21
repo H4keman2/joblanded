@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listJobs } from "@/lib/jobs.functions";
+import { listJobs, listTailoredJobIds } from "@/lib/jobs.functions";
 import { listApplications } from "@/lib/applications.functions";
 import { getLatestResume } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
@@ -86,6 +86,7 @@ function DashboardPage() {
   const fetchJobs = useServerFn(listJobs);
   const fetchApplications = useServerFn(listApplications);
   const fetchResume = useServerFn(getLatestResume);
+  const fetchTailoredJobIds = useServerFn(listTailoredJobIds);
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
   const applications = useQuery({
@@ -93,6 +94,10 @@ function DashboardPage() {
     queryFn: () => fetchApplications(),
   });
   const resume = useQuery({ queryKey: ["resume", "latest"], queryFn: () => fetchResume() });
+  const tailored = useQuery({
+    queryKey: ["tailored", "job-ids"],
+    queryFn: () => fetchTailoredJobIds(),
+  });
 
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"recent" | "title" | "company">("recent");
@@ -135,6 +140,56 @@ function DashboardPage() {
       sorted.sort((a, b) => (a.company ?? "").localeCompare(b.company ?? ""));
     return sorted;
   }, [activeJobs, search, sort]);
+
+  // One next step per saved posting: tailor it, apply to it, or follow up.
+  const needs = useMemo(() => {
+    const tailoredIds = new Set(tailored.data ?? []);
+    const appByJob = new Map((applications.data ?? []).map((a) => [a.job_id, a]));
+
+    return activeJobs
+      .map((job) => {
+        const app = appByJob.get(job.id);
+        const status = app?.status ?? "saved";
+        if (status === "rejected" || status === "offer") return null;
+
+        if (!tailoredIds.has(job.id)) {
+          return {
+            job,
+            step: "Tailor your resume",
+            hint: "No tailored version yet — start one for this role.",
+            cta: "Tailor",
+            to: "job" as const,
+            urgent: false,
+          };
+        }
+        if (status === "saved") {
+          return {
+            job,
+            step: "Apply",
+            hint: "Your tailored version is ready — send it and mark it applied.",
+            cta: "Mark applied",
+            to: "applications" as const,
+            urgent: false,
+          };
+        }
+        if (app && !app.follow_up_sent && app.follow_up_date) {
+          const due = app.follow_up_date <= today;
+          return {
+            job,
+            step: "Follow up",
+            hint: due
+              ? `Follow-up due ${formatDate(app.follow_up_date)}`
+              : `Follow up on ${formatDate(app.follow_up_date)}`,
+            cta: "Follow up",
+            to: "applications" as const,
+            urgent: due,
+          };
+        }
+        return null;
+      })
+      .filter((n): n is NonNullable<typeof n> => n !== null)
+      .sort((a, b) => Number(b.urgent) - Number(a.urgent));
+  }, [activeJobs, applications.data, tailored.data, today]);
 
   const hasResume = Boolean(resume.data);
   const hasJobs = activeJobs.length > 0;
@@ -235,6 +290,74 @@ function DashboardPage() {
                 </li>
               );
             })}
+          </ul>
+        )}
+      </section>
+
+      {/* Needs list — the single next step for every posting still in play. */}
+      <section className="panel p-6 sm:p-8" aria-labelledby="needs-heading">
+        <h2 id="needs-heading" className="font-display text-lg font-semibold">
+          Needs
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          The next step for each posting you're still working on.
+        </p>
+        {jobs.isLoading || applications.isLoading || tailored.isLoading ? (
+          <div className="mt-4">
+            <ListSkeleton />
+          </div>
+        ) : jobs.isError || applications.isError || tailored.isError ? (
+          <div className="mt-4">
+            <LoadFailed
+              what="next steps"
+              onRetry={() => {
+                void jobs.refetch();
+                void applications.refetch();
+                void tailored.refetch();
+              }}
+            />
+          </div>
+        ) : needs.length === 0 ? (
+          <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4 text-primary" />
+            Nothing waiting — every saved posting is up to date.
+          </p>
+        ) : (
+          <ul className="mt-4 divide-y divide-border">
+            {needs.map((need) => (
+              <li
+                key={need.job.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+              >
+                <div>
+                  <p className="font-medium">
+                    {need.job.title}
+                    <span
+                      className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                        need.urgent
+                          ? "bg-destructive/10 text-destructive"
+                          : "bg-secondary text-secondary-foreground"
+                      }`}
+                    >
+                      {need.step}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {need.job.company ? `${need.job.company} · ` : ""}
+                    {need.hint}
+                  </p>
+                </div>
+                <Button asChild size="sm" variant="secondary">
+                  {need.to === "job" ? (
+                    <Link to="/jobs/$jobId" params={{ jobId: need.job.id }}>
+                      {need.cta}
+                    </Link>
+                  ) : (
+                    <Link to="/applications">{need.cta}</Link>
+                  )}
+                </Button>
+              </li>
+            ))}
           </ul>
         )}
       </section>
