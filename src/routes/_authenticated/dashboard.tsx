@@ -1,9 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { listJobs, listTailoredJobIds } from "@/lib/jobs.functions";
-import { listApplications } from "@/lib/applications.functions";
+import {
+  APPLICATION_STATUSES,
+  listApplications,
+  setJobStatus,
+  type ApplicationStatus,
+} from "@/lib/applications.functions";
+
+const STATUS_LABELS: Record<ApplicationStatus, string> = {
+  saved: "Saved",
+  applied: "Applied",
+  interviewing: "Interview",
+  offer: "Offer",
+  rejected: "Rejected",
+};
+
+type Need = {
+  job: { id: string; title: string; company: string | null };
+  status: ApplicationStatus;
+  step: string;
+  hint: string;
+  action: "tailor" | "mark-applied" | "follow-up" | null;
+  rank: number;
+};
 import { getLatestResume } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,55 +164,108 @@ function DashboardPage() {
     return sorted;
   }, [activeJobs, search, sort]);
 
-  // One next step per saved posting: tailor it, apply to it, or follow up.
+  // One next step per saved posting, driven by its application status:
+  // saved → tailor, then apply; applied → follow up, then wait;
+  // interview → follow up or prep; offer → decide. Rejected drops off.
   const needs = useMemo(() => {
     const tailoredIds = new Set(tailored.data ?? []);
     const appByJob = new Map((applications.data ?? []).map((a) => [a.job_id, a]));
 
     return activeJobs
-      .map((job) => {
+      .map((job): Need | null => {
         const app = appByJob.get(job.id);
-        const status = app?.status ?? "saved";
-        if (status === "rejected" || status === "offer") return null;
+        const status = (app?.status ?? "saved") as ApplicationStatus;
+        const base = { job, status };
+        const followUpDue =
+          app && !app.follow_up_sent && app.follow_up_date && app.follow_up_date <= today
+            ? app.follow_up_date
+            : null;
 
-        if (!tailoredIds.has(job.id)) {
-          return {
-            job,
-            step: "Tailor your resume",
-            hint: "No tailored version yet — start one for this role.",
-            cta: "Tailor",
-            to: "job" as const,
-            urgent: false,
-          };
+        switch (status) {
+          case "rejected":
+            return null;
+          case "saved":
+            return tailoredIds.has(job.id)
+              ? {
+                  ...base,
+                  step: "Apply",
+                  hint: "Your tailored version is ready — send it, then mark it applied.",
+                  action: "mark-applied",
+                  rank: 2,
+                }
+              : {
+                  ...base,
+                  step: "Tailor your resume",
+                  hint: "No tailored version yet — start one for this role.",
+                  action: "tailor",
+                  rank: 3,
+                };
+          case "applied":
+            if (followUpDue)
+              return {
+                ...base,
+                step: "Follow up",
+                hint: `Follow-up due ${formatDate(followUpDue)}`,
+                action: "follow-up",
+                rank: 0,
+              };
+            if (app && !app.follow_up_sent && app.follow_up_date)
+              return {
+                ...base,
+                step: "Follow up",
+                hint: `Follow up on ${formatDate(app.follow_up_date)}`,
+                action: "follow-up",
+                rank: 4,
+              };
+            return {
+              ...base,
+              step: "Waiting to hear back",
+              hint: "Followed up — move it to Interview when they reply.",
+              action: null,
+              rank: 5,
+            };
+          case "interviewing":
+            if (followUpDue)
+              return {
+                ...base,
+                step: "Follow up",
+                hint: `Follow-up due ${formatDate(followUpDue)}`,
+                action: "follow-up",
+                rank: 0,
+              };
+            return {
+              ...base,
+              step: "Prep for interview",
+              hint: "Review your tailored resume and the posting before you talk.",
+              action: "tailor",
+              rank: 1,
+            };
+          case "offer":
+            return {
+              ...base,
+              step: "Decide on offer",
+              hint: "You have an offer — review it and reply.",
+              action: null,
+              rank: 1,
+            };
         }
-        if (status === "saved") {
-          return {
-            job,
-            step: "Apply",
-            hint: "Your tailored version is ready — send it and mark it applied.",
-            cta: "Mark applied",
-            to: "applications" as const,
-            urgent: false,
-          };
-        }
-        if (app && !app.follow_up_sent && app.follow_up_date) {
-          const due = app.follow_up_date <= today;
-          return {
-            job,
-            step: "Follow up",
-            hint: due
-              ? `Follow-up due ${formatDate(app.follow_up_date)}`
-              : `Follow up on ${formatDate(app.follow_up_date)}`,
-            cta: "Follow up",
-            to: "applications" as const,
-            urgent: due,
-          };
-        }
-        return null;
       })
-      .filter((n): n is NonNullable<typeof n> => n !== null)
-      .sort((a, b) => Number(b.urgent) - Number(a.urgent));
+      .filter((n): n is Need => n !== null)
+      .sort((a, b) => a.rank - b.rank);
   }, [activeJobs, applications.data, tailored.data, today]);
+
+  const qc = useQueryClient();
+  const changeStatus = useServerFn(setJobStatus);
+  const statusMutation = useMutation({
+    mutationFn: (input: { jobId: string; status: ApplicationStatus }) =>
+      changeStatus({ data: input }),
+    onSuccess: (_r, v) => {
+      toast.success(`Marked ${STATUS_LABELS[v.status].toLowerCase()}`);
+      void qc.invalidateQueries({ queryKey: ["applications"] });
+      void qc.invalidateQueries({ queryKey: ["application-stats"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const hasResume = Boolean(resume.data);
   const hasJobs = activeJobs.length > 0;
