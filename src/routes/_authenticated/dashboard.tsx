@@ -1,9 +1,32 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { listJobs, listTailoredJobIds } from "@/lib/jobs.functions";
-import { listApplications } from "@/lib/applications.functions";
+import {
+  APPLICATION_STATUSES,
+  listApplications,
+  setJobStatus,
+  type ApplicationStatus,
+} from "@/lib/applications.functions";
+
+const STATUS_LABELS: Record<ApplicationStatus, string> = {
+  saved: "Saved",
+  applied: "Applied",
+  interviewing: "Interview",
+  offer: "Offer",
+  rejected: "Rejected",
+};
+
+type Need = {
+  job: { id: string; title: string; company: string | null };
+  status: ApplicationStatus;
+  step: string;
+  hint: string;
+  action: "tailor" | "mark-applied" | "follow-up" | null;
+  rank: number;
+};
 import { getLatestResume } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -141,55 +164,108 @@ function DashboardPage() {
     return sorted;
   }, [activeJobs, search, sort]);
 
-  // One next step per saved posting: tailor it, apply to it, or follow up.
+  // One next step per saved posting, driven by its application status:
+  // saved → tailor, then apply; applied → follow up, then wait;
+  // interview → follow up or prep; offer → decide. Rejected drops off.
   const needs = useMemo(() => {
     const tailoredIds = new Set(tailored.data ?? []);
     const appByJob = new Map((applications.data ?? []).map((a) => [a.job_id, a]));
 
     return activeJobs
-      .map((job) => {
+      .map((job): Need | null => {
         const app = appByJob.get(job.id);
-        const status = app?.status ?? "saved";
-        if (status === "rejected" || status === "offer") return null;
+        const status = (app?.status ?? "saved") as ApplicationStatus;
+        const base = { job, status };
+        const followUpDue =
+          app && !app.follow_up_sent && app.follow_up_date && app.follow_up_date <= today
+            ? app.follow_up_date
+            : null;
 
-        if (!tailoredIds.has(job.id)) {
-          return {
-            job,
-            step: "Tailor your resume",
-            hint: "No tailored version yet — start one for this role.",
-            cta: "Tailor",
-            to: "job" as const,
-            urgent: false,
-          };
+        switch (status) {
+          case "rejected":
+            return null;
+          case "saved":
+            return tailoredIds.has(job.id)
+              ? {
+                  ...base,
+                  step: "Apply",
+                  hint: "Your tailored version is ready — send it, then mark it applied.",
+                  action: "mark-applied",
+                  rank: 2,
+                }
+              : {
+                  ...base,
+                  step: "Tailor your resume",
+                  hint: "No tailored version yet — start one for this role.",
+                  action: "tailor",
+                  rank: 3,
+                };
+          case "applied":
+            if (followUpDue)
+              return {
+                ...base,
+                step: "Follow up",
+                hint: `Follow-up due ${formatDate(followUpDue)}`,
+                action: "follow-up",
+                rank: 0,
+              };
+            if (app && !app.follow_up_sent && app.follow_up_date)
+              return {
+                ...base,
+                step: "Follow up",
+                hint: `Follow up on ${formatDate(app.follow_up_date)}`,
+                action: "follow-up",
+                rank: 4,
+              };
+            return {
+              ...base,
+              step: "Waiting to hear back",
+              hint: "Followed up — move it to Interview when they reply.",
+              action: null,
+              rank: 5,
+            };
+          case "interviewing":
+            if (followUpDue)
+              return {
+                ...base,
+                step: "Follow up",
+                hint: `Follow-up due ${formatDate(followUpDue)}`,
+                action: "follow-up",
+                rank: 0,
+              };
+            return {
+              ...base,
+              step: "Prep for interview",
+              hint: "Review your tailored resume and the posting before you talk.",
+              action: "tailor",
+              rank: 1,
+            };
+          case "offer":
+            return {
+              ...base,
+              step: "Decide on offer",
+              hint: "You have an offer — review it and reply.",
+              action: null,
+              rank: 1,
+            };
         }
-        if (status === "saved") {
-          return {
-            job,
-            step: "Apply",
-            hint: "Your tailored version is ready — send it and mark it applied.",
-            cta: "Mark applied",
-            to: "applications" as const,
-            urgent: false,
-          };
-        }
-        if (app && !app.follow_up_sent && app.follow_up_date) {
-          const due = app.follow_up_date <= today;
-          return {
-            job,
-            step: "Follow up",
-            hint: due
-              ? `Follow-up due ${formatDate(app.follow_up_date)}`
-              : `Follow up on ${formatDate(app.follow_up_date)}`,
-            cta: "Follow up",
-            to: "applications" as const,
-            urgent: due,
-          };
-        }
-        return null;
       })
-      .filter((n): n is NonNullable<typeof n> => n !== null)
-      .sort((a, b) => Number(b.urgent) - Number(a.urgent));
+      .filter((n): n is Need => n !== null)
+      .sort((a, b) => a.rank - b.rank);
   }, [activeJobs, applications.data, tailored.data, today]);
+
+  const qc = useQueryClient();
+  const changeStatus = useServerFn(setJobStatus);
+  const statusMutation = useMutation({
+    mutationFn: (input: { jobId: string; status: ApplicationStatus }) =>
+      changeStatus({ data: input }),
+    onSuccess: (_r, v) => {
+      toast.success(`Marked ${STATUS_LABELS[v.status].toLowerCase()}`);
+      void qc.invalidateQueries({ queryKey: ["applications"] });
+      void qc.invalidateQueries({ queryKey: ["application-stats"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const hasResume = Boolean(resume.data);
   const hasJobs = activeJobs.length > 0;
@@ -324,40 +400,84 @@ function DashboardPage() {
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-border">
-            {needs.map((need) => (
-              <li
-                key={need.job.id}
-                className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-              >
-                <div>
-                  <p className="font-medium">
-                    {need.job.title}
-                    <span
-                      className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        need.urgent
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-secondary text-secondary-foreground"
-                      }`}
+            {needs.map((need) => {
+              const urgent = need.rank === 0;
+              const pending =
+                statusMutation.isPending && statusMutation.variables?.jobId === need.job.id;
+              return (
+                <li
+                  key={need.job.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium">
+                      {need.job.title}
+                      <span
+                        className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          urgent
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                      >
+                        {need.step}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {need.job.company ? `${need.job.company} · ` : ""}
+                      {need.hint}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={need.status}
+                      disabled={pending}
+                      onValueChange={(value) =>
+                        statusMutation.mutate({
+                          jobId: need.job.id,
+                          status: value as ApplicationStatus,
+                        })
+                      }
                     >
-                      {need.step}
-                    </span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {need.job.company ? `${need.job.company} · ` : ""}
-                    {need.hint}
-                  </p>
-                </div>
-                <Button asChild size="sm" variant="secondary">
-                  {need.to === "job" ? (
-                    <Link to="/jobs/$jobId" params={{ jobId: need.job.id }}>
-                      {need.cta}
-                    </Link>
-                  ) : (
-                    <Link to="/applications">{need.cta}</Link>
-                  )}
-                </Button>
-              </li>
-            ))}
+                      <SelectTrigger
+                        className="h-8 w-[120px] text-xs"
+                        aria-label={`Status for ${need.job.title}`}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {APPLICATION_STATUSES.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {STATUS_LABELS[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {need.action === "mark-applied" ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={pending}
+                        onClick={() =>
+                          statusMutation.mutate({ jobId: need.job.id, status: "applied" })
+                        }
+                      >
+                        Mark applied
+                      </Button>
+                    ) : need.action === "tailor" ? (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link to="/jobs/$jobId" params={{ jobId: need.job.id }}>
+                          {need.status === "interviewing" ? "Open" : "Tailor"}
+                        </Link>
+                      </Button>
+                    ) : need.action === "follow-up" ? (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link to="/applications">Follow up</Link>
+                      </Button>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

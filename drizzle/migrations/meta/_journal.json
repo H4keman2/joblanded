@@ -8,6 +8,13 @@
       "when": 1789673109099,
       "tag": "0000_add_jobs_archived_at",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790165780464,
+      "tag": "0001_auto_create_application_per_job",
+      "breakpoints": true
     }
   ]
 }

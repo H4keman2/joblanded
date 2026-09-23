@@ -169,9 +169,14 @@ Pay values are annual USD numbers when stated, otherwise null. Never invent fact
     .single();
   if (jobError) throw new Error(jobError.message);
 
+  // A database trigger already opens the "saved" application for every new
+  // job; this upsert is a harmless safety net that never duplicates it.
   const { error: appError } = await supabase
     .from("applications")
-    .insert({ user_id: userId, job_id: job.id, status: "saved" });
+    .upsert(
+      { user_id: userId, job_id: job.id, status: "saved" },
+      { onConflict: "job_id", ignoreDuplicates: true },
+    );
   if (appError) throw new Error(appError.message);
 
   return job;

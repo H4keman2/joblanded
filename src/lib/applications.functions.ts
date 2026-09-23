@@ -145,6 +145,60 @@ export const updateApplicationStatus = createServerFn({ method: "POST" })
     return row;
   });
 
+const jobStatusInput = z.object({
+  jobId: z.string().uuid(),
+  status: z.enum(APPLICATION_STATUSES),
+});
+
+// Sets a posting's status straight from the Dashboard, keyed by the job rather
+// than the application. Opens the application row if one is somehow missing,
+// and stamps the applied / follow-up dates the same way the Applications page
+// does the first time a role moves past "saved".
+export const setJobStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => jobStatusInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: job, error: jobError } = await context.supabase
+      .from("jobs")
+      .select("id")
+      .eq("id", data.jobId)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (jobError) throw new Error(jobError.message);
+    if (!job) throw new Error("Posting not found");
+
+    const { data: existing, error: existingError } = await context.supabase
+      .from("applications")
+      .select("id, date_applied")
+      .eq("job_id", data.jobId)
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (existingError) throw new Error(existingError.message);
+
+    const appliedDate = new Date().toISOString().slice(0, 10);
+    const shouldStampApplied = data.status !== "saved" && !existing?.date_applied;
+    const values = {
+      status: data.status,
+      ...(shouldStampApplied
+        ? { date_applied: appliedDate, follow_up_date: addBusinessDays(appliedDate, 2) }
+        : {}),
+    };
+
+    const query = existing
+      ? context.supabase
+          .from("applications")
+          .update(values)
+          .eq("id", existing.id)
+          .eq("user_id", context.userId)
+      : context.supabase
+          .from("applications")
+          .insert({ ...values, user_id: context.userId, job_id: data.jobId });
+
+    const { data: row, error } = await query.select(APPLICATION_COLUMNS).single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
 const followUpInput = z.object({
   id: z.string().uuid(),
   follow_up_date: z.string().nullable().optional(),
