@@ -400,40 +400,84 @@ function DashboardPage() {
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-border">
-            {needs.map((need) => (
-              <li
-                key={need.job.id}
-                className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-              >
-                <div>
-                  <p className="font-medium">
-                    {need.job.title}
-                    <span
-                      className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
-                        need.urgent
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-secondary text-secondary-foreground"
-                      }`}
+            {needs.map((need) => {
+              const urgent = need.rank === 0;
+              const pending =
+                statusMutation.isPending && statusMutation.variables?.jobId === need.job.id;
+              return (
+                <li
+                  key={need.job.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium">
+                      {need.job.title}
+                      <span
+                        className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+                          urgent
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                      >
+                        {need.step}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {need.job.company ? `${need.job.company} · ` : ""}
+                      {need.hint}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={need.status}
+                      disabled={pending}
+                      onValueChange={(value) =>
+                        statusMutation.mutate({
+                          jobId: need.job.id,
+                          status: value as ApplicationStatus,
+                        })
+                      }
                     >
-                      {need.step}
-                    </span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {need.job.company ? `${need.job.company} · ` : ""}
-                    {need.hint}
-                  </p>
-                </div>
-                <Button asChild size="sm" variant="secondary">
-                  {need.to === "job" ? (
-                    <Link to="/jobs/$jobId" params={{ jobId: need.job.id }}>
-                      {need.cta}
-                    </Link>
-                  ) : (
-                    <Link to="/applications">{need.cta}</Link>
-                  )}
-                </Button>
-              </li>
-            ))}
+                      <SelectTrigger
+                        className="h-8 w-[120px] text-xs"
+                        aria-label={`Status for ${need.job.title}`}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {APPLICATION_STATUSES.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {STATUS_LABELS[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {need.action === "mark-applied" ? (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={pending}
+                        onClick={() =>
+                          statusMutation.mutate({ jobId: need.job.id, status: "applied" })
+                        }
+                      >
+                        Mark applied
+                      </Button>
+                    ) : need.action === "tailor" ? (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link to="/jobs/$jobId" params={{ jobId: need.job.id }}>
+                          {need.status === "interviewing" ? "Open" : "Tailor"}
+                        </Link>
+                      </Button>
+                    ) : need.action === "follow-up" ? (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link to="/applications">Follow up</Link>
+                      </Button>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
