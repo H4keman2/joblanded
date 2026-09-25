@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Loader2, Layers, Sparkles, Wand2 } from "lucide-react";
 import { generateDraft, getJob, listDrafts, listJobs, rankRoles } from "@/lib/jobs.functions";
 import { DraftCard, Hint, type TailorDraft } from "@/components/tailor/DraftCard";
+import { ApplyPanel } from "@/components/jobs/ApplyPanel";
 
 
 
@@ -257,6 +258,7 @@ function JobDetailPage() {
               View original posting
             </a>
           )}
+          <ApplyPanel jobId={jobId} sourceUrl={job.data?.source_url ?? null} />
           {job.data?.description && (
             <details className="mt-4">
               <summary className="cursor-pointer text-xs font-medium uppercase tracking-wide text-muted-foreground">
