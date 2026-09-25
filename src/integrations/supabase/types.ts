@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       applications: {
         Row: {
+          application_url: string | null
           created_at: string
           date_applied: string | null
           follow_up_date: string | null
@@ -27,6 +28,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          application_url?: string | null
           created_at?: string
           date_applied?: string | null
           follow_up_date?: string | null
@@ -38,6 +40,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          application_url?: string | null
           created_at?: string
           date_applied?: string | null
           follow_up_date?: string | null
