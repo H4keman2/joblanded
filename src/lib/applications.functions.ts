@@ -29,7 +29,7 @@ export function addBusinessDays(dateStr: string, days: number): string {
 }
 
 const APPLICATION_COLUMNS =
-  "id, status, date_applied, follow_up_date, follow_up_sent, notes, created_at, job_id";
+  "id, status, date_applied, follow_up_date, follow_up_sent, notes, created_at, job_id, application_url";
 
 type FollowUpBackfillRow = {
   id: string;
@@ -148,6 +148,13 @@ export const updateApplicationStatus = createServerFn({ method: "POST" })
 const jobStatusInput = z.object({
   jobId: z.string().uuid(),
   status: z.enum(APPLICATION_STATUSES),
+  applicationUrl: z
+    .string()
+    .trim()
+    .max(2000)
+    .url()
+    .refine((u) => /^https?:\/\//i.test(u), "Link must start with http(s)://")
+    .optional(),
 });
 
 // Sets a posting's status straight from the Dashboard, keyed by the job rather
@@ -179,6 +186,7 @@ export const setJobStatus = createServerFn({ method: "POST" })
     const shouldStampApplied = data.status !== "saved" && !existing?.date_applied;
     const values = {
       status: data.status,
+      ...(data.applicationUrl ? { application_url: data.applicationUrl } : {}),
       ...(shouldStampApplied
         ? { date_applied: appliedDate, follow_up_date: addBusinessDays(appliedDate, 2) }
         : {}),

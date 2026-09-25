@@ -84,6 +84,7 @@ type ApplicationRow = {
   notes: string | null;
   created_at: string;
   job_id: string;
+  application_url?: string | null;
   jobs: JobInfo | JobInfo[] | null;
 };
 
@@ -380,6 +381,16 @@ function ApplicationsPage() {
                         {job?.title ?? "Untitled role"}
                       </Link>
                       <p className="text-xs text-muted-foreground">{payLine(job)}</p>
+                      {(app.application_url || job?.source_url) && (
+                        <a
+                          href={app.application_url ?? job!.source_url!}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-primary underline"
+                        >
+                          {app.application_url ? "View application" : "View posting"}
+                        </a>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-3">
