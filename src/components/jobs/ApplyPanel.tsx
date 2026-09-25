@@ -28,7 +28,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
 
   const mutation = useMutation({
     mutationFn: (applicationUrl?: string) =>
-      apply({ data: { jobId, status: "applied", ...(applicationUrl ? { applicationUrl } : {}) } }),
+      apply({ data: { jobId, status: app && app.status !== "saved" ? (app.status as "applied") : "applied", ...(applicationUrl ? { applicationUrl } : {}) } }),
     onSuccess: async () => {
       toast.success("Marked as applied — it's now in your tracker");
       setUrl("");
