@@ -41,6 +41,10 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     onError: (e: Error) => toast.error(e.message.includes("url") ? "Enter a valid link starting with https://" : e.message),
   });
 
+  if (apps.isLoading) {
+    return <div className="mt-5 h-16 animate-pulse rounded-lg border border-border bg-secondary/30" />;
+  }
+
   const status = app?.status ?? "saved";
   const applied = status !== "saved";
   const link = app?.application_url ?? null;
