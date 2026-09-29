@@ -394,6 +394,11 @@ function ApplicationsPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                      <Button asChild size="sm" variant="outline">
+                        <Link to="/jobs/$jobId" params={{ jobId: app.job_id }}>
+                          Tailor
+                        </Link>
+                      </Button>
                       {submitted && (
                         <Select
                           value={app.status}
