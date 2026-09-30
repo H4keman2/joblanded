@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Hint } from "@/components/ui/hint";
-import { toast } from "sonner";
+import { ProUpsell } from "@/components/ProUpsell";
+import { usePro, toastProError } from "@/lib/pro-store";
 import { Loader2, Search } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/posting-search")({
@@ -40,10 +41,11 @@ function scoreTone(score: number) {
 function PostingSearchPage() {
   const run = useServerFn(matchPostings);
   const [text, setText] = useState("");
+  const pro = usePro();
 
   const match = useMutation({
-    mutationFn: (value: string) => run({ data: { text: value } }),
-    onError: (e: Error) => toast.error(e.message),
+    mutationFn: (value: string) => run({ data: { text: value, licenseKey: pro.key ?? "" } }),
+    onError: toastProError,
   });
 
   const result = match.data;
@@ -59,6 +61,9 @@ function PostingSearchPage() {
           speaks to best.
         </p>
 
+        {pro.loaded && !pro.isPro ? (
+          <div className="mt-6"><ProUpsell feature="Posting search" /></div>
+        ) : (
         <form
           className="mt-6 space-y-4"
           onSubmit={(e) => {
@@ -86,6 +91,7 @@ function PostingSearchPage() {
             Compare postings
           </Button>
         </form>
+        )}
       </div>
 
       {result && (
