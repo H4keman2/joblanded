@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 
 // Placeholder until the Gumroad checkout URL is configured.
-const CHECKOUT_URL = "https://gumroad.com/";
+const CHECKOUT_URL = "https://gumroad.com/l/xrynld";
 
 export const Route = createFileRoute("/pro")({
   head: () => ({
