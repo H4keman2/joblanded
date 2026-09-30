@@ -7,6 +7,7 @@ const MAX_POSTINGS = 8;
 
 const matchInput = z.object({
   text: z.string().trim().min(80, "Paste at least one full job posting."),
+  licenseKey: z.string(),
 });
 
 export interface SectionMatch {
@@ -73,6 +74,8 @@ export const matchPostings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => matchInput.parse(input))
   .handler(async ({ data, context }) => {
+    const { requireValidLicense } = await import("@/lib/license.server");
+    await requireValidLicense(data.licenseKey);
     const postings = splitPostings(data.text);
     if (!postings.length) throw new Error("Could not read any postings from that text.");
 
