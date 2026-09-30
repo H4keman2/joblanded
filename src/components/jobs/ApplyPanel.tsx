@@ -45,7 +45,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">
-          Status: <span className="text-primary">{LABELS[status] ?? status}</span>
+          Status: <span className="text-primary">{STATUS_LABELS[status] ?? status}</span>
           {app?.date_applied && (
             <span className="ml-2 text-xs font-normal text-muted-foreground">
               applied {app.date_applied}
