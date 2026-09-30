@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { usePro } from "@/lib/pro-store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -211,6 +212,8 @@ function AccountPage() {
         <h1 className="text-3xl font-semibold">Account</h1>
         <p className="mt-1 text-sm text-muted-foreground">Manage your profile, login and data.</p>
       </div>
+
+      <ProLicenseSection />
 
       <section className="panel max-w-xl space-y-1 p-6">
         <h2 className="text-lg font-semibold">Profile</h2>
@@ -461,5 +464,65 @@ function AccountPage() {
         </AlertDialog>
       </section>
     </div>
+  );
+}
+
+function ProLicenseSection() {
+  const pro = usePro();
+  const [value, setValue] = useState("");
+  return (
+    <section className="panel max-w-xl space-y-4 p-6">
+      <div>
+        <h2 className="text-lg font-semibold">JobLanded Pro</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {pro.isPro
+            ? "Pro is active on this device. AI tailoring, match scores, recommendations and posting search are unlocked."
+            : "Paste the license key from your Gumroad receipt to unlock AI features."}{" "}
+          {!pro.isPro && (
+            <Link to="/pro" className="text-primary underline">
+              Haven't bought yet? See Pro
+            </Link>
+          )}
+        </p>
+      </div>
+      {pro.isPro ? (
+        <div className="flex items-center gap-3">
+          <code className="rounded bg-secondary px-2 py-1 text-xs">
+            {pro.key?.slice(0, 4)}…{pro.key?.slice(-4)}
+          </code>
+          <Button variant="outline" size="sm" onClick={pro.deactivate}>
+            Deactivate
+          </Button>
+        </div>
+      ) : (
+        <form
+          className="flex flex-wrap gap-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            if (await pro.activate(value)) {
+              setValue("");
+              toast.success("JobLanded Pro activated");
+            }
+          }}
+        >
+          <Label htmlFor="license-key" className="sr-only">
+            License key
+          </Label>
+          <Input
+            id="license-key"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
+            className="min-w-0 flex-1"
+            autoComplete="off"
+          />
+          <Button type="submit" disabled={pro.checking || value.trim().length < 8}>
+            {pro.checking && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+            Activate
+          </Button>
+        </form>
+      )}
+      {pro.error && <p className="text-sm text-destructive">{pro.error}</p>}
+    </section>
   );
 }
