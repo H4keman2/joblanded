@@ -10,6 +10,8 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Hint } from "@/components/ui/hint";
 import { toast } from "sonner";
+import { ProUpsell } from "@/components/ProUpsell";
+import { usePro, toastProError } from "@/lib/pro-store";
 import { ExternalLink, Loader2, Plus, Search } from "lucide-react";
 
 type Parsed = { titles?: string[]; location?: string | null };
@@ -46,6 +48,7 @@ export function JobRecommendations() {
   const fetchResume = useServerFn(getLatestResume);
   const fetchRecommended = useServerFn(getRecommendedJobs);
   const saveJob = useServerFn(addJob);
+  const pro = usePro();
 
   const resume = useQuery({ queryKey: ["latest-resume"], queryFn: () => fetchResume() });
 
@@ -64,11 +67,11 @@ export function JobRecommendations() {
       location?: string | undefined;
       salaryMin?: number | undefined;
       salaryMax?: number | undefined;
-    }) => fetchRecommended({ data: input }),
+    }) => fetchRecommended({ data: { ...input, licenseKey: pro.key ?? "" } }),
     onSuccess: (rows) => setResults(rows as RecommendedJob[]),
     onError: (e: Error) => {
       setResults([]);
-      toast.error(e.message);
+      toastProError(e);
     },
   });
 
@@ -78,7 +81,7 @@ export function JobRecommendations() {
   // across roles, not just re-run a single title. Only runs once
   // resume.data has settled (success with a resume, or null).
   useEffect(() => {
-    if (primed.current || resume.isLoading) return;
+    if (primed.current || resume.isLoading || !pro.isPro) return;
     primed.current = true;
     const parsed = (resume.data?.parsed_json as Parsed | null) ?? {};
     const defaultKeyword = parsed.titles?.[0] ?? "";
@@ -90,7 +93,7 @@ export function JobRecommendations() {
       location: defaultLocation || undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [resume.isLoading, resume.data]);
+  }, [resume.isLoading, resume.data, pro.isPro]);
 
   function runSearch() {
     const min = salaryMin.trim() ? Number(salaryMin) : undefined;
@@ -113,6 +116,8 @@ export function JobRecommendations() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  if (pro.loaded && !pro.isPro) return <ProUpsell feature="AI job recommendations" />;
 
   return (
     <div className="panel space-y-5 p-8">

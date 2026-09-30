@@ -16,6 +16,8 @@ import { ArrowLeft, Loader2, Layers, Sparkles, Wand2 } from "lucide-react";
 import { generateDraft, getJob, listDrafts, listJobs, rankRoles } from "@/lib/jobs.functions";
 import { DraftCard, Hint, type TailorDraft } from "@/components/tailor/DraftCard";
 import { ApplyPanel } from "@/components/jobs/ApplyPanel";
+import { ProUpsell } from "@/components/ProUpsell";
+import { usePro, toastProError } from "@/lib/pro-store";
 
 
 
@@ -96,6 +98,7 @@ function JobDetailPage() {
   const fetchDrafts = useServerFn(listDrafts);
   const fetchFits = useServerFn(rankRoles);
   const generate = useServerFn(generateDraft);
+  const pro = usePro();
 
   const [selected, setSelected] = useState(0);
   const [compare, setCompare] = useState<number | null>(null);
@@ -106,7 +109,11 @@ function JobDetailPage() {
 
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => fetchJob({ data: { id: jobId } }) });
   const roles = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
-  const fits = useQuery({ queryKey: ["role-fit"], queryFn: () => fetchFits() });
+  const fits = useQuery({
+    queryKey: ["role-fit", pro.key],
+    queryFn: () => fetchFits({ data: { licenseKey: pro.key ?? "" } }),
+    enabled: pro.isPro,
+  });
   const drafts = useQuery({
     queryKey: ["drafts", jobId],
     queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
@@ -158,7 +165,7 @@ function JobDetailPage() {
     mutationFn: async () => {
       const targets = roleOptions.filter((r) => r.id !== jobId);
       for (const r of targets) {
-        await generate({ data: { jobId: r.id } });
+        await generate({ data: { jobId: r.id, licenseKey: pro.key ?? "" } });
         await qc.invalidateQueries({ queryKey: ["drafts", r.id] });
       }
       return targets.length;
@@ -167,13 +174,13 @@ function JobDetailPage() {
       count === 0
         ? toast.info("Add more roles on the Jobs page to tailor several at once.")
         : toast.success(`Tailored a new version for ${count} other role${count === 1 ? "" : "s"}`),
-    onError: (e: Error) => toast.error(e.message),
+    onError: toastProError,
   });
 
 
   const gen = useMutation({
     mutationFn: (input: { optimizeFromId?: string }) =>
-      generate({ data: { jobId, ...(input.optimizeFromId ? { optimizeFromId: input.optimizeFromId } : {}) } }),
+      generate({ data: { jobId, licenseKey: pro.key ?? "", ...(input.optimizeFromId ? { optimizeFromId: input.optimizeFromId } : {}) } }),
     onSuccess: async (_res, input) => {
       const fresh = (await qc.fetchQuery({
         queryKey: ["drafts", jobId],
@@ -183,7 +190,7 @@ function JobDetailPage() {
       setCompare(input.optimizeFromId ? fresh.length - 1 : null);
       toast.success(input.optimizeFromId ? "ATS-optimized version ready" : "New version ready");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: toastProError,
   });
 
   const primaryEntry = versions[selected];
@@ -323,6 +330,9 @@ function JobDetailPage() {
               </Hint>
             ))}
 
+            {!pro.isPro && pro.loaded ? (
+              <div className="w-full"><ProUpsell feature="Tailoring for this job" /></div>
+            ) : (<>
             <Hint tip={needsConfirm ? "Confirm the role above first." : "Runs your latest parsed resume against this posting and writes a new tailored version with a different framing angle."}>
               <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending || genAll.isPending || needsConfirm}>
                 {gen.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
@@ -363,6 +373,7 @@ function JobDetailPage() {
                 </Button>
               </Hint>
             )}
+            </>)}
 
             {versions.length > 1 && (
               <Button

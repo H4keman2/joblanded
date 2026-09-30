@@ -327,12 +327,15 @@ Never invent experience, employers, metrics or skills that are not in the resume
 const generateInput = z.object({
   jobId: z.string().uuid(),
   optimizeFromId: z.string().uuid().optional(),
+  licenseKey: z.string(),
 });
 
 export const generateDraft = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => generateInput.parse(input))
   .handler(async ({ data, context }) => {
+    const { requireValidLicense } = await import("@/lib/license.server");
+    await requireValidLicense(data.licenseKey);
     const { supabase, userId } = context;
 
     const [{ data: job, error: jobError }, { data: resume, error: resumeError }] =
@@ -532,7 +535,10 @@ export function scoreAgainstResume(
 
 export const rankRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((input: unknown) => z.object({ licenseKey: z.string() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { requireValidLicense } = await import("@/lib/license.server");
+    await requireValidLicense(data.licenseKey);
     const { supabase, userId } = context;
 
     const [{ data: jobs, error: jobsError }, { data: resume, error: resumeError }] =
@@ -579,6 +585,7 @@ export const rankRoles = createServerFn({ method: "GET" })
 const RECOMMEND_RESULTS = 12;
 
 const recommendInput = z.object({
+  licenseKey: z.string(),
   keyword: z.string().trim().max(200).optional(),
   // When true, ignore keyword entirely (both the caller's and the resume's
   // top title) and browse broadly by location/salary only, ranking purely
@@ -605,6 +612,8 @@ export const getRecommendedJobs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => recommendInput.parse(input))
   .handler(async ({ data, context }) => {
+    const { requireValidLicense } = await import("@/lib/license.server");
+    await requireValidLicense(data.licenseKey);
     const { supabase, userId } = context;
 
     const appId = process.env["ADZUNA_APP_ID"];
