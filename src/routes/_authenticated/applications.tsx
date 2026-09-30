@@ -426,7 +426,7 @@ function ApplicationsPage() {
                               })
                             }
                           />
-                          {statusLabels[app.status as ApplicationStatus] ?? app.status}
+                          {STATUS_LABELS[app.status as ApplicationStatus] ?? app.status}
                         </label>
                       </Hint>
                     </div>

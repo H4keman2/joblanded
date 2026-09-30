@@ -5,15 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { listApplications, setJobStatus } from "@/lib/applications.functions";
-
-const LABELS: Record<string, string> = {
-  saved: "Saved",
-  applied: "Applied",
-  interviewing: "Interviewing",
-  offer: "Offer",
-  rejected: "Rejected",
-};
+import { listApplications, setJobStatus, STATUS_LABELS } from "@/lib/applications.functions";
 
 // Lets the user close the loop from the tailoring workspace: once they've sent
 // the tailored resume, mark the posting applied and keep the link to where
