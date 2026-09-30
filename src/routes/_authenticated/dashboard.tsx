@@ -8,16 +8,9 @@ import {
   APPLICATION_STATUSES,
   listApplications,
   setJobStatus,
+  STATUS_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
-
-const STATUS_LABELS: Record<ApplicationStatus, string> = {
-  saved: "Saved",
-  applied: "Applied",
-  interviewing: "Interview",
-  offer: "Offer",
-  rejected: "Rejected",
-};
 
 type Need = {
   job: { id: string; title: string; company: string | null };

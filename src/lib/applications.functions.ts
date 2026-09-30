@@ -14,6 +14,16 @@ export const APPLICATION_STATUSES = [
 ] as const;
 export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number];
 
+// One shared wording for every status, so the Dashboard, the Applications
+// page and the job workspace all call the same status the same thing.
+export const STATUS_LABELS: Record<ApplicationStatus, string> = {
+  saved: "Saved",
+  applied: "Applied",
+  interviewing: "Interviewing",
+  offer: "Offer",
+  rejected: "Rejected",
+};
+
 // Adds `days` business days (Mon–Fri) to a "YYYY-MM-DD" date string, skipping
 // weekends. Used to auto-suggest a follow-up date once a role is marked
 // applied, so the user isn't left to work that out themselves.

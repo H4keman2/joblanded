@@ -7,6 +7,7 @@ import {
   listApplications,
   updateApplicationFollowUp,
   updateApplicationStatus,
+  STATUS_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
 import { getApplicationStats } from "@/lib/account.functions";
@@ -48,13 +49,6 @@ export const Route = createFileRoute("/_authenticated/applications")({
   component: ApplicationsPage,
 });
 
-const statusLabels: Record<ApplicationStatus, string> = {
-  saved: "In process",
-  applied: "Submitted",
-  interviewing: "Interviewing",
-  offer: "Offer",
-  rejected: "Rejected",
-};
 
 // The application funnel bar — saved → applied → interviewing → offer, in the
 // order a role actually progresses. Rejected is shown as a separate count
@@ -432,7 +426,7 @@ function ApplicationsPage() {
                               })
                             }
                           />
-                          {statusLabels[app.status as ApplicationStatus] ?? app.status}
+                          {STATUS_LABELS[app.status as ApplicationStatus] ?? app.status}
                         </label>
                       </Hint>
                     </div>
