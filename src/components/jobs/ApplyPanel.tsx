@@ -5,7 +5,12 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { listApplications, setJobStatus, STATUS_LABELS } from "@/lib/applications.functions";
+import {
+  listApplications,
+  setJobStatus,
+  STATUS_LABELS,
+  type ApplicationStatus,
+} from "@/lib/applications.functions";
 
 // Lets the user close the loop from the tailoring workspace: once they've sent
 // the tailored resume, mark the posting applied and keep the link to where
@@ -45,7 +50,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">
-          Status: <span className="text-primary">{STATUS_LABELS[status] ?? status}</span>
+          Status: <span className="text-primary">{STATUS_LABELS[status as ApplicationStatus] ?? status}</span>
           {app?.date_applied && (
             <span className="ml-2 text-xs font-normal text-muted-foreground">
               applied {app.date_applied}
