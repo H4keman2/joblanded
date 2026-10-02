@@ -118,7 +118,12 @@ function AuthPage() {
                   Check <span className="font-medium">{email}</span> for a reset link — it'll bring
                   you back here to set a new password.
                 </p>
-                <Button type="button" variant="outline" className="w-full" onClick={() => switchMode("signin")}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => switchMode("signin")}
+                >
                   Back to sign in
                 </Button>
               </div>

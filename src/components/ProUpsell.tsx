@@ -8,7 +8,8 @@ export function ProUpsell({ feature }: { feature: string }) {
       <div>
         <p className="font-semibold">{feature} is a JobLanded Pro feature</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          One-time $9.99 unlocks all AI features. Already bought? Activate your key on the Account page.
+          One-time $9.99 unlocks all AI features. Already bought? Activate your key on the Account
+          page.
         </p>
       </div>
       <Button asChild>
