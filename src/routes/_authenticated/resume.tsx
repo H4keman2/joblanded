@@ -111,7 +111,8 @@ function ResumePage() {
     }
     setExtracting(true);
     try {
-      const isPdf = file.type === "application/pdf";
+      const isPdf =
+        file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
       const text = isPdf ? await extractPdfText(file) : await file.text();
       if (text.trim().length < 30) throw new Error("Couldn't read enough text from that file.");
       setRawText(text);
