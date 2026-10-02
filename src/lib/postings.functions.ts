@@ -137,8 +137,7 @@ ${postings.map((p, i) => `### POSTING ${i}\n${p.slice(0, 6000)}`).join("\n\n")}`
         });
       }
       const orderedSections = sections.map(
-        (s) =>
-          byName.get(s.name) ?? { section: s.name, score: 0, evidence: [], gap: null },
+        (s) => byName.get(s.name) ?? { section: s.name, score: 0, evidence: [], gap: null },
       );
       const overall =
         typeof r["overall"] === "number"
@@ -148,8 +147,12 @@ ${postings.map((p, i) => `### POSTING ${i}\n${p.slice(0, 6000)}`).join("\n\n")}`
             );
       return {
         index: idx,
-        title: typeof r["title"] === "string" && r["title"].trim() ? r["title"].trim() : `Posting ${idx + 1}`,
-        company: typeof r["company"] === "string" && r["company"].trim() ? r["company"].trim() : null,
+        title:
+          typeof r["title"] === "string" && r["title"].trim()
+            ? r["title"].trim()
+            : `Posting ${idx + 1}`,
+        company:
+          typeof r["company"] === "string" && r["company"].trim() ? r["company"].trim() : null,
         overall,
         sections: orderedSections,
       };

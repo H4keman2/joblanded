@@ -19,8 +19,6 @@ import { ApplyPanel } from "@/components/jobs/ApplyPanel";
 import { ProUpsell } from "@/components/ProUpsell";
 import { usePro, toastProError } from "@/lib/pro-store";
 
-
-
 export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
   head: () => ({
     meta: [
@@ -53,7 +51,8 @@ function normalize(content: string): TailorDraft {
   }
   const s = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? Math.round(v) : 0);
-  const arr = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
+  const arr = (v: unknown) =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
   const ats = (raw["ats"] ?? {}) as Record<string, unknown>;
   const kw = (raw["keywords"] ?? {}) as Record<string, unknown>;
   const match = (raw["match"] ?? {}) as Record<string, unknown>;
@@ -107,7 +106,10 @@ function JobDetailPage() {
   const pickedManually = useRef(false);
   const autoSwitched = useRef(false);
 
-  const job = useQuery({ queryKey: ["job", jobId], queryFn: () => fetchJob({ data: { id: jobId } }) });
+  const job = useQuery({
+    queryKey: ["job", jobId],
+    queryFn: () => fetchJob({ data: { id: jobId } }),
+  });
   const roles = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
   const fits = useQuery({
     queryKey: ["role-fit", pro.key],
@@ -128,7 +130,10 @@ function JobDetailPage() {
   }, [fits.data]);
 
   const roleOptions = useMemo(() => {
-    const list = (roles.data ?? []).map((r) => ({ ...r, ...(fitById.get(r.id) ?? { fit: null, matched: [] }) }));
+    const list = (roles.data ?? []).map((r) => ({
+      ...r,
+      ...(fitById.get(r.id) ?? { fit: null, matched: [] }),
+    }));
     return list.sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
   }, [roles.data, fitById]);
 
@@ -159,8 +164,6 @@ function JobDetailPage() {
     drafts.isSuccess &&
     versions.length === 0;
 
-
-
   const genAll = useMutation({
     mutationFn: async () => {
       const targets = roleOptions.filter((r) => r.id !== jobId);
@@ -177,16 +180,25 @@ function JobDetailPage() {
     onError: toastProError,
   });
 
-
   const gen = useMutation({
     mutationFn: (input: { optimizeFromId?: string }) =>
-      generate({ data: { jobId, licenseKey: pro.key ?? "", ...(input.optimizeFromId ? { optimizeFromId: input.optimizeFromId } : {}) } }),
+      generate({
+        data: {
+          jobId,
+          licenseKey: pro.key ?? "",
+          ...(input.optimizeFromId ? { optimizeFromId: input.optimizeFromId } : {}),
+        },
+      }),
     onSuccess: async (_res, input) => {
       const fresh = (await qc.fetchQuery({
         queryKey: ["drafts", jobId],
         queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
       })) as StoredDraft[];
-      setSelected(input.optimizeFromId ? fresh.findIndex((d) => d.id === input.optimizeFromId) : fresh.length - 1);
+      setSelected(
+        input.optimizeFromId
+          ? fresh.findIndex((d) => d.id === input.optimizeFromId)
+          : fresh.length - 1,
+      );
       setCompare(input.optimizeFromId ? fresh.length - 1 : null);
       toast.success(input.optimizeFromId ? "ATS-optimized version ready" : "New version ready");
     },
@@ -203,7 +215,10 @@ function JobDetailPage() {
     <TooltipProvider>
       <div className="space-y-6">
         <div className="panel p-8">
-          <Link to="/jobs" className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground">
+          <Link
+            to="/jobs"
+            className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground"
+          >
             <ArrowLeft className="mr-1 h-3.5 w-3.5" /> All jobs
           </Link>
           <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -314,7 +329,10 @@ function JobDetailPage() {
               Version history
             </span>
             {versions.map((v, i) => (
-              <Hint key={v.id} tip={`Angle: ${normalize(v.content).angle}. Same resume and posting — only the framing changes.`}>
+              <Hint
+                key={v.id}
+                tip={`Angle: ${normalize(v.content).angle}. Same resume and posting — only the framing changes.`}
+              >
                 <button
                   onClick={() => setSelected(i)}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
@@ -331,49 +349,65 @@ function JobDetailPage() {
             ))}
 
             {!pro.isPro && pro.loaded ? (
-              <div className="w-full"><ProUpsell feature="Tailoring for this job" /></div>
-            ) : (<>
-            <Hint tip={needsConfirm ? "Confirm the role above first." : "Runs your latest parsed resume against this posting and writes a new tailored version with a different framing angle."}>
-              <Button size="sm" onClick={() => gen.mutate({})} disabled={gen.isPending || genAll.isPending || needsConfirm}>
-                {gen.isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
-                {versions.length === 0 ? "Generate first version" : "Regenerate"}
-              </Button>
-            </Hint>
-
-
-            {roleOptions.length > 1 && (
-              <Hint tip="Tailors your resume for every other saved role too. Each role's version is saved under that role.">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={gen.isPending || genAll.isPending || needsConfirm}
-                  onClick={() => genAll.mutate()}
+              <div className="w-full">
+                <ProUpsell feature="Tailoring for this job" />
+              </div>
+            ) : (
+              <>
+                <Hint
+                  tip={
+                    needsConfirm
+                      ? "Confirm the role above first."
+                      : "Runs your latest parsed resume against this posting and writes a new tailored version with a different framing angle."
+                  }
                 >
-                  {genAll.isPending ? (
-                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Layers className="mr-1.5 h-4 w-4" />
-                  )}
-                  Tailor all roles
-                </Button>
-              </Hint>
-            )}
+                  <Button
+                    size="sm"
+                    onClick={() => gen.mutate({})}
+                    disabled={gen.isPending || genAll.isPending || needsConfirm}
+                  >
+                    {gen.isPending ? (
+                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="mr-1.5 h-4 w-4" />
+                    )}
+                    {versions.length === 0 ? "Generate first version" : "Regenerate"}
+                  </Button>
+                </Hint>
 
+                {roleOptions.length > 1 && (
+                  <Hint tip="Tailors your resume for every other saved role too. Each role's version is saved under that role.">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={gen.isPending || genAll.isPending || needsConfirm}
+                      onClick={() => genAll.mutate()}
+                    >
+                      {genAll.isPending ? (
+                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Layers className="mr-1.5 h-4 w-4" />
+                      )}
+                      Tailor all roles
+                    </Button>
+                  </Hint>
+                )}
 
-            {primaryEntry && (
-              <Hint tip="Rewrites the selected version to fix its weakest readability flags and work its missing keywords back in, then opens both side by side.">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  disabled={gen.isPending}
-                  onClick={() => gen.mutate({ optimizeFromId: primaryEntry.id })}
-                >
-                  <Wand2 className="mr-1.5 h-4 w-4" />
-                  ATS-optimize this draft
-                </Button>
-              </Hint>
+                {primaryEntry && (
+                  <Hint tip="Rewrites the selected version to fix its weakest readability flags and work its missing keywords back in, then opens both side by side.">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={gen.isPending}
+                      onClick={() => gen.mutate({ optimizeFromId: primaryEntry.id })}
+                    >
+                      <Wand2 className="mr-1.5 h-4 w-4" />
+                      ATS-optimize this draft
+                    </Button>
+                  </Hint>
+                )}
+              </>
             )}
-            </>)}
 
             {versions.length > 1 && (
               <Button
@@ -381,7 +415,9 @@ function JobDetailPage() {
                 variant="ghost"
                 onClick={() =>
                   setCompare((c) =>
-                    c === null ? versions.map((_, i) => i).find((i) => i !== selected) ?? null : null,
+                    c === null
+                      ? (versions.map((_, i) => i).find((i) => i !== selected) ?? null)
+                      : null,
                   )
                 }
               >
@@ -391,7 +427,11 @@ function JobDetailPage() {
 
             {compare !== null && (
               <Hint tip="Word-level diff between the two versions: text only in the other version is struck through, text unique to this one is highlighted.">
-                <Button size="sm" variant={showDiff ? "secondary" : "ghost"} onClick={() => setShowDiff((d) => !d)}>
+                <Button
+                  size="sm"
+                  variant={showDiff ? "secondary" : "ghost"}
+                  onClick={() => setShowDiff((d) => !d)}
+                >
                   {showDiff ? "Hide changes" : "Highlight changes"}
                 </Button>
               </Hint>
@@ -402,10 +442,13 @@ function JobDetailPage() {
             <p className="mt-6 text-sm text-muted-foreground">Loading versions…</p>
           ) : !primary ? (
             <p className="mt-6 max-w-xl text-sm text-muted-foreground">
-              No tailored versions yet. Generate one to run your parsed resume against this posting —
-              you'll get a rewritten summary, cover opener, ATS readability score and keyword coverage.
-              Make sure your <Link to="/resume" className="text-primary underline">resume</Link> is
-              uploaded and parsed first.
+              No tailored versions yet. Generate one to run your parsed resume against this posting
+              — you'll get a rewritten summary, cover opener, ATS readability score and keyword
+              coverage. Make sure your{" "}
+              <Link to="/resume" className="text-primary underline">
+                resume
+              </Link>{" "}
+              is uploaded and parsed first.
             </p>
           ) : (
             <div className={`mt-5 grid gap-6 ${secondary ? "md:grid-cols-2" : ""}`}>

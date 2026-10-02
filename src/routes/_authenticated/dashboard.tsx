@@ -152,8 +152,7 @@ function DashboardPage() {
     );
     const sorted = [...rows];
     if (sort === "title") sorted.sort((a, b) => a.title.localeCompare(b.title));
-    if (sort === "company")
-      sorted.sort((a, b) => (a.company ?? "").localeCompare(b.company ?? ""));
+    if (sort === "company") sorted.sort((a, b) => (a.company ?? "").localeCompare(b.company ?? ""));
     return sorted;
   }, [activeJobs, search, sort]);
 
@@ -297,8 +296,8 @@ function DashboardPage() {
           <div>
             <h1 className="text-2xl font-semibold">Dashboard</h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-              What needs you today, and every posting you've saved — added on your phone, waiting
-              on your laptop.
+              What needs you today, and every posting you've saved — added on your phone, waiting on
+              your laptop.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">

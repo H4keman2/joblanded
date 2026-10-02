@@ -261,9 +261,9 @@ function JobsPage() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete this job?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This removes "{job.title}"
-                            {job.company ? ` at ${job.company}` : ""} along with every tailored
-                            resume and cover letter generated for it. This can't be undone.
+                            This removes "{job.title}"{job.company ? ` at ${job.company}` : ""}{" "}
+                            along with every tailored resume and cover letter generated for it. This
+                            can't be undone.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

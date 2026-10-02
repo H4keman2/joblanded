@@ -55,42 +55,44 @@ function PostingSearchPage() {
       <div className="panel p-8">
         <h1 className="text-2xl font-semibold">Posting search</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Paste several postings at once, separated by a line with three dashes
-          (<code className="rounded bg-secondary px-1">---</code>). You'll get a grid showing which
+          Paste several postings at once, separated by a line with three dashes (
+          <code className="rounded bg-secondary px-1">---</code>). You'll get a grid showing which
           role each part of your resume — summary, skills, experience, achievements, education —
           speaks to best.
         </p>
 
         {pro.loaded && !pro.isPro ? (
-          <div className="mt-6"><ProUpsell feature="Posting search" /></div>
-        ) : (
-        <form
-          className="mt-6 space-y-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            match.mutate(text);
-          }}
-        >
-          <div>
-            <Label htmlFor="postings">Job postings</Label>
-            <Textarea
-              id="postings"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              rows={14}
-              placeholder={"Paste posting one…\n\n---\n\nPaste posting two…"}
-              className="mt-1.5"
-            />
+          <div className="mt-6">
+            <ProUpsell feature="Posting search" />
           </div>
-          <Button type="submit" disabled={match.isPending || text.trim().length < 80}>
-            {match.isPending ? (
-              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="mr-1.5 h-4 w-4" />
-            )}
-            Compare postings
-          </Button>
-        </form>
+        ) : (
+          <form
+            className="mt-6 space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              match.mutate(text);
+            }}
+          >
+            <div>
+              <Label htmlFor="postings">Job postings</Label>
+              <Textarea
+                id="postings"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={14}
+                placeholder={"Paste posting one…\n\n---\n\nPaste posting two…"}
+                className="mt-1.5"
+              />
+            </div>
+            <Button type="submit" disabled={match.isPending || text.trim().length < 80}>
+              {match.isPending ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="mr-1.5 h-4 w-4" />
+              )}
+              Compare postings
+            </Button>
+          </form>
         )}
       </div>
 

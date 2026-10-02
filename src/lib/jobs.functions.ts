@@ -11,9 +11,7 @@ export const listJobs = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("jobs")
-      .select(
-        "id, title, company, location, pay_min, pay_max, source_url, date_added, archived_at",
-      )
+      .select("id, title, company, location, pay_min, pay_max, source_url, date_added, archived_at")
       .eq("user_id", context.userId)
       .order("date_added", { ascending: false });
     if (error) throw new Error(error.message);
@@ -251,8 +249,6 @@ export const setJobArchived = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-
-
 
 // Which postings already have at least one tailored version, so the Dashboard
 // can tell "still needs tailoring" apart from "ready to send".

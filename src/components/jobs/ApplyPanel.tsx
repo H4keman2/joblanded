@@ -25,7 +25,13 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
 
   const mutation = useMutation({
     mutationFn: (applicationUrl?: string) =>
-      apply({ data: { jobId, status: app && app.status !== "saved" ? (app.status as "applied") : "applied", ...(applicationUrl ? { applicationUrl } : {}) } }),
+      apply({
+        data: {
+          jobId,
+          status: app && app.status !== "saved" ? (app.status as "applied") : "applied",
+          ...(applicationUrl ? { applicationUrl } : {}),
+        },
+      }),
     onSuccess: async () => {
       toast.success("Marked as applied — it's now in your tracker");
       setUrl("");
@@ -35,11 +41,16 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
         ),
       );
     },
-    onError: (e: Error) => toast.error(e.message.includes("url") ? "Enter a valid link starting with https://" : e.message),
+    onError: (e: Error) =>
+      toast.error(
+        e.message.includes("url") ? "Enter a valid link starting with https://" : e.message,
+      ),
   });
 
   if (apps.isLoading) {
-    return <div className="mt-5 h-16 animate-pulse rounded-lg border border-border bg-secondary/30" />;
+    return (
+      <div className="mt-5 h-16 animate-pulse rounded-lg border border-border bg-secondary/30" />
+    );
   }
 
   const status = app?.status ?? "saved";
@@ -50,7 +61,10 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium">
-          Status: <span className="text-primary">{STATUS_LABELS[status as ApplicationStatus] ?? status}</span>
+          Status:{" "}
+          <span className="text-primary">
+            {STATUS_LABELS[status as ApplicationStatus] ?? status}
+          </span>
           {app?.date_applied && (
             <span className="ml-2 text-xs font-normal text-muted-foreground">
               applied {app.date_applied}
@@ -64,7 +78,12 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
         )}
       </div>
       {link && (
-        <a href={link} target="_blank" rel="noreferrer" className="mt-1 block truncate text-xs text-primary underline">
+        <a
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-1 block truncate text-xs text-primary underline"
+        >
           {link}
         </a>
       )}
@@ -80,7 +99,9 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder={sourceUrl ? `Application link (e.g. ${sourceUrl})` : "Application link (optional)"}
+            placeholder={
+              sourceUrl ? `Application link (e.g. ${sourceUrl})` : "Application link (optional)"
+            }
             aria-label="Application link"
             className="h-9 text-sm"
           />

@@ -1,12 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function Hint({ children, tip }: { children: React.ReactNode; tip: string }) {
   return (
@@ -107,7 +102,8 @@ function Landing() {
           <span className="text-primary">without the spreadsheet.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          Stop bouncing between tabs. Find the right roles, tailor your story, and follow up on time.
+          Stop bouncing between tabs. Find the right roles, tailor your story, and follow up on
+          time.
         </p>
         <div className="mt-8 flex justify-center">
           <Button asChild size="lg">
@@ -159,7 +155,8 @@ const exampleSteps = [
     key: "parse",
     label: "Parse",
     step: "Step 1",
-    caption: "Maya uploads a 2-page PDF resume. JobLanded returns a structured profile she can edit.",
+    caption:
+      "Maya uploads a 2-page PDF resume. JobLanded returns a structured profile she can edit.",
     why: "Everything downstream reads from this structured profile, not the raw PDF. Fixing a wrong title or a missing skill here changes every future match score and tailored draft.",
     render: () => (
       <>
@@ -191,13 +188,25 @@ const exampleSteps = [
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {[
-              ["Design systems", "Appears 4 times across her roles, so it's treated as a core skill rather than a mention."],
+              [
+                "Design systems",
+                "Appears 4 times across her roles, so it's treated as a core skill rather than a mention.",
+              ],
               ["Figma", "Named tool. Matched literally against tools listed in the posting."],
               ["Prototyping", "Inferred from bullet wording, not a skills list."],
-              ["User research", "Present but shallow — this is what produces the research gap in step 2."],
-              ["Accessibility", "Extra skill the posting doesn't ask for; never counted against her."],
+              [
+                "User research",
+                "Present but shallow — this is what produces the research gap in step 2.",
+              ],
+              [
+                "Accessibility",
+                "Extra skill the posting doesn't ask for; never counted against her.",
+              ],
               ["Design ops", "Grouped from process and tooling ownership bullets."],
-              ["Cross-functional leadership", "Derived from bullets about leading engineers and PMs through launches."],
+              [
+                "Cross-functional leadership",
+                "Derived from bullets about leading engineers and PMs through launches.",
+              ],
             ].map(([s, tip]) => (
               <Hint key={s} tip={tip!}>
                 <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground">
@@ -217,7 +226,8 @@ const exampleSteps = [
     key: "match",
     label: "Match",
     step: "Step 2",
-    caption: "She pastes the Northwind Labs job description. It's scored against her parsed profile.",
+    caption:
+      "She pastes the Northwind Labs job description. It's scored against her parsed profile.",
     why: "The score is a weighted read of four things: required skills covered (50%), years of experience vs. the minimum (20%), title similarity (20%), and preferred-but-optional extras (10%). Missing a preferred item costs a few points; missing a required skill costs a lot.",
     render: () => (
       <>
@@ -256,7 +266,9 @@ const exampleSteps = [
             </ul>
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Gaps</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Gaps
+            </p>
             <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
               <li>
                 <Hint tip="Listed under &ldquo;nice to have,&rdquo; so it only reduces the 10% preferred bucket — roughly 3 points, not a disqualifier.">
@@ -273,7 +285,6 @@ const exampleSteps = [
         </div>
         <ScoreBreakdown />
       </>
-
     ),
   },
   {
@@ -289,7 +300,8 @@ const exampleSteps = [
     key: "followup",
     label: "Follow up",
     step: "Step 4",
-    caption: "She marks it applied and sets a date. It surfaces at the top of her applications list the day it's due.",
+    caption:
+      "She marks it applied and sets a date. It surfaces at the top of her applications list the day it's due.",
     why: "The follow-up date is the only thing that decides what rises to the top of your applications list. Applications with a date due today or earlier rise to the top; everything else stays out of the way.",
     render: () => (
       <>
@@ -304,8 +316,8 @@ const exampleSteps = [
           </Hint>
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
-          On Mar 11 the application moves to the top of her applications list. If she hears back, she flips
-          the status to Interviewing and sets the next date.
+          On Mar 11 the application moves to the top of her applications list. If she hears back,
+          she flips the status to Interviewing and sets the next date.
         </p>
       </>
     ),
@@ -318,77 +330,77 @@ function WorkedExample() {
 
   return (
     <TooltipProvider delayDuration={100}>
-    <section id="example" className="scroll-mt-20 border-t border-border bg-secondary/30">
-      <div className="mx-auto max-w-5xl px-4 py-20">
-        <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          A worked example
-        </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted-foreground">
-          Meet Maya, a product designer applying to Northwind Labs. Click through each step to see
-          exactly what JobLanded produces.
-        </p>
+      <section id="example" className="scroll-mt-20 border-t border-border bg-secondary/30">
+        <div className="mx-auto max-w-5xl px-4 py-20">
+          <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+            A worked example
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted-foreground">
+            Meet Maya, a product designer applying to Northwind Labs. Click through each step to see
+            exactly what JobLanded produces.
+          </p>
 
-        <div
-          role="tablist"
-          aria-label="Worked example steps"
-          className="mx-auto mt-8 flex max-w-xl flex-wrap justify-center gap-2"
-        >
-          {exampleSteps.map((s, i) => (
-            <button
-              key={s.key}
-              role="tab"
-              aria-selected={i === active}
-              onClick={() => setActive(i)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                i === active
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-background text-muted-foreground hover:text-foreground"
-              }`}
+          <div
+            role="tablist"
+            aria-label="Worked example steps"
+            className="mx-auto mt-8 flex max-w-xl flex-wrap justify-center gap-2"
+          >
+            {exampleSteps.map((s, i) => (
+              <button
+                key={s.key}
+                role="tab"
+                aria-selected={i === active}
+                onClick={() => setActive(i)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  i === active
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-6">
+            <ExampleStep
+              key={current.key}
+              step={current.step}
+              title={current.label}
+              caption={current.caption}
+              why={current.why}
             >
-              {s.label}
-            </button>
-          ))}
-        </div>
+              {current.render()}
+            </ExampleStep>
+          </div>
 
-        <div className="mt-6">
-          <ExampleStep
-            key={current.key}
-            step={current.step}
-            title={current.label}
-            caption={current.caption}
-            why={current.why}
-          >
-            {current.render()}
-          </ExampleStep>
-        </div>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setActive((i) => Math.max(0, i - 1))}
+              disabled={active === 0}
+            >
+              Back
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {active + 1} of {exampleSteps.length}
+            </span>
+            <Button
+              variant="outline"
+              onClick={() => setActive((i) => Math.min(exampleSteps.length - 1, i + 1))}
+              disabled={active === exampleSteps.length - 1}
+            >
+              Next
+            </Button>
+          </div>
 
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <Button
-            variant="outline"
-            onClick={() => setActive((i) => Math.max(0, i - 1))}
-            disabled={active === 0}
-          >
-            Back
-          </Button>
-          <span className="text-xs text-muted-foreground">
-            {active + 1} of {exampleSteps.length}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => setActive((i) => Math.min(exampleSteps.length - 1, i + 1))}
-            disabled={active === exampleSteps.length - 1}
-          >
-            Next
-          </Button>
+          <div className="mt-10 flex justify-center">
+            <Button asChild size="lg">
+              <Link to="/auth">Try it with your resume</Link>
+            </Button>
+          </div>
         </div>
-
-        <div className="mt-10 flex justify-center">
-          <Button asChild size="lg">
-            <Link to="/auth">Try it with your resume</Link>
-          </Button>
-        </div>
-      </div>
-    </section>
+      </section>
     </TooltipProvider>
   );
 }
@@ -418,7 +430,17 @@ const tailorDrafts: TailorDraft[] = [
     keywords: {
       score: 91,
       note: "Covers 9 of 10 posting keywords. 'Analytics tooling' appears once in the cover but not in the summary.",
-      hits: ["design system", "component library", "B2B software", "product designer", "handoff", "adopted", "analytics surface", "maintain", "teams"],
+      hits: [
+        "design system",
+        "component library",
+        "B2B software",
+        "product designer",
+        "handoff",
+        "adopted",
+        "analytics surface",
+        "maintain",
+        "teams",
+      ],
       misses: ["analytics tooling"],
     },
   },
@@ -437,7 +459,16 @@ const tailorDrafts: TailorDraft[] = [
     keywords: {
       score: 84,
       note: "Covers 8 of 10 keywords. Swapping 'design system' for 'component library' drops the posting's top exact-match phrase.",
-      hits: ["component library", "B2B workflows", "product designer", "handoff", "dashboards", "analytics surface", "maintains", "teams"],
+      hits: [
+        "component library",
+        "B2B workflows",
+        "product designer",
+        "handoff",
+        "dashboards",
+        "analytics surface",
+        "maintains",
+        "teams",
+      ],
       misses: ["design system", "analytics tooling"],
     },
   },
@@ -456,7 +487,15 @@ const tailorDrafts: TailorDraft[] = [
     keywords: {
       score: 79,
       note: "Covers 7 of 10 keywords. 'Partnering with engineering' is a near-match for 'partner with data engineering' but not exact, and no metric keywords carry over.",
-      hits: ["product designer", "B2B tooling", "component library", "product teams", "engineering", "adopted", "cross-team"],
+      hits: [
+        "product designer",
+        "B2B tooling",
+        "component library",
+        "product teams",
+        "engineering",
+        "adopted",
+        "cross-team",
+      ],
       misses: ["design system", "analytics tooling", "handoff"],
     },
   },
@@ -475,12 +514,18 @@ const tailorDrafts: TailorDraft[] = [
     keywords: {
       score: 72,
       note: "Covers 6 of 10 keywords. 'Analytics tooling' is named directly (a win for screening questions) but systems vocabulary disappears entirely.",
-      hits: ["product designer", "B2B software", "analytics tooling", "dashboards", "drill-downs", "analytics teams"],
+      hits: [
+        "product designer",
+        "B2B software",
+        "analytics tooling",
+        "dashboards",
+        "drill-downs",
+        "analytics teams",
+      ],
       misses: ["design system", "component library", "handoff", "adopted"],
     },
   },
 ];
-
 
 // ATS-optimized revisions: same inputs, rewritten to fix the base version's
 // weakest readability flag and work the missing keywords back in.
@@ -500,7 +545,18 @@ const optimizedDrafts: TailorDraft[] = [
     keywords: {
       score: 100,
       note: "Covers all 10 posting keywords. 'Analytics tooling' now appears in both the summary and the cover letter.",
-      hits: ["design system", "component library", "B2B software", "product designer", "handoff", "adopted", "analytics surface", "analytics tooling", "maintain", "teams"],
+      hits: [
+        "design system",
+        "component library",
+        "B2B software",
+        "product designer",
+        "handoff",
+        "adopted",
+        "analytics surface",
+        "analytics tooling",
+        "maintain",
+        "teams",
+      ],
       misses: [],
     },
   },
@@ -519,7 +575,18 @@ const optimizedDrafts: TailorDraft[] = [
     keywords: {
       score: 100,
       note: "Covers all 10 posting keywords. 'Design system' and 'analytics tooling' restored as exact matches.",
-      hits: ["design system", "component library", "B2B workflows", "product designer", "handoff", "dashboards", "analytics surface", "analytics tooling", "maintains", "teams"],
+      hits: [
+        "design system",
+        "component library",
+        "B2B workflows",
+        "product designer",
+        "handoff",
+        "dashboards",
+        "analytics surface",
+        "analytics tooling",
+        "maintains",
+        "teams",
+      ],
       misses: [],
     },
   },
@@ -538,7 +605,18 @@ const optimizedDrafts: TailorDraft[] = [
     keywords: {
       score: 100,
       note: "Covers all 10 posting keywords. 'Design system', 'handoff', and 'analytics tooling' all restored.",
-      hits: ["design system", "product designer", "B2B tooling", "component library", "product teams", "engineering", "adopted", "cross-team", "handoff", "analytics tooling"],
+      hits: [
+        "design system",
+        "product designer",
+        "B2B tooling",
+        "component library",
+        "product teams",
+        "engineering",
+        "adopted",
+        "cross-team",
+        "handoff",
+        "analytics tooling",
+      ],
       misses: [],
     },
   },
@@ -557,7 +635,17 @@ const optimizedDrafts: TailorDraft[] = [
     keywords: {
       score: 95,
       note: "Covers 9 of 10 keywords. 'Adopted' is implied by the consolidation story rather than stated — the one deliberate trade-off kept from v4.",
-      hits: ["design system", "product designer", "B2B software", "analytics tooling", "dashboards", "drill-downs", "analytics teams", "handoff", "component library"],
+      hits: [
+        "design system",
+        "product designer",
+        "B2B software",
+        "analytics tooling",
+        "dashboards",
+        "drill-downs",
+        "analytics teams",
+        "handoff",
+        "component library",
+      ],
       misses: ["adopted"],
     },
   },
@@ -574,7 +662,6 @@ function TailorStudio() {
   const [selected, setSelected] = useState(0);
   const [compare, setCompare] = useState<number | null>(null);
   const [showDiff, setShowDiff] = useState(true);
-
 
   const regenerate = () => {
     const next = versions.length % tailorDrafts.length;
@@ -606,7 +693,12 @@ function TailorStudio() {
     const optimizedRef = base + 100;
     const next = versions.includes(optimizedRef)
       ? versions
-      : [...versions, ...[...new Set(versions.filter((r) => r < 100))].map((b) => b + 100).filter((o) => !versions.includes(o))];
+      : [
+          ...versions,
+          ...[...new Set(versions.filter((r) => r < 100))]
+            .map((b) => b + 100)
+            .filter((o) => !versions.includes(o)),
+        ];
     const baseIdx = next.indexOf(base);
     const optIdx = next.indexOf(optimizedRef);
     setSelected(baseIdx === -1 ? 0 : baseIdx);
@@ -615,8 +707,7 @@ function TailorStudio() {
 
   const primary = resolveDraft(versions[selected]!);
   const secondary = compare === null ? null : resolveDraft(versions[compare]!);
-  const versionLabel = (i: number) =>
-    `v${i + 1}${isOptimized(versions[i]!) ? " · ATS" : ""}`;
+  const versionLabel = (i: number) => `v${i + 1}${isOptimized(versions[i]!) ? " · ATS" : ""}`;
 
   return (
     <div>
@@ -625,7 +716,10 @@ function TailorStudio() {
           Version history
         </span>
         {versions.map((d, i) => (
-          <Hint key={i} tip={`Angle: ${resolveDraft(d).angle}. Same parsed resume and job post — only the framing changes.`}>
+          <Hint
+            key={i}
+            tip={`Angle: ${resolveDraft(d).angle}. Same parsed resume and job post — only the framing changes.`}
+          >
             <button
               onClick={() => setSelected(i)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
@@ -659,7 +753,7 @@ function TailorStudio() {
             variant="ghost"
             onClick={() =>
               setCompare((c) =>
-                c === null ? versions.map((_, i) => i).find((i) => i !== selected) ?? null : null,
+                c === null ? (versions.map((_, i) => i).find((i) => i !== selected) ?? null) : null,
               )
             }
           >
@@ -668,7 +762,11 @@ function TailorStudio() {
         )}
         {compare !== null && (
           <Hint tip="Word-level diff between the two drafts: text only in the other version is struck through, text unique to this one is highlighted.">
-            <Button size="sm" variant={showDiff ? "secondary" : "ghost"} onClick={() => setShowDiff((d) => !d)}>
+            <Button
+              size="sm"
+              variant={showDiff ? "secondary" : "ghost"}
+              onClick={() => setShowDiff((d) => !d)}
+            >
               {showDiff ? "Hide changes" : "Highlight changes"}
             </Button>
           </Hint>
@@ -708,18 +806,19 @@ function TailorStudio() {
           </div>
         )}
       </div>
-
     </div>
   );
 }
 
 function ScoreBar({ score, tone }: { score: number; tone?: "warn" }) {
-  const color =
-    score >= 85 ? "bg-primary" : score >= 75 ? "bg-amber-500" : "bg-destructive";
+  const color = score >= 85 ? "bg-primary" : score >= 75 ? "bg-amber-500" : "bg-destructive";
   return (
     <div className="flex items-center gap-2">
       <div className="h-1.5 w-24 overflow-hidden rounded-full bg-border">
-        <div className={`h-full rounded-full ${tone === "warn" ? "bg-amber-500" : color}`} style={{ width: `${score}%` }} />
+        <div
+          className={`h-full rounded-full ${tone === "warn" ? "bg-amber-500" : color}`}
+          style={{ width: `${score}%` }}
+        />
       </div>
       <span className="text-xs font-semibold text-foreground">{score}</span>
     </div>
@@ -732,7 +831,11 @@ type DiffToken = { text: string; type: "same" | "add" | "del" };
 function diffWords(base: string, target: string): DiffToken[] {
   const a = base.match(/\S+\s*/g) ?? [];
   const b = target.match(/\S+\s*/g) ?? [];
-  const norm = (s: string) => s.trim().toLowerCase().replace(/[.,;:—–-]+$/g, "");
+  const norm = (s: string) =>
+    s
+      .trim()
+      .toLowerCase()
+      .replace(/[.,;:—–-]+$/g, "");
   const n = a.length;
   const m = b.length;
   const table: number[][] = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
@@ -785,7 +888,10 @@ function DiffText({ base, text }: { base?: string | undefined; text: string }) {
             {t.text}
           </span>
         ) : (
-          <span key={i} className="rounded-sm bg-destructive/10 px-0.5 text-destructive/70 line-through">
+          <span
+            key={i}
+            className="rounded-sm bg-destructive/10 px-0.5 text-destructive/70 line-through"
+          >
             {t.text}
           </span>
         ),
@@ -803,7 +909,6 @@ function DraftCard({
   draft: TailorDraft;
   diffAgainst?: TailorDraft | undefined;
 }) {
-
   return (
     <div>
       <div className="flex items-baseline gap-2">
@@ -823,7 +928,10 @@ function DraftCard({
           </div>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {draft.ats.flags.map((f) => (
-              <span key={f} className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground">
+              <span
+                key={f}
+                className="rounded-full bg-secondary px-2 py-0.5 text-[10px] text-secondary-foreground"
+              >
                 {f}
               </span>
             ))}
@@ -864,7 +972,9 @@ function DraftCard({
         {diffAgainst && (
           <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
             <span className="rounded-sm bg-primary/15 px-1 font-medium text-foreground">added</span>
-            <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">removed</span>
+            <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">
+              removed
+            </span>
           </span>
         )}
       </div>
@@ -885,7 +995,6 @@ function DraftCard({
     </div>
   );
 }
-
 
 function ExampleStep({
   step,
@@ -941,7 +1050,8 @@ const scoreBuckets = [
         label: "Figma",
         weight: "+5.6",
         note: "Literal tool match against the posting's tooling line",
-        resume: "Ran all design work in Figma, including shared libraries and component documentation.",
+        resume:
+          "Ran all design work in Figma, including shared libraries and component documentation.",
         resumeMark: ["Figma"],
         job: "Deep fluency in Figma and modern prototyping tools.",
         jobMark: ["Figma"],
@@ -949,8 +1059,9 @@ const scoreBuckets = [
       {
         label: "Cross-functional leadership",
         weight: "+5.6",
-        note: "Matched to \"partner with engineering and product\"",
-        resume: "Led cross-functional launches with engineering and product for four major releases.",
+        note: 'Matched to "partner with engineering and product"',
+        resume:
+          "Led cross-functional launches with engineering and product for four major releases.",
         resumeMark: ["cross-functional", "engineering and product"],
         job: "Partner with engineering and product to take features from concept to launch.",
         jobMark: ["engineering and product"],
@@ -997,7 +1108,7 @@ const scoreBuckets = [
     name: "Title similarity",
     earned: 19,
     max: 20,
-    detail: "\"Product Designer\" vs. \"Senior Product Designer\"",
+    detail: '"Product Designer" vs. "Senior Product Designer"',
     tip: "Titles are compared as phrases. A seniority-only difference costs a single point; a different discipline would cost most of the bucket.",
     items: [
       {
@@ -1181,7 +1292,6 @@ function ScoreBreakdown() {
 }
 
 function Row({ label, value, tip }: { label: string; value: string; tip?: string }) {
-
   return (
     <div className="flex gap-2">
       <dt className="shrink-0 text-muted-foreground">{label}:</dt>
@@ -1203,8 +1313,8 @@ function MatchPreviewCard() {
         </span>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Strong overlap on design systems and cross-functional leadership. Light on the B2B
-        analytics experience listed as preferred.
+        Strong overlap on design systems and cross-functional leadership. Light on the B2B analytics
+        experience listed as preferred.
       </p>
       <div className="mt-4 flex items-center gap-2 border-t border-border pt-3">
         <span className="rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
@@ -1231,8 +1341,7 @@ function SampleOutput() {
           <div className="flex items-center gap-4">
             <Hint tip={d.ats.note}>
               <span className="text-xs text-muted-foreground">
-                ATS readability{" "}
-                <span className="font-semibold text-foreground">{d.ats.score}</span>
+                ATS readability <span className="font-semibold text-foreground">{d.ats.score}</span>
               </span>
             </Hint>
             <Hint tip={d.keywords.note}>
@@ -1289,8 +1398,15 @@ const faqs = [
 
 function Faq() {
   return (
-    <section id="faq" className="mx-auto max-w-3xl scroll-mt-20 px-4 py-20" aria-labelledby="faq-heading">
-      <h2 id="faq-heading" className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+    <section
+      id="faq"
+      className="mx-auto max-w-3xl scroll-mt-20 px-4 py-20"
+      aria-labelledby="faq-heading"
+    >
+      <h2
+        id="faq-heading"
+        className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground"
+      >
         Questions worth asking
       </h2>
       <div className="mt-8 divide-y divide-border border-y border-border">
@@ -1329,7 +1445,10 @@ function Footer() {
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               On this page
             </p>
-            <a href="#how" className="text-muted-foreground transition-colors hover:text-foreground">
+            <a
+              href="#how"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
               How it works
             </a>
             <a
@@ -1338,7 +1457,10 @@ function Footer() {
             >
               A worked example
             </a>
-            <a href="#faq" className="text-muted-foreground transition-colors hover:text-foreground">
+            <a
+              href="#faq"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
               FAQ
             </a>
           </nav>
@@ -1346,10 +1468,16 @@ function Footer() {
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Get started
             </p>
-            <Link to="/auth" className="text-muted-foreground transition-colors hover:text-foreground">
+            <Link
+              to="/auth"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
               Create an account
             </Link>
-            <Link to="/auth" className="text-muted-foreground transition-colors hover:text-foreground">
+            <Link
+              to="/auth"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
               Sign in
             </Link>
           </nav>

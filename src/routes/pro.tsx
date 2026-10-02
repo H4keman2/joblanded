@@ -41,7 +41,9 @@ function ProPage() {
           ← JobLanded
         </Link>
         <h1 className="mt-4 text-4xl font-semibold">JobLanded Pro</h1>
-        <p className="mt-2 text-lg text-muted-foreground">$9.99 one-time payment. No subscription.</p>
+        <p className="mt-2 text-lg text-muted-foreground">
+          $9.99 one-time payment. No subscription.
+        </p>
       </div>
       <ul className="panel space-y-3 p-6">
         {features.map((f) => (

@@ -49,7 +49,6 @@ export const Route = createFileRoute("/_authenticated/applications")({
   component: ApplicationsPage,
 });
 
-
 // The application funnel bar — saved → applied → interviewing → offer, in the
 // order a role actually progresses. Rejected is shown as a separate count
 // instead of a stage, since it's an exit rather than a step forward.

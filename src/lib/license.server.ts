@@ -30,7 +30,8 @@ async function checkWithGumroad(rawKey: string, increment: boolean): Promise<Lic
     return { valid: false, reason: "Couldn't reach the license server. Try again shortly." };
   }
 
-  if (!ok || json["success"] !== true) return { valid: false, reason: "License key not recognized." };
+  if (!ok || json["success"] !== true)
+    return { valid: false, reason: "License key not recognized." };
 
   const purchase = (json["purchase"] ?? {}) as Record<string, unknown>;
   if (purchase["refunded"] === true || purchase["chargebacked"] === true)
