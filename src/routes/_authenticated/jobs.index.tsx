@@ -177,6 +177,15 @@ function JobsPage() {
         <div className="mt-5">
           {jobs.isLoading ? (
             <p className="text-sm text-muted-foreground">Loading your jobs…</p>
+          ) : jobs.isError ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-sm text-muted-foreground">
+                We couldn&apos;t load your postings. Your connection may have dropped.
+              </p>
+              <Button size="sm" variant="secondary" onClick={() => void jobs.refetch()}>
+                Try again
+              </Button>
+            </div>
           ) : visibleJobs.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {showArchived
