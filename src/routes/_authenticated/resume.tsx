@@ -231,6 +231,8 @@ function ResumePage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Full name">
               <Input
+                type="text"
+                autoComplete="name"
                 value={draft.full_name ?? ""}
                 onChange={(e) => update("full_name", e.target.value)}
               />
@@ -246,10 +248,22 @@ function ResumePage() {
               />
             </Field>
             <Field label="Email">
-              <Input value={draft.email ?? ""} onChange={(e) => update("email", e.target.value)} />
+              <Input
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                value={draft.email ?? ""}
+                onChange={(e) => update("email", e.target.value)}
+              />
             </Field>
             <Field label="Phone">
-              <Input value={draft.phone ?? ""} onChange={(e) => update("phone", e.target.value)} />
+              <Input
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={draft.phone ?? ""}
+                onChange={(e) => update("phone", e.target.value)}
+              />
             </Field>
             <Field label="Location">
               <Input
