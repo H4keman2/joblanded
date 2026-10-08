@@ -194,11 +194,10 @@ function JobDetailPage() {
         queryKey: ["drafts", jobId],
         queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
       })) as StoredDraft[];
-      setSelected(
-        input.optimizeFromId
-          ? fresh.findIndex((d) => d.id === input.optimizeFromId)
-          : fresh.length - 1,
-      );
+      const idx = input.optimizeFromId
+        ? fresh.findIndex((d) => d.id === input.optimizeFromId)
+        : fresh.length - 1;
+      setSelected(idx >= 0 ? idx : fresh.length - 1);
       setCompare(input.optimizeFromId ? fresh.length - 1 : null);
       toast.success(input.optimizeFromId ? "ATS-optimized version ready" : "New version ready");
     },
