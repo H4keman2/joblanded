@@ -367,7 +367,8 @@ function ApplicationsPage() {
             {applications.data!.map((app) => {
               const job = jobOf(app);
               const submitted = app.status !== "saved";
-              const overdue = !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < today;
+              const overdue =
+                !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < today;
               return (
                 <li key={app.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
                   <div className="flex flex-wrap items-center justify-between gap-4">
