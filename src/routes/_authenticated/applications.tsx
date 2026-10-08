@@ -98,7 +98,6 @@ function payLine(job: JobInfo | null) {
   return parts + pay;
 }
 
-
 function ApplicationsPage() {
   const qc = useQueryClient();
   const fetchApplications = useServerFn(listApplications);

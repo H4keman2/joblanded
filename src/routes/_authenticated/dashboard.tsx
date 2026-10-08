@@ -62,7 +62,6 @@ function jobOf(app: { jobs: unknown }): JobInfo {
   return Array.isArray(j) ? (j[0] ?? null) : j;
 }
 
-
 function ListSkeleton() {
   return (
     <div className="space-y-4">
