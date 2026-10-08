@@ -11,6 +11,7 @@ import {
   STATUS_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
+import { formatDate, todayStr } from "@/lib/dates";
 
 type Need = {
   job: { id: string; title: string; company: string | null };
@@ -61,22 +62,6 @@ function jobOf(app: { jobs: unknown }): JobInfo {
   return Array.isArray(j) ? (j[0] ?? null) : j;
 }
 
-const todayStr = () => {
-  const d = new Date();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${mm}-${dd}`;
-};
-
-function formatDate(value: string) {
-  const d = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return value;
-  const opts: Intl.DateTimeFormatOptions =
-    d.getFullYear() === new Date().getFullYear()
-      ? { month: "short", day: "numeric" }
-      : { month: "short", day: "numeric", year: "numeric" };
-  return d.toLocaleDateString(undefined, opts);
-}
 
 function ListSkeleton() {
   return (
