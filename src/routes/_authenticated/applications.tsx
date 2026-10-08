@@ -104,7 +104,12 @@ function formatDate(value: string | null) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-const todayStr = () => new Date().toISOString().slice(0, 10);
+const todayStr = () => {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+};
 
 function ApplicationsPage() {
   const qc = useQueryClient();
@@ -118,6 +123,8 @@ function ApplicationsPage() {
   const [description, setDescription] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [open, setOpen] = useState(false);
+
+  const today = todayStr();
 
   const applications = useQuery({
     queryKey: ["applications"],
@@ -361,7 +368,7 @@ function ApplicationsPage() {
               const job = jobOf(app);
               const submitted = app.status !== "saved";
               const overdue =
-                !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < todayStr();
+                !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < today;
               return (
                 <li key={app.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
                   <div className="flex flex-wrap items-center justify-between gap-4">
