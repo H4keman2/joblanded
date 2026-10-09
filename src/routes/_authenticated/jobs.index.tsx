@@ -129,6 +129,7 @@ function JobsPage() {
               <Label htmlFor="description">Job description</Label>
               <Textarea
                 id="description"
+                autoFocus
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={10}
