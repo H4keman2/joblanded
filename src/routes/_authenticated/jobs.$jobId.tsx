@@ -334,6 +334,7 @@ function JobDetailPage() {
               >
                 <button
                   onClick={() => setSelected(i)}
+                  aria-pressed={i === selected}
                   className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                     i === selected
                       ? "bg-primary text-primary-foreground"
