@@ -9,6 +9,7 @@ import {
   listApplications,
   setJobStatus,
   STATUS_LABELS,
+  updateApplicationFollowUp,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
 import { formatDate, todayStr } from "@/lib/dates";
@@ -252,6 +253,17 @@ function DashboardPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const markFollowUpSent = useServerFn(updateApplicationFollowUp);
+  const followUpMutation = useMutation({
+    mutationFn: (id: string) => markFollowUpSent({ data: { id, follow_up_sent: true } }),
+    onSuccess: () => {
+      toast.success("Follow-up marked sent");
+      void qc.invalidateQueries({ queryKey: ["applications"] });
+      void qc.invalidateQueries({ queryKey: ["application-stats"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const hasResume = Boolean(resume.data);
   const hasJobs = activeJobs.length > 0;
   const hasApplications = (applications.data?.length ?? 0) > 0;
@@ -345,9 +357,19 @@ function DashboardPage() {
                       </p>
                     </div>
                   </div>
-                  <Button asChild size="sm" variant="secondary">
-                    <Link to="/applications">Follow up</Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      disabled={followUpMutation.isPending && followUpMutation.variables === app.id}
+                      onClick={() => followUpMutation.mutate(app.id)}
+                    >
+                      Mark sent
+                    </Button>
+                    <Button asChild size="sm" variant="secondary">
+                      <Link to="/applications">Follow up</Link>
+                    </Button>
+                  </div>
                 </li>
               );
             })}
