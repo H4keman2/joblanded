@@ -8,16 +8,16 @@ const CHECKOUT_URL = "https://gumroad.com/l/xrynld";
 export const Route = createFileRoute("/pro")({
   head: () => ({
     meta: [
-      { title: "JobLanded Pro — AI tailoring for $9.99" },
+      { title: "JobLanded Pro — AI tailoring for $4.99" },
       {
         name: "description",
         content:
-          "Unlock AI-tailored resumes and cover letters, explained match scores, job recommendations and posting-search analysis for a one-time $9.99.",
+          "Unlock AI-tailored resumes and cover letters, explained match scores, job recommendations and posting-search analysis for a one-time $4.99.",
       },
-      { property: "og:title", content: "JobLanded Pro — AI tailoring for $9.99" },
+      { property: "og:title", content: "JobLanded Pro — AI tailoring for $4.99" },
       {
         property: "og:description",
-        content: "One-time $9.99 unlocks every AI feature in JobLanded.",
+        content: "One-time $4.99 unlocks every AI feature in JobLanded.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -42,7 +42,7 @@ function ProPage() {
         </Link>
         <h1 className="mt-4 text-4xl font-semibold">JobLanded Pro</h1>
         <p className="mt-2 text-lg text-muted-foreground">
-          $9.99 one-time payment. No subscription.
+          $4.99 one-time payment. No subscription.
         </p>
       </div>
       <ul className="panel space-y-3 p-6">
@@ -54,7 +54,7 @@ function ProPage() {
       </ul>
       <Button asChild size="lg">
         <a href={CHECKOUT_URL} target="_blank" rel="noreferrer">
-          Buy JobLanded Pro — $9.99
+          Buy JobLanded Pro — $4.99
         </a>
       </Button>
       <section className="panel p-6">

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 function Hint({ children, tip }: { children: React.ReactNode; tip: string }) {
@@ -84,12 +85,20 @@ function Landing() {
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
         <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
-        <Link
-          to="/auth"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link
+            to="/pro"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Pro
+          </Link>
+          <Link
+            to="/auth"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Sign in
+          </Link>
+        </div>
       </header>
 
       <section className="mx-auto max-w-3xl px-4 pb-14 pt-12 text-center sm:pt-20">
@@ -138,6 +147,8 @@ function Landing() {
 
         <MatchPreviewCard />
       </section>
+
+      <Pricing />
 
       <SampleOutput />
 
@@ -1297,6 +1308,75 @@ function Row({ label, value, tip }: { label: string; value: string; tip?: string
       <dt className="shrink-0 text-muted-foreground">{label}:</dt>
       <dd className="font-medium">{tip ? <Hint tip={tip}>{value}</Hint> : value}</dd>
     </div>
+  );
+}
+
+// Free vs Pro, side by side. The Free column only lists what is genuinely
+// ungated server-side (parsing, job saving, tracking, follow-ups).
+function Pricing() {
+  const freeFeatures = [
+    "Resume upload and parsing into an editable profile",
+    "Save job postings and revisit them any time",
+    "Application tracking with statuses from saved to offer",
+    "Follow-up reminders that surface when they're due",
+    "A live match preview for your first posting",
+  ];
+
+  const proFeatures = [
+    "AI-tailored resumes and cover letters for every posting",
+    "Match scores with explanations for every job",
+    "AI job recommendations based on your resume",
+    "Posting-search match analysis across many roles at once",
+  ];
+
+  return (
+    <section className="mx-auto max-w-4xl px-4 pb-20" aria-labelledby="pricing-heading">
+      <h2
+        id="pricing-heading"
+        className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground"
+      >
+        Upgrade to Pro
+      </h2>
+      <p className="mt-3 text-center text-lg text-muted-foreground">
+        One-time $4.99. No subscription.
+      </p>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2">
+        <div className="panel p-6">
+          <h3 className="font-display text-lg font-semibold">Free</h3>
+          <ul className="mt-4 space-y-3">
+            {freeFeatures.map((f) => (
+              <li key={f} className="flex gap-2 text-sm">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" /> {f}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 text-sm text-muted-foreground">
+            Every day you need: parse, save, track, follow up.
+          </p>
+        </div>
+        <div className="panel border-2 border-primary p-6">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-display text-lg font-semibold text-primary">Pro</h3>
+            <span className="rounded-full bg-accent px-2.5 py-1 text-xs font-semibold text-accent-foreground">
+              $4.99 one-time
+            </span>
+          </div>
+          <ul className="mt-4 space-y-3">
+            {proFeatures.map((f) => (
+              <li key={f} className="flex gap-2 text-sm">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {f}
+              </li>
+            ))}
+          </ul>
+          <Button asChild className="mt-6 w-full">
+            <Link to="/pro">Upgrade to Pro</Link>
+          </Button>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Pay once. Every AI feature unlocked.
+          </p>
+        </div>
+      </div>
+    </section>
   );
 }
 
