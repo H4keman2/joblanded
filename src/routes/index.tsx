@@ -84,12 +84,20 @@ function Landing() {
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
         <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
-        <Link
-          to="/auth"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Sign in
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link
+            to="/pro"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Pro
+          </Link>
+          <Link
+            to="/auth"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Sign in
+          </Link>
+        </div>
       </header>
 
       <section className="mx-auto max-w-3xl px-4 pb-14 pt-12 text-center sm:pt-20">
@@ -138,6 +146,8 @@ function Landing() {
 
         <MatchPreviewCard />
       </section>
+
+      <Pricing />
 
       <SampleOutput />
 
