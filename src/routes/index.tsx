@@ -36,6 +36,8 @@ export const Route = createFileRoute("/")({
           "Parse your resume, score job matches, tailor documents and never miss a follow-up.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://joblanded.lovable.app/og-image.jpg" },
+      { name: "twitter:image", content: "https://joblanded.lovable.app/og-image.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
@@ -106,19 +108,23 @@ function Landing() {
           Job search workspace
         </p>
         <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
-          From Start to JobLanded,
-          <br />
-          <span className="text-primary">without the spreadsheet.</span>
+          Stop applying to <span className="text-primary">jobs you won’t get.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          Stop bouncing between tabs. Find the right roles, tailor your story, and follow up on
-          time.
+          JobLanded scores every posting against your resume, writes you a tailored resume and
+          cover letter, and tracks every follow-up. Free to start — $4.99 once for the AI.
         </p>
-        <div className="mt-8 flex justify-center">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-5">
           <Button asChild size="lg">
             <Link to="/auth">Get started free</Link>
           </Button>
+          <a href="#how" className="text-sm text-muted-foreground hover:text-foreground">
+            See how it works ↓
+          </a>
         </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Free forever · Pro $4.99 one-time · No subscription.
+        </p>
       </section>
 
       <section id="how" className="mx-auto max-w-5xl scroll-mt-20 px-4 pb-16">
@@ -147,6 +153,8 @@ function Landing() {
 
         <MatchPreviewCard />
       </section>
+
+      <FounderTrust />
 
       <Pricing />
 
@@ -1313,6 +1321,32 @@ function Row({ label, value, tip }: { label: string; value: string; tip?: string
 
 // Free vs Pro, side by side. The Free column only lists what is genuinely
 // ungated server-side (parsing, job saving, tracking, follow-ups).
+function FounderTrust() {
+  return (
+    <section className="mx-auto max-w-4xl px-4 pb-12" aria-labelledby="founder-heading">
+      <div className="panel p-6">
+        <h2 id="founder-heading" className="font-display text-lg font-semibold">
+          Built by someone who’s been there
+        </h2>
+        <p className="mt-3 text-sm text-muted-foreground">
+          I’m Ryan Hake, a PMP-certified product manager working on AI products at Zebra
+          Technologies. I built JobLanded during my own job search — I was drowning in
+          spreadsheets and spray-and-pray applications, and I wanted a tool that told me which
+          jobs were actually worth my time.
+        </p>
+        <a
+          href="https://www.linkedin.com/in/ryanhake1/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-block text-sm text-primary hover:underline"
+        >
+          Connect on LinkedIn →
+        </a>
+      </div>
+    </section>
+  );
+}
+
 function Pricing() {
   const freeFeatures = [
     "Resume upload and parsing into an editable profile",
@@ -1361,6 +1395,9 @@ function Pricing() {
               $4.99 one-time
             </span>
           </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Similar tools charge monthly forever. You pay $4.99 once.
+          </p>
           <ul className="mt-4 space-y-3">
             {proFeatures.map((f) => (
               <li key={f} className="flex gap-2 text-sm">
@@ -1373,6 +1410,9 @@ function Pricing() {
           </Button>
           <p className="mt-3 text-center text-xs text-muted-foreground">
             Pay once. Every AI feature unlocked.
+          </p>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            7-day no-questions refund — just reply to your receipt.
           </p>
         </div>
       </div>
@@ -1483,6 +1523,20 @@ function Faq() {
       className="mx-auto max-w-3xl scroll-mt-20 px-4 py-20"
       aria-labelledby="faq-heading"
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqs.map(({ q, a }) => ({
+              "@type": "Question",
+              name: q,
+              acceptedAnswer: { "@type": "Answer", text: a },
+            })),
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <h2
         id="faq-heading"
         className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground"

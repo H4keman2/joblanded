@@ -57,6 +57,9 @@ function ProPage() {
           Buy JobLanded Pro — $4.99
         </a>
       </Button>
+      <p className="text-sm text-muted-foreground">
+        7-day no-questions refund. Just reply to your Gumroad receipt.
+      </p>
       <section className="panel p-6">
         <h2 className="text-lg font-semibold">Already bought?</h2>
         <p className="mt-1 text-sm text-muted-foreground">
