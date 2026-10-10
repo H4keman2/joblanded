@@ -267,6 +267,7 @@ function ResumePage() {
             </Field>
             <Field label="Location">
               <Input
+                autoComplete="address-level2"
                 value={draft.location ?? ""}
                 onChange={(e) => update("location", e.target.value)}
                 placeholder="City, State"
