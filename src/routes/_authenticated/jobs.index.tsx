@@ -120,6 +120,7 @@ function JobsPage() {
         {open && (
           <form
             className="mt-6 space-y-4 border-t border-border pt-6"
+            noValidate
             onSubmit={(e) => {
               e.preventDefault();
               addMutation.mutate({ description, sourceUrl });
@@ -143,6 +144,9 @@ function JobsPage() {
               </Label>
               <Input
                 id="sourceUrl"
+                type="url"
+                inputMode="url"
+                autoComplete="url"
                 value={sourceUrl}
                 onChange={(e) => setSourceUrl(e.target.value)}
                 placeholder="https://…"
