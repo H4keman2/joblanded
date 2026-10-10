@@ -10,7 +10,14 @@ import { MIN_PASSWORD_LENGTH, PASSWORD_HINT, passwordIssue } from "@/lib/passwor
 export const Route = createFileRoute("/auth/reset")({
   ssr: false,
   head: () => ({
-    meta: [{ title: "Reset your password — JobLanded" }],
+    meta: [
+      { title: "Reset your password — JobLanded" },
+      { name: "description", content: "Choose a new password for your JobLanded account." },
+      { property: "og:title", content: "Reset your password — JobLanded" },
+      { property: "og:description", content: "Choose a new password for your JobLanded account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
   }),
   component: ResetPasswordPage,
 });
