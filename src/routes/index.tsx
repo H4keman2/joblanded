@@ -111,8 +111,8 @@ function Landing() {
           Stop applying to <span className="text-primary">jobs you won’t get.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          JobLanded scores every posting against your resume, writes you a tailored resume and
-          cover letter, and tracks every follow-up. Free to start — $4.99 once for the AI.
+          JobLanded scores every posting against your resume, writes you a tailored resume and cover
+          letter, and tracks every follow-up. Free to start — $4.99 once for the AI.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-5">
           <Button asChild size="lg">
@@ -1330,9 +1330,9 @@ function FounderTrust() {
         </h2>
         <p className="mt-3 text-sm text-muted-foreground">
           I’m Ryan Hake, a PMP-certified product manager working on AI products at Zebra
-          Technologies. I built JobLanded during my own job search — I was drowning in
-          spreadsheets and spray-and-pray applications, and I wanted a tool that told me which
-          jobs were actually worth my time.
+          Technologies. I built JobLanded during my own job search — I was drowning in spreadsheets
+          and spray-and-pray applications, and I wanted a tool that told me which jobs were actually
+          worth my time.
         </p>
         <a
           href="https://www.linkedin.com/in/ryanhake1/"
