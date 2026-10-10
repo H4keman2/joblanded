@@ -24,6 +24,18 @@ import {
 import { toast } from "sonner";
 import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 
+// The server checks the link too, but a bare "example.com/jobs" is almost always
+// a missing https:// rather than a real posting — catch it here with copy a person
+// can act on instead of surfacing the validator's raw JSON in a toast.
+function isFullUrl(value: string) {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export const Route = createFileRoute("/_authenticated/jobs/")({
   head: () => ({
     meta: [
@@ -123,6 +135,11 @@ function JobsPage() {
             noValidate
             onSubmit={(e) => {
               e.preventDefault();
+              const link = sourceUrl.trim();
+              if (link && !isFullUrl(link)) {
+                toast.error("That link needs a full address — paste it starting with https://");
+                return;
+              }
               addMutation.mutate({ description, sourceUrl });
             }}
           >
