@@ -250,14 +250,16 @@ export function JobRecommendations() {
                   href={job.url}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label={`View posting: ${job.title}${job.company ? ` at ${job.company}` : ""} (opens in new tab)`}
                   className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                 >
-                  View posting <ExternalLink className="size-3" />
+                  View posting <ExternalLink className="size-3" aria-hidden="true" />
                 </a>
                 <Hint tip="Save this posting to your Jobs list so you can tailor a resume against it.">
                   <Button
                     size="sm"
                     variant="secondary"
+                    aria-label={`Save ${job.title} to your Jobs list`}
                     onClick={() => add.mutate(job)}
                     disabled={add.isPending}
                   >
