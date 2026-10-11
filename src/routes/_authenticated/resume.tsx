@@ -1,13 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Children,
-  cloneElement,
-  isValidElement,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import { Children, cloneElement, isValidElement, useEffect, useId, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLatestResume, parseResume, saveParsedResume } from "@/lib/resume.functions";
