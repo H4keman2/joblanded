@@ -235,10 +235,7 @@ function JobDetailPage() {
                       void navigate({ to: "/jobs/$jobId", params: { jobId: id } });
                     }}
                   >
-                    <SelectTrigger
-                      className="h-9 text-sm"
-                      aria-label="Choose a role"
-                    >
+                    <SelectTrigger className="h-9 text-sm" aria-label="Choose a role">
                       <SelectValue placeholder="Choose a role" />
                     </SelectTrigger>
                     <SelectContent>
