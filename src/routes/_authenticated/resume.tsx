@@ -391,7 +391,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   const id = useId();
   const [first, ...rest] = Children.toArray(children);
   const control = isValidElement(first)
-    ? cloneElement(first as React.ReactElement, { id })
+    ? cloneElement(first as React.ReactElement<{ id?: string }>, { id })
     : first;
   return (
     <div className="space-y-2">
