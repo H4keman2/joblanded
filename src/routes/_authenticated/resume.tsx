@@ -1,5 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import {
+  Children,
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getLatestResume, parseResume, saveParsedResume } from "@/lib/resume.functions";
@@ -380,10 +388,16 @@ function ResumePage() {
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const id = useId();
+  const [first, ...rest] = Children.toArray(children);
+  const control = isValidElement(first)
+    ? cloneElement(first as React.ReactElement, { id })
+    : first;
   return (
     <div className="space-y-2">
-      <Label>{label}</Label>
-      {children}
+      <Label htmlFor={id}>{label}</Label>
+      {control}
+      {rest}
     </div>
   );
 }
