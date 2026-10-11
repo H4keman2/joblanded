@@ -361,13 +361,19 @@ function DashboardPage() {
                     <Button
                       size="sm"
                       variant="secondary"
+                      aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
                       disabled={followUpMutation.isPending && followUpMutation.variables === app.id}
                       onClick={() => followUpMutation.mutate(app.id)}
                     >
                       Mark sent
                     </Button>
                     <Button asChild size="sm" variant="secondary">
-                      <Link to="/applications">Follow up</Link>
+                      <Link
+                        to="/applications"
+                        aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
+                      >
+                        Follow up
+                      </Link>
                     </Button>
                   </div>
                 </li>
