@@ -368,7 +368,10 @@ function DashboardPage() {
                       Mark sent
                     </Button>
                     <Button asChild size="sm" variant="secondary">
-                      <Link to="/applications" aria-label={`Follow up on ${job?.title ?? "Saved role"}`}>
+                      <Link
+                        to="/applications"
+                        aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
+                      >
                         Follow up
                       </Link>
                     </Button>
