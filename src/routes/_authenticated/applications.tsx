@@ -396,7 +396,10 @@ function ApplicationsPage() {
                             })
                           }
                         >
-                          <SelectTrigger className="h-8 w-40 text-xs">
+                          <SelectTrigger
+                            className="h-8 w-40 text-xs"
+                            aria-label={`Status for ${job?.title ?? "Untitled role"}`}
+                          >
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
