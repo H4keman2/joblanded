@@ -452,6 +452,7 @@ function ApplicationsPage() {
                           <Hint tip="Recommended 2 business days after you applied. Toggle on once you've actually sent the follow-up email.">
                             <label className="flex items-center gap-1.5 font-medium text-muted-foreground">
                               <Switch
+                                aria-label={`Mark follow-up sent for ${job?.title ?? "Untitled role"}`}
                                 checked={app.follow_up_sent}
                                 disabled={followUpMutation.isPending}
                                 onCheckedChange={(checked) =>
