@@ -118,7 +118,11 @@ function JobsPage() {
               resume against it and compare tailored versions side by side.
             </p>
           </div>
-          <Button onClick={() => setOpen((o) => !o)} variant={open ? "ghost" : "default"}>
+          <Button
+            onClick={() => setOpen((o) => !o)}
+            variant={open ? "ghost" : "default"}
+            aria-pressed={open}
+          >
             {open ? (
               "Cancel"
             ) : (
@@ -190,7 +194,12 @@ function JobsPage() {
             {showArchived ? "Archived postings" : "Saved postings"}
           </h2>
           {archivedCount > 0 && (
-            <Button size="sm" variant="ghost" onClick={() => setShowArchived((v) => !v)}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowArchived((v) => !v)}
+              aria-pressed={showArchived}
+            >
               {showArchived ? "Back to active" : `Archived (${archivedCount})`}
             </Button>
           )}
