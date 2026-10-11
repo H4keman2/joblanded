@@ -322,7 +322,7 @@ function ResumePage() {
             />
           </Field>
 
-          <Field label="Education">
+          <Field label="Education" group>
             <div className="space-y-2">
               {(draft.education ?? []).map((ed, i) => (
                 <div key={i} className="grid gap-2 sm:grid-cols-3">
@@ -379,8 +379,24 @@ function ResumePage() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+  group = false,
+}: {
+  label: string;
+  children: React.ReactNode;
+  group?: boolean;
+}) {
   const id = useId();
+  if (group) {
+    return (
+      <fieldset className="min-w-0 space-y-2">
+        <legend className="text-sm font-medium leading-none">{label}</legend>
+        {children}
+      </fieldset>
+    );
+  }
   const [first, ...rest] = Children.toArray(children);
   const control = isValidElement(first)
     ? cloneElement(first as React.ReactElement<{ id?: string }>, { id })
