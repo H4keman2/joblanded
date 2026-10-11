@@ -413,6 +413,7 @@ function JobDetailPage() {
               <Button
                 size="sm"
                 variant="ghost"
+                aria-pressed={compare !== null}
                 onClick={() =>
                   setCompare((c) =>
                     c === null
@@ -430,6 +431,7 @@ function JobDetailPage() {
                 <Button
                   size="sm"
                   variant={showDiff ? "secondary" : "ghost"}
+                  aria-pressed={showDiff}
                   onClick={() => setShowDiff((d) => !d)}
                 >
                   {showDiff ? "Hide changes" : "Highlight changes"}
@@ -466,6 +468,7 @@ function JobDetailPage() {
                         <button
                           key={v.id}
                           onClick={() => setCompare(i)}
+                          aria-pressed={i === compare}
                           className={`rounded-full px-3 py-1 text-xs font-medium ${
                             i === compare
                               ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
