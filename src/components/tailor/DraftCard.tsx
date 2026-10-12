@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/ui/hint";
 import { downloadResumePdf } from "@/lib/resume-pdf";
+import { toast } from "sonner";
 import { Copy, Download } from "lucide-react";
 
 export { Hint };
@@ -242,7 +243,14 @@ export function DraftCard({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => void navigator.clipboard.writeText(draft.resume)}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(draft.resume);
+                  toast.success("Copied to clipboard");
+                } catch {
+                  toast.error("Couldn't copy — your browser blocked clipboard access");
+                }
+              }}
             >
               <Copy className="size-4" />
               Copy
