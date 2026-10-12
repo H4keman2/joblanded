@@ -328,6 +328,7 @@ function ResumePage() {
                 <div key={i} className="grid gap-2 sm:grid-cols-3">
                   <Input
                     value={ed.school ?? ""}
+                    aria-label={`Education row ${i + 1}: school`}
                     placeholder="School"
                     onChange={(e) => {
                       const next = [...(draft.education ?? [])];
@@ -337,6 +338,7 @@ function ResumePage() {
                   />
                   <Input
                     value={ed.degree ?? ""}
+                    aria-label={`Education row ${i + 1}: degree`}
                     placeholder="Degree"
                     onChange={(e) => {
                       const next = [...(draft.education ?? [])];
@@ -346,6 +348,7 @@ function ResumePage() {
                   />
                   <Input
                     value={ed.year ?? ""}
+                    aria-label={`Education row ${i + 1}: year`}
                     placeholder="Year"
                     onChange={(e) => {
                       const next = [...(draft.education ?? [])];
