@@ -1385,7 +1385,7 @@ function Pricing() {
             ))}
           </ul>
           <p className="mt-6 text-sm text-muted-foreground">
-            Every day you need: parse, save, track, follow up.
+            Everything you need: parse, save, track, follow up.
           </p>
         </div>
         <div className="panel border-2 border-primary p-6">
