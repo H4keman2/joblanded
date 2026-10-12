@@ -30,7 +30,7 @@ const features = [
   "AI-tailored resumes and cover letters for every posting",
   "Match scores with explanations for every job",
   "AI job recommendations based on your resume",
-  "Posting-search match analysis across many roles at once",
+  "Match analysis across many job postings at once",
 ];
 
 function ProPage() {
