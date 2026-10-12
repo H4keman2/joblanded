@@ -158,8 +158,6 @@ function Landing() {
 
       <Pricing />
 
-      <SampleOutput />
-
       <WorkedExample />
 
       <Faq />
@@ -1443,53 +1441,6 @@ function MatchPreviewCard() {
         <span className="text-xs text-muted-foreground">Follow up in 4 days</span>
       </div>
     </div>
-  );
-}
-
-// Static, non-interactive sample of a tailored draft. Reuses the worked
-// example's Maya content so the page never shows more than one story.
-function SampleOutput() {
-  const d = tailorDrafts[0]!;
-  return (
-    <section className="mx-auto max-w-4xl px-4 pb-20" aria-labelledby="sample-heading">
-      <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-        What a tailored draft looks like
-      </h2>
-      <div className="panel mt-8 p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm font-medium">Senior Product Designer · Northwind Labs</p>
-          <div className="flex items-center gap-4">
-            <Hint tip={d.ats.note}>
-              <span className="text-xs text-muted-foreground">
-                ATS readability <span className="font-semibold text-foreground">{d.ats.score}</span>
-              </span>
-            </Hint>
-            <Hint tip={d.keywords.note}>
-              <span className="text-xs text-muted-foreground">
-                Keyword coverage{" "}
-                <span className="font-semibold text-foreground">{d.keywords.score}</span>
-              </span>
-            </Hint>
-          </div>
-        </div>
-        <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Rewritten resume summary
-        </p>
-        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          {d.summary}
-        </blockquote>
-        <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Cover letter opener
-        </p>
-        <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-          {d.cover}
-        </blockquote>
-        <p className="mt-4 text-xs text-muted-foreground">
-          Every claim traces to a line in the resume. The full worked example below shows the
-          scores, evidence, and version diffs behind this draft.
-        </p>
-      </div>
-    </section>
   );
 }
 
