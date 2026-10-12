@@ -140,6 +140,10 @@ function JobsPage() {
             onSubmit={(e) => {
               e.preventDefault();
               const link = sourceUrl.trim();
+              if (!description.trim() && !link) {
+                toast.error("Add a job description or a posting link first.");
+                return;
+              }
               if (link && !isFullUrl(link)) {
                 toast.error("That link needs a full address — paste it starting with https://");
                 return;
