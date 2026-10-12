@@ -7,7 +7,7 @@ export const getProfile = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("profiles")
-      .select("id, full_name, phone")
+      .select("id, full_name, phone, email_notifications")
       .eq("user_id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -22,16 +22,24 @@ export const getProfile = createServerFn({ method: "GET" })
 const profileInput = z.object({
   full_name: z.string().max(200).nullable(),
   phone: z.string().max(50).nullable(),
+  email_notifications: z.boolean().optional(),
 });
 
 export const saveProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => profileInput.parse(input))
   .handler(async ({ data, context }) => {
-    const values = {
+    const values: {
+      full_name?: string | null;
+      phone?: string | null;
+      email_notifications?: boolean;
+    } = {
       full_name: data.full_name || null,
       phone: data.phone || null,
     };
+    if (data.email_notifications !== undefined) {
+      values.email_notifications = data.email_notifications;
+    }
 
     const { data: existing, error: readError } = await context.supabase
       .from("profiles")

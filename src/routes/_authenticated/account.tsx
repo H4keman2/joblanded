@@ -80,7 +80,7 @@ function AccountPage() {
     },
   });
 
-  const [form, setForm] = useState({ full_name: "", phone: "" });
+  const [form, setForm] = useState({ full_name: "", phone: "", email_notifications: true });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -88,6 +88,7 @@ function AccountPage() {
       setForm({
         full_name: profile.full_name ?? "",
         phone: profile.phone ?? "",
+        email_notifications: profile.email_notifications ?? true,
       });
     }
   }, [profile]);
@@ -96,7 +97,13 @@ function AccountPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      await persistProfile({ data: { full_name: form.full_name, phone: form.phone } });
+      await persistProfile({
+        data: {
+          full_name: form.full_name,
+          phone: form.phone,
+          email_notifications: form.email_notifications,
+        },
+      });
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Profile updated");
     } catch (err) {
@@ -238,6 +245,23 @@ function AccountPage() {
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               placeholder="+1 555 000 1234"
             />
+          </div>
+          <div className="flex items-start gap-3">
+            <input
+              id="email_notifications"
+              type="checkbox"
+              className="mt-1 h-4 w-4 accent-primary"
+              checked={form.email_notifications}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, email_notifications: e.target.checked }))
+              }
+            />
+            <div>
+              <Label htmlFor="email_notifications">Follow-up reminder emails</Label>
+              <p className="text-sm text-muted-foreground">
+                Email me when an application follow-up is due.
+              </p>
+            </div>
           </div>
           <Button type="submit" disabled={saving}>
             {saving ? "Saving…" : "Save changes"}
