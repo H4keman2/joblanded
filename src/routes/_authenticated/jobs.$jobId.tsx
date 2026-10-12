@@ -210,6 +210,19 @@ function JobDetailPage() {
   const secondary = secondaryEntry ? normalize(secondaryEntry.content) : null;
   const label = (i: number) => `v${i + 1}`;
 
+  if (job.isError) {
+    return (
+      <div className="panel p-8">
+        <p className="text-sm text-muted-foreground">
+          We couldn&apos;t load this posting. It may have been deleted.
+        </p>
+        <Button asChild size="sm" className="mt-4">
+          <Link to="/jobs">Back to jobs</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <TooltipProvider>
       <div className="space-y-6">
