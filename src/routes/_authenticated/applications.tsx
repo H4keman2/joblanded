@@ -407,7 +407,11 @@ function ApplicationsPage() {
 
                     <div className="flex items-center gap-3">
                       <Button asChild size="sm" variant="outline">
-                        <Link to="/jobs/$jobId" params={{ jobId: app.job_id }}>
+                        <Link
+                          to="/jobs/$jobId"
+                          params={{ jobId: app.job_id }}
+                          aria-label={`Tailor resume for ${job?.title ?? "Untitled role"}`}
+                        >
                           Tailor
                         </Link>
                       </Button>

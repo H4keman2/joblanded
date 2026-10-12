@@ -469,6 +469,7 @@ function DashboardPage() {
                       <Button
                         size="sm"
                         variant="secondary"
+                        aria-label={`Mark applied for ${need.job.title}`}
                         disabled={pending}
                         onClick={() =>
                           statusMutation.mutate({ jobId: need.job.id, status: "applied" })
@@ -478,7 +479,15 @@ function DashboardPage() {
                       </Button>
                     ) : need.action === "tailor" ? (
                       <Button asChild size="sm" variant="secondary">
-                        <Link to="/jobs/$jobId" params={{ jobId: need.job.id }}>
+                        <Link
+                          to="/jobs/$jobId"
+                          params={{ jobId: need.job.id }}
+                          aria-label={
+                            need.status === "interviewing"
+                              ? `Open ${need.job.title}`
+                              : `Tailor resume for ${need.job.title}`
+                          }
+                        >
                           {need.status === "interviewing" ? "Open" : "Tailor"}
                         </Link>
                       </Button>
@@ -609,7 +618,11 @@ function DashboardPage() {
                     </p>
                   </div>
                   <Button asChild size="sm">
-                    <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
+                    <Link
+                      to="/jobs/$jobId"
+                      params={{ jobId: job.id }}
+                      aria-label={`Match my resume against ${job.title}`}
+                    >
                       <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" /> Match my resume
                     </Link>
                   </Button>

@@ -482,6 +482,7 @@ function JobDetailPage() {
                           key={v.id}
                           onClick={() => setCompare(i)}
                           aria-pressed={i === compare}
+                          aria-label={`Compare with version ${i + 1}`}
                           className={`rounded-full px-3 py-1 text-xs font-medium ${
                             i === compare
                               ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
