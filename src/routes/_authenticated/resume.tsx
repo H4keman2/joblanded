@@ -376,6 +376,12 @@ function ResumePage() {
               className="min-h-16"
             />
           </Field>
+
+          <div className="flex justify-end pt-2">
+            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? "Saving…" : "Save changes"}
+            </Button>
+          </div>
         </section>
       )}
     </div>
