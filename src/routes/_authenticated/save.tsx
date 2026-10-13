@@ -10,6 +10,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
+// The server checks the link too, but a bare "example.com/jobs" is almost always
+// a missing https:// rather than a real posting — catch it here with copy a person
+// can act on instead of surfacing the validator's raw JSON in a toast.
+function isFullUrl(value: string) {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 type SaveSearch = { url?: string | undefined; text?: string | undefined };
 
 export const Route = createFileRoute("/_authenticated/save")({
@@ -67,8 +79,18 @@ function QuickSavePage() {
 
       <form
         className="space-y-4"
+        noValidate
         onSubmit={(e) => {
           e.preventDefault();
+          const link = sourceUrl.trim();
+          if (!description.trim() && !link) {
+            toast.error("Add a posting link or some posting text first.");
+            return;
+          }
+          if (link && !isFullUrl(link)) {
+            toast.error("That link needs a full address — paste it starting with https://");
+            return;
+          }
           save.mutate();
         }}
       >
@@ -76,7 +98,9 @@ function QuickSavePage() {
           <Label htmlFor="quick-url">Posting link</Label>
           <Input
             id="quick-url"
+            type="url"
             inputMode="url"
+            autoComplete="url"
             autoFocus
             value={sourceUrl}
             onChange={(e) => setSourceUrl(e.target.value)}

@@ -252,9 +252,7 @@ function AccountPage() {
               type="checkbox"
               className="mt-1 h-4 w-4 accent-primary"
               checked={form.email_notifications}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, email_notifications: e.target.checked }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, email_notifications: e.target.checked }))}
             />
             <div>
               <Label htmlFor="email_notifications">Follow-up reminder emails</Label>

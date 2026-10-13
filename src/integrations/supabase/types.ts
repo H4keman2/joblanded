@@ -273,7 +273,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      escape_html: { Args: { input: string }; Returns: string }
+      send_due_followup_emails: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never
