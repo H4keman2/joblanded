@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Upload, Sparkles, Loader2 } from "lucide-react";
+import { Upload, Sparkles, Loader2, X } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/resume")({
   head: () => ({
@@ -325,37 +325,54 @@ function ResumePage() {
           <Field label="Education" group>
             <div className="space-y-2">
               {(draft.education ?? []).map((ed, i) => (
-                <div key={i} className="grid gap-2 sm:grid-cols-3">
-                  <Input
-                    value={ed.school ?? ""}
-                    aria-label={`Education row ${i + 1}: school`}
-                    placeholder="School"
-                    onChange={(e) => {
-                      const next = [...(draft.education ?? [])];
-                      next[i] = { ...next[i], school: e.target.value };
-                      update("education", next);
-                    }}
-                  />
-                  <Input
-                    value={ed.degree ?? ""}
-                    aria-label={`Education row ${i + 1}: degree`}
-                    placeholder="Degree"
-                    onChange={(e) => {
-                      const next = [...(draft.education ?? [])];
-                      next[i] = { ...next[i], degree: e.target.value };
-                      update("education", next);
-                    }}
-                  />
-                  <Input
-                    value={ed.year ?? ""}
-                    aria-label={`Education row ${i + 1}: year`}
-                    placeholder="Year"
-                    onChange={(e) => {
-                      const next = [...(draft.education ?? [])];
-                      next[i] = { ...next[i], year: e.target.value };
-                      update("education", next);
-                    }}
-                  />
+                <div key={i} className="flex items-start gap-2">
+                  <div className="grid flex-1 gap-2 sm:grid-cols-3">
+                    <Input
+                      value={ed.school ?? ""}
+                      aria-label={`Education row ${i + 1}: school`}
+                      placeholder="School"
+                      onChange={(e) => {
+                        const next = [...(draft.education ?? [])];
+                        next[i] = { ...next[i], school: e.target.value };
+                        update("education", next);
+                      }}
+                    />
+                    <Input
+                      value={ed.degree ?? ""}
+                      aria-label={`Education row ${i + 1}: degree`}
+                      placeholder="Degree"
+                      onChange={(e) => {
+                        const next = [...(draft.education ?? [])];
+                        next[i] = { ...next[i], degree: e.target.value };
+                        update("education", next);
+                      }}
+                    />
+                    <Input
+                      value={ed.year ?? ""}
+                      aria-label={`Education row ${i + 1}: year`}
+                      placeholder="Year"
+                      onChange={(e) => {
+                        const next = [...(draft.education ?? [])];
+                        next[i] = { ...next[i], year: e.target.value };
+                        update("education", next);
+                      }}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Remove education row ${i + 1}`}
+                    onClick={() =>
+                      update(
+                        "education",
+                        (draft.education ?? []).filter((_, j) => j !== i),
+                      )
+                    }
+                    className="mt-0.5 shrink-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
               <Button
