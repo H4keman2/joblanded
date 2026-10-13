@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Hint } from "@/components/ui/hint";
 import { PASSWORD_HINT, passwordIssue } from "@/lib/password";
+import { todayStr } from "@/lib/dates";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,9 +43,6 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
 });
 
-function todayFileStamp() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 function downloadJson(payload: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
@@ -186,7 +184,7 @@ function AccountPage() {
   const exportMutation = useMutation({
     mutationFn: () => runExport(),
     onSuccess: (payload) => {
-      downloadJson(payload, `joblanded-export-${todayFileStamp()}.json`);
+      downloadJson(payload, `joblanded-export-${todayStr()}.json`);
       toast.success("Your data was downloaded.");
     },
     onError: (e: Error) => toast.error(e.message),
@@ -232,6 +230,7 @@ function AccountPage() {
             <Label htmlFor="full_name">Full name</Label>
             <Input
               id="full_name"
+              autoComplete="name"
               value={form.full_name}
               onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
               placeholder={isLoading ? "Loading…" : "Jane Doe"}
@@ -241,6 +240,9 @@ function AccountPage() {
             <Label htmlFor="phone">Phone</Label>
             <Input
               id="phone"
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               placeholder="+1 555 000 1234"
