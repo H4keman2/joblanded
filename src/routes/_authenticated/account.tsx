@@ -43,7 +43,6 @@ export const Route = createFileRoute("/_authenticated/account")({
   component: AccountPage,
 });
 
-
 function downloadJson(payload: unknown, filename: string) {
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
