@@ -327,36 +327,36 @@ function ResumePage() {
               {(draft.education ?? []).map((ed, i) => (
                 <div key={i} className="flex items-start gap-2">
                   <div className="grid flex-1 gap-2 sm:grid-cols-3">
-                  <Input
-                    value={ed.school ?? ""}
-                    aria-label={`Education row ${i + 1}: school`}
-                    placeholder="School"
-                    onChange={(e) => {
-                      const next = [...(draft.education ?? [])];
-                      next[i] = { ...next[i], school: e.target.value };
-                      update("education", next);
-                    }}
-                  />
-                  <Input
-                    value={ed.degree ?? ""}
-                    aria-label={`Education row ${i + 1}: degree`}
-                    placeholder="Degree"
-                    onChange={(e) => {
-                      const next = [...(draft.education ?? [])];
-                      next[i] = { ...next[i], degree: e.target.value };
-                      update("education", next);
-                    }}
-                  />
-                  <Input
-                    value={ed.year ?? ""}
-                    aria-label={`Education row ${i + 1}: year`}
-                    placeholder="Year"
-                    onChange={(e) => {
-                      const next = [...(draft.education ?? [])];
-                      next[i] = { ...next[i], year: e.target.value };
-                      update("education", next);
-                    }}
-                  />
+                    <Input
+                      value={ed.school ?? ""}
+                      aria-label={`Education row ${i + 1}: school`}
+                      placeholder="School"
+                      onChange={(e) => {
+                        const next = [...(draft.education ?? [])];
+                        next[i] = { ...next[i], school: e.target.value };
+                        update("education", next);
+                      }}
+                    />
+                    <Input
+                      value={ed.degree ?? ""}
+                      aria-label={`Education row ${i + 1}: degree`}
+                      placeholder="Degree"
+                      onChange={(e) => {
+                        const next = [...(draft.education ?? [])];
+                        next[i] = { ...next[i], degree: e.target.value };
+                        update("education", next);
+                      }}
+                    />
+                    <Input
+                      value={ed.year ?? ""}
+                      aria-label={`Education row ${i + 1}: year`}
+                      placeholder="Year"
+                      onChange={(e) => {
+                        const next = [...(draft.education ?? [])];
+                        next[i] = { ...next[i], year: e.target.value };
+                        update("education", next);
+                      }}
+                    />
                   </div>
                   <Button
                     type="button"
@@ -364,7 +364,10 @@ function ResumePage() {
                     size="icon"
                     aria-label={`Remove education row ${i + 1}`}
                     onClick={() =>
-                      update("education", (draft.education ?? []).filter((_, j) => j !== i))
+                      update(
+                        "education",
+                        (draft.education ?? []).filter((_, j) => j !== i),
+                      )
                     }
                     className="mt-0.5 shrink-0"
                   >
