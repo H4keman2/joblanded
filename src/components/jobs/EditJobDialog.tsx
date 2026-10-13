@@ -94,13 +94,19 @@ export function EditJobDialog({
           onSubmit={(e) => {
             e.preventDefault();
             if (!job) return;
+            const min = toNumber(payMin);
+            const max = toNumber(payMax);
+            if (min != null && max != null && min > max) {
+              toast.error("The pay range is flipped — ‘Pay from’ should be lower than ‘Pay to’.");
+              return;
+            }
             mutation.mutate({
               id: job.id,
               title,
               company,
               location,
-              pay_min: toNumber(payMin),
-              pay_max: toNumber(payMax),
+              pay_min: min,
+              pay_max: max,
               source_url: sourceUrl.trim(),
             });
           }}
@@ -163,6 +169,9 @@ export function EditJobDialog({
             <Label htmlFor="edit-url">Posting link</Label>
             <Input
               id="edit-url"
+              type="url"
+              inputMode="url"
+              autoComplete="url"
               value={sourceUrl}
               onChange={(e) => setSourceUrl(e.target.value)}
               placeholder="https://…"
