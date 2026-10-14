@@ -63,7 +63,12 @@ function AccountPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: profile, isLoading, isError, refetch } = useQuery({
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["profile"],
     queryFn: () => fetchProfile(),
   });
