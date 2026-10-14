@@ -157,6 +157,7 @@ function PostingSearchPage() {
                                 }`}
                               >
                                 <div className="font-semibold">{score}%</div>
+                                {isBest && <span className="sr-only">, strongest match</span>}
                                 {cell?.gap && (
                                   <div className="mt-1 text-xs opacity-80">Missing: {cell.gap}</div>
                                 )}
