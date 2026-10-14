@@ -255,7 +255,11 @@ function JobsPage() {
                   <div className="flex items-center gap-2">
                     {!job.archived_at && (
                       <Button asChild size="sm" variant="secondary">
-                        <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
+                        <Link
+                          to="/jobs/$jobId"
+                          params={{ jobId: job.id }}
+                          aria-label={`Tailor resume and compare drafts for ${job.title}`}
+                        >
                           Tailor & compare
                         </Link>
                       </Button>
