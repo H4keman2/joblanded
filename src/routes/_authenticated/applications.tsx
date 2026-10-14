@@ -130,7 +130,12 @@ function ApplicationsPage() {
     queryFn: async () => (await fetchApplications()) as unknown as ApplicationRow[],
   });
 
-  const { data: stats, isLoading: loadingStats } = useQuery({
+  const {
+    data: stats,
+    isLoading: loadingStats,
+    isError: statsError,
+    refetch: refetchStats,
+  } = useQuery({
     queryKey: ["application-stats"],
     queryFn: () => fetchStats(),
   });
@@ -273,46 +278,57 @@ function ApplicationsPage() {
         </div>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
-          icon={FileText}
-          label="Resume"
-          value={
-            loadingStats
-              ? "…"
-              : stats && stats.resumesCount > 0
-                ? `${stats.resumesCount} uploaded`
-                : "Not added"
-          }
-          sublabel={
-            !loadingStats && stats && stats.tailoredVersionsCount > 0
-              ? `${stats.tailoredVersionsCount} tailored version${stats.tailoredVersionsCount === 1 ? "" : "s"} created`
-              : undefined
-          }
-          to="/resume"
-        />
-        <StatCard
-          icon={Briefcase}
-          label="Jobs"
-          value={loadingStats ? "…" : `${stats?.jobsCount ?? 0} saved`}
-          sublabel={
-            !loadingStats && stats && stats.jobsAddedThisWeek > 0
-              ? `+${stats.jobsAddedThisWeek} this week`
-              : undefined
-          }
-          to="/jobs"
-        />
-        <StatCard
-          icon={ClipboardList}
-          label="Applications"
-          value={loadingStats ? "…" : `${stats?.applications.total ?? 0} total`}
-          sublabel={
-            !loadingStats && stats && stats.applicationsThisWeek > 0
-              ? `+${stats.applicationsThisWeek} this week`
-              : undefined
-          }
-        />
-      </div>
+      {statsError ? (
+        <div className="panel flex flex-wrap items-center gap-3 p-5">
+          <p className="text-sm text-muted-foreground">
+            We could not load your tracker summary. Your connection may have dropped.
+          </p>
+          <Button size="sm" variant="secondary" onClick={() => void refetchStats()}>
+            Try again
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <StatCard
+            icon={FileText}
+            label="Resume"
+            value={
+              loadingStats
+                ? "…"
+                : stats && stats.resumesCount > 0
+                  ? `${stats.resumesCount} uploaded`
+                  : "Not added"
+            }
+            sublabel={
+              !loadingStats && stats && stats.tailoredVersionsCount > 0
+                ? `${stats.tailoredVersionsCount} tailored version${stats.tailoredVersionsCount === 1 ? "" : "s"} created`
+                : undefined
+            }
+            to="/resume"
+          />
+          <StatCard
+            icon={Briefcase}
+            label="Jobs"
+            value={loadingStats ? "…" : `${stats?.jobsCount ?? 0} saved`}
+            sublabel={
+              !loadingStats && stats && stats.jobsAddedThisWeek > 0
+                ? `+${stats.jobsAddedThisWeek} this week`
+                : undefined
+            }
+            to="/jobs"
+          />
+          <StatCard
+            icon={ClipboardList}
+            label="Applications"
+            value={loadingStats ? "…" : `${stats?.applications.total ?? 0} total`}
+            sublabel={
+              !loadingStats && stats && stats.applicationsThisWeek > 0
+                ? `+${stats.applicationsThisWeek} this week`
+                : undefined
+            }
+          />
+        </div>
+      )}
 
       {!loadingStats && stats && stats.applications.total > 0 && (
         <div className="panel space-y-3 p-5">
