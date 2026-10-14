@@ -65,7 +65,12 @@ function ResumePage() {
   const [draft, setDraft] = useState<Parsed | null>(null);
   const [resumeId, setResumeId] = useState<string | null>(null);
 
-  const { data: resume, isLoading, isError, refetch } = useQuery({
+  const {
+    data: resume,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["latest-resume"],
     queryFn: () => fetchResume(),
   });
