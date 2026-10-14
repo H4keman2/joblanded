@@ -11,6 +11,7 @@ import {
   STATUS_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
+import { formatDate } from "@/lib/dates";
 
 // Lets the user close the loop from the tailoring workspace: once they've sent
 // the tailored resume, mark the posting applied and keep the link to where
@@ -67,7 +68,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
           </span>
           {app?.date_applied && (
             <span className="ml-2 text-xs font-normal text-muted-foreground">
-              applied {app.date_applied}
+              applied {formatDate(app.date_applied)}
             </span>
           )}
         </p>
