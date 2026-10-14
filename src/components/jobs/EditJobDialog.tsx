@@ -26,6 +26,18 @@ export type EditableJob = {
   source_url: string | null;
 };
 
+// The server checks the link too, but a bare "example.com/jobs" is almost always
+// a missing https:// rather than a real posting — catch it here with copy a person
+// can act on instead of surfacing the validator's raw JSON in a toast.
+function isFullUrl(value: string) {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 export function EditJobDialog({
   job,
   open,
@@ -91,6 +103,7 @@ export function EditJobDialog({
         </DialogHeader>
         <form
           className="space-y-4"
+          noValidate
           onSubmit={(e) => {
             e.preventDefault();
             if (!job) return;
@@ -98,6 +111,11 @@ export function EditJobDialog({
             const max = toNumber(payMax);
             if (min != null && max != null && min > max) {
               toast.error("The pay range is flipped — ‘Pay from’ should be lower than ‘Pay to’.");
+              return;
+            }
+            const link = sourceUrl.trim();
+            if (link && !isFullUrl(link)) {
+              toast.error("That link needs a full address — paste it starting with https://");
               return;
             }
             mutation.mutate({
