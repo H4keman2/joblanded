@@ -63,7 +63,7 @@ function AccountPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, isError, refetch } = useQuery({
     queryKey: ["profile"],
     queryFn: () => fetchProfile(),
   });
@@ -224,6 +224,16 @@ function AccountPage() {
         <p className="text-sm text-muted-foreground">
           Your name and phone are used when tailoring resumes and cover letters.
         </p>
+        {isError && (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <p className="text-sm text-muted-foreground">
+              We could not load your profile. Your connection may have dropped.
+            </p>
+            <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+              Try again
+            </Button>
+          </div>
+        )}
         <form onSubmit={onSave} className="mt-4 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="full_name">Full name</Label>
@@ -262,7 +272,7 @@ function AccountPage() {
               </p>
             </div>
           </div>
-          <Button type="submit" disabled={saving}>
+          <Button type="submit" disabled={saving || isLoading || isError}>
             {saving ? "Saving…" : "Save changes"}
           </Button>
         </form>
