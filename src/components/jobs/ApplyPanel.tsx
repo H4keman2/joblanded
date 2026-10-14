@@ -83,6 +83,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
           href={link}
           target="_blank"
           rel="noreferrer"
+          aria-label={`${link} (opens in new tab)`}
           className="mt-1 block truncate text-xs text-primary underline"
         >
           {link}

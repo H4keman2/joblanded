@@ -287,6 +287,7 @@ function JobDetailPage() {
               href={job.data.source_url}
               target="_blank"
               rel="noreferrer"
+              aria-label="View original posting (opens in new tab)"
               className="mt-2 inline-block text-xs text-primary underline"
             >
               View original posting
