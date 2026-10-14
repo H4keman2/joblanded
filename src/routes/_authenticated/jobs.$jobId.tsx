@@ -455,6 +455,15 @@ function JobDetailPage() {
 
           {drafts.isLoading ? (
             <p className="mt-6 text-sm text-muted-foreground">Loading versions…</p>
+          ) : drafts.isError ? (
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-muted-foreground">
+                We could not load your tailored versions. Your connection may have dropped.
+              </p>
+              <Button size="sm" variant="secondary" onClick={() => void drafts.refetch()}>
+                Try again
+              </Button>
+            </div>
           ) : !primary ? (
             <p className="mt-6 max-w-xl text-sm text-muted-foreground">
               No tailored versions yet. Generate one to run your parsed resume against this posting
