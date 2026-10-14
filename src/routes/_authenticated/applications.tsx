@@ -414,6 +414,7 @@ function ApplicationsPage() {
                           href={app.application_url ?? job!.source_url!}
                           target="_blank"
                           rel="noreferrer"
+                          aria-label={`${app.application_url ? "View application" : "View posting"} (opens in new tab)`}
                           className="text-xs text-primary underline"
                         >
                           {app.application_url ? "View application" : "View posting"}
