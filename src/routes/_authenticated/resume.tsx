@@ -65,7 +65,12 @@ function ResumePage() {
   const [draft, setDraft] = useState<Parsed | null>(null);
   const [resumeId, setResumeId] = useState<string | null>(null);
 
-  const { data: resume, isLoading } = useQuery({
+  const {
+    data: resume,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["latest-resume"],
     queryFn: () => fetchResume(),
   });
@@ -178,6 +183,7 @@ function ResumePage() {
                 value={rawText}
                 onChange={(e) => setRawText(e.target.value)}
                 placeholder="Paste your resume text here…"
+                aria-label="Resume text"
                 className="min-h-56 text-sm leading-relaxed"
               />
               <Button
@@ -199,6 +205,7 @@ function ResumePage() {
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
               placeholder="Paste your resume text here…"
+              aria-label="Resume text"
               className="min-h-56 text-sm leading-relaxed"
             />
 
@@ -216,6 +223,17 @@ function ResumePage() {
           </>
         )}
       </section>
+
+      {isError && (
+        <div className="panel flex flex-wrap items-center gap-3 p-6">
+          <p className="text-sm text-muted-foreground">
+            We could not load your resume profile. Your connection may have dropped.
+          </p>
+          <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+            Try again
+          </Button>
+        </div>
+      )}
 
       {isLoading && <p className="text-sm text-muted-foreground">Loading your profile…</p>}
 
