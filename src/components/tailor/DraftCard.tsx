@@ -269,7 +269,6 @@ export function DraftCard({
                 }
               }}
             >
-
               <Download className="size-4" />
               Download PDF
             </Button>
