@@ -107,7 +107,12 @@ export function EditJobDialog({
           onSubmit={(e) => {
             e.preventDefault();
             if (!job) return;
+            if (!title.trim()) {
+              toast.error("Role title can't be blank.");
+              return;
+            }
             const min = toNumber(payMin);
+
             const max = toNumber(payMax);
             if (min != null && max != null && min > max) {
               toast.error("The pay range is flipped — ‘Pay from’ should be lower than ‘Pay to’.");
