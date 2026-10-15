@@ -200,7 +200,11 @@ function ApplicationsPage() {
             <h1 className="text-2xl font-semibold">Applications</h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">{heroLine}</p>
           </div>
-          <Button onClick={() => setOpen((o) => !o)} variant={open ? "ghost" : "default"}>
+          <Button
+            onClick={() => setOpen((o) => !o)}
+            variant={open ? "ghost" : "default"}
+            aria-pressed={open}
+          >
             {open ? (
               "Cancel"
             ) : (
