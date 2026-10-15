@@ -268,7 +268,6 @@ export function DraftCard({
                   toast.error("Couldn't download the PDF — please try again");
                 }
               }}
-
             >
               <Download className="size-4" />
               Download PDF

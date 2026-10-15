@@ -98,6 +98,10 @@ export function JobRecommendations() {
   function runSearch() {
     const min = salaryMin.trim() ? Number(salaryMin) : undefined;
     const max = salaryMax.trim() ? Number(salaryMax) : undefined;
+    if (min != null && max != null && min > max) {
+      toast.error("Min salary should be lower than Max salary — check your range.");
+      return;
+    }
     search.mutate({
       keyword: anyTitle ? undefined : keyword.trim() || undefined,
       anyTitle,
