@@ -197,6 +197,11 @@ function ResumePage() {
                 )}
                 {parseMutation.isPending ? "Parsing…" : "Parse resume again"}
               </Button>
+              {rawText.trim().length < 30 && !parseMutation.isPending && (
+                <p className="text-xs text-muted-foreground">
+                  {30 - rawText.trim().length} more characters needed — paste your full resume text to parse.
+                </p>
+              )}
             </div>
           </details>
         ) : (
@@ -220,6 +225,11 @@ function ResumePage() {
               )}
               {parseMutation.isPending ? "Parsing…" : "Parse resume"}
             </Button>
+            {rawText.trim().length < 30 && !parseMutation.isPending && (
+              <p className="text-xs text-muted-foreground">
+                {30 - rawText.trim().length} more characters needed — paste your full resume text to parse.
+              </p>
+            )}
           </>
         )}
       </section>
