@@ -74,8 +74,8 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     );
   }
 
-
   const status = app?.status ?? "saved";
+
   const applied = status !== "saved";
   const link = app?.application_url ?? null;
 
