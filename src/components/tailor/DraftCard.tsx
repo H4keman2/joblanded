@@ -31,10 +31,7 @@ export function ScoreBar({ score }: { score: number }) {
         aria-valuemin={0}
         aria-valuemax={100}
       >
-        <div
-          className={`h-full rounded-full ${color}`}
-          style={{ width: `${val}%` }}
-        />
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${val}%` }} />
       </div>
       <span className="text-xs font-semibold text-foreground">{score}</span>
     </div>

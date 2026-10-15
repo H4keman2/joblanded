@@ -493,10 +493,7 @@ function DashboardPage() {
                       </Button>
                     ) : need.action === "follow-up" ? (
                       <Button asChild size="sm" variant="secondary">
-                        <Link
-                          to="/applications"
-                          aria-label={`Follow up on ${need.job.title}`}
-                        >
+                        <Link to="/applications" aria-label={`Follow up on ${need.job.title}`}>
                           Follow up
                         </Link>
                       </Button>
