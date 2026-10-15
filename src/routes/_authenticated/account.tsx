@@ -298,6 +298,7 @@ function AccountPage() {
             <div className="mt-2 space-y-3">
               <Input
                 type="email"
+                aria-label="New email address"
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="new@email.com"
@@ -346,6 +347,7 @@ function AccountPage() {
             <form onSubmit={onSubmitPassword} className="mt-2 space-y-3">
               <Input
                 type="password"
+                aria-label="New password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="New password"
@@ -354,6 +356,7 @@ function AccountPage() {
               <p className="text-xs text-muted-foreground">{PASSWORD_HINT}</p>
               <Input
                 type="password"
+                aria-label="Confirm new password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
@@ -476,6 +479,7 @@ function AccountPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Input
+              aria-label="Type your email address to confirm deletion"
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
               placeholder={authUser?.email ?? ""}
