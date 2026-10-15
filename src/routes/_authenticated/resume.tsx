@@ -199,7 +199,8 @@ function ResumePage() {
               </Button>
               {rawText.trim().length < 30 && !parseMutation.isPending && (
                 <p className="text-xs text-muted-foreground">
-                  {30 - rawText.trim().length} more characters needed — paste your full resume text to parse.
+                  {30 - rawText.trim().length} more characters needed — paste your full resume text
+                  to parse.
                 </p>
               )}
             </div>
@@ -227,7 +228,8 @@ function ResumePage() {
             </Button>
             {rawText.trim().length < 30 && !parseMutation.isPending && (
               <p className="text-xs text-muted-foreground">
-                {30 - rawText.trim().length} more characters needed — paste your full resume text to parse.
+                {30 - rawText.trim().length} more characters needed — paste your full resume text to
+                parse.
               </p>
             )}
           </>
