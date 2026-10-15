@@ -261,9 +261,14 @@ export function DraftCard({
               type="button"
               variant="default"
               size="sm"
-              onClick={() =>
-                downloadResumePdf(draft.resume, `${fileNameHint ?? "tailored-resume"}.pdf`)
-              }
+              onClick={() => {
+                try {
+                  downloadResumePdf(draft.resume, `${fileNameHint ?? "tailored-resume"}.pdf`);
+                } catch {
+                  toast.error("Couldn't download the PDF — please try again");
+                }
+              }}
+
             >
               <Download className="size-4" />
               Download PDF
