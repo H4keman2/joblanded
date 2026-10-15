@@ -20,13 +20,18 @@ export interface TailorDraft {
 
 export function ScoreBar({ score }: { score: number }) {
   const color = score >= 85 ? "bg-primary" : score >= 75 ? "bg-amber-500" : "bg-destructive";
+  const val = Math.max(0, Math.min(100, score));
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 w-24 overflow-hidden rounded-full bg-border">
-        <div
-          className={`h-full rounded-full ${color}`}
-          style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
-        />
+      <div
+        className="h-1.5 w-24 overflow-hidden rounded-full bg-border"
+        role="progressbar"
+        aria-label="Resume match score"
+        aria-valuenow={val}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div className={`h-full rounded-full ${color}`} style={{ width: `${val}%` }} />
       </div>
       <span className="text-xs font-semibold text-foreground">{score}</span>
     </div>
