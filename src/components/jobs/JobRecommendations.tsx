@@ -103,7 +103,6 @@ export function JobRecommendations() {
       return;
     }
     search.mutate({
-
       keyword: anyTitle ? undefined : keyword.trim() || undefined,
       anyTitle,
       location: location.trim() || undefined,
