@@ -54,7 +54,28 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     );
   }
 
+  if (apps.isError) {
+    return (
+      <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            We couldn't load this posting's application status. Your connection may have dropped.
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={apps.isFetching}
+            onClick={() => void apps.refetch()}
+          >
+            Try again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const status = app?.status ?? "saved";
+
   const applied = status !== "saved";
   const link = app?.application_url ?? null;
 
