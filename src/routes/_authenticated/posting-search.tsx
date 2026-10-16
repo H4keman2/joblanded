@@ -45,7 +45,10 @@ function PostingSearchPage() {
 
   const match = useMutation({
     mutationFn: (value: string) => run({ data: { text: value, licenseKey: pro.key ?? "" } }),
-    onError: toastProError,
+    onError: (error) => {
+      toastProError(error);
+      match.reset();
+    },
   });
 
   const result = match.data;
