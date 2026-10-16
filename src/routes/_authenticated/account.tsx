@@ -541,7 +541,7 @@ function ProLicenseSection() {
           className="flex flex-wrap gap-2"
           onSubmit={async (e) => {
             e.preventDefault();
-            if (await pro.activate(value)) {
+            if (await pro.activate(value.trim().toUpperCase())) {
               setValue("");
               toast.success("JobLanded Pro activated");
             }
@@ -557,6 +557,9 @@ function ProLicenseSection() {
             placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
             className="min-w-0 flex-1"
             autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
           />
           <Button type="submit" disabled={pro.checking || value.trim().length < 8}>
             {pro.checking && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
