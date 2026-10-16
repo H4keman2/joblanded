@@ -5,653 +5,712 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { listJobs, listTailoredJobIds } from "@/lib/jobs.functions";
 import {
-  APPLICATION_STATUSES,
-  listApplications,
-  setJobStatus,
-  STATUS_LABELS,
-  updateApplicationFollowUp,
-  type ApplicationStatus,
+	APPLICATION_STATUSES,
+	listApplications,
+	setJobStatus,
+	STATUS_LABELS,
+	updateApplicationFollowUp,
+	type ApplicationStatus,
 } from "@/lib/applications.functions";
 import { formatDate, todayStr } from "@/lib/dates";
 
 type Need = {
-  job: { id: string; title: string; company: string | null };
-  status: ApplicationStatus;
-  step: string;
-  hint: string;
-  action: "tailor" | "mark-applied" | "follow-up" | null;
-  rank: number;
+	job: { id: string; title: string; company: string | null };
+	status: ApplicationStatus;
+	step: string;
+	hint: string;
+	action: "tailor" | "mark-applied" | "follow-up" | null;
+	rank: number;
 };
 import { getLatestResume } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@/components/ui/select";
 import { AlertCircle, CheckCircle2, Search, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — JobLanded" },
-      {
-        name: "description",
-        content:
-          "What needs your attention today, plus every saved posting ready to match against your resume.",
-      },
-      { property: "og:title", content: "Dashboard — JobLanded" },
-      {
-        property: "og:description",
-        content: "Follow-ups due and saved job postings ready for resume matching.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: DashboardPage,
+	head: () => ({
+		meta: [
+			{ title: "Dashboard — JobLanded" },
+			{
+				name: "description",
+				content:
+					"What needs your attention today, plus every saved posting ready to match against your resume.",
+			},
+			{ property: "og:title", content: "Dashboard — JobLanded" },
+			{
+				property: "og:description",
+				content:
+					"Follow-ups due and saved job postings ready for resume matching.",
+			},
+			{ property: "og:type", content: "website" },
+			{ name: "twitter:card", content: "summary_large_image" },
+		],
+	}),
+	component: DashboardPage,
 });
 
 type JobInfo = { title: string; company: string | null } | null;
 
 function jobOf(app: { jobs: unknown }): JobInfo {
-  const j = app.jobs as JobInfo | JobInfo[] | null;
-  return Array.isArray(j) ? (j[0] ?? null) : j;
+	const j = app.jobs as JobInfo | JobInfo[] | null;
+	return Array.isArray(j) ? (j[0] ?? null) : j;
 }
 
 function ListSkeleton() {
-  return (
-    <div className="space-y-4">
-      {[0, 1, 2].map((i) => (
-        <div key={i} className="flex items-center justify-between gap-4">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-48" />
-            <Skeleton className="h-3 w-32" />
-          </div>
-          <Skeleton className="h-8 w-32" />
-        </div>
-      ))}
-    </div>
-  );
+	return (
+		<div className="space-y-4">
+			{[0, 1, 2].map((i) => (
+				<div key={i} className="flex items-center justify-between gap-4">
+					<div className="space-y-2">
+						<Skeleton className="h-4 w-48" />
+						<Skeleton className="h-3 w-32" />
+					</div>
+					<Skeleton className="h-8 w-32" />
+				</div>
+			))}
+		</div>
+	);
 }
 
 function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <p className="text-sm text-muted-foreground">
-        We couldn't load your {what}. Your connection may have dropped.
-      </p>
-      <Button size="sm" variant="secondary" onClick={onRetry}>
-        Try again
-      </Button>
-    </div>
-  );
+	return (
+		<div className="flex flex-wrap items-center gap-3">
+			<p className="text-sm text-muted-foreground">
+				We couldn't load your {what}. Your connection may have dropped.
+			</p>
+			<Button size="sm" variant="secondary" onClick={onRetry}>
+				Try again
+			</Button>
+		</div>
+	);
 }
 
 function DashboardPage() {
-  const fetchJobs = useServerFn(listJobs);
-  const fetchApplications = useServerFn(listApplications);
-  const fetchResume = useServerFn(getLatestResume);
-  const fetchTailoredJobIds = useServerFn(listTailoredJobIds);
+	const fetchJobs = useServerFn(listJobs);
+	const fetchApplications = useServerFn(listApplications);
+	const fetchResume = useServerFn(getLatestResume);
+	const fetchTailoredJobIds = useServerFn(listTailoredJobIds);
 
-  const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
-  const applications = useQuery({
-    queryKey: ["applications"],
-    queryFn: () => fetchApplications(),
-  });
-  const resume = useQuery({ queryKey: ["resume", "latest"], queryFn: () => fetchResume() });
-  const tailored = useQuery({
-    queryKey: ["tailored", "job-ids"],
-    queryFn: () => fetchTailoredJobIds(),
-  });
+	const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
+	const applications = useQuery({
+		queryKey: ["applications"],
+		queryFn: () => fetchApplications(),
+	});
+	const resume = useQuery({
+		queryKey: ["resume", "latest"],
+		queryFn: () => fetchResume(),
+	});
+	const tailored = useQuery({
+		queryKey: ["tailored", "job-ids"],
+		queryFn: () => fetchTailoredJobIds(),
+	});
 
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<"recent" | "title" | "company">("recent");
+	const [search, setSearch] = useState("");
+	const [sort, setSort] = useState<"recent" | "title" | "company">("recent");
 
-  const today = todayStr();
+	const today = todayStr();
 
-  // Anything past "saved" and not yet rejected, whose follow-up date has
-  // arrived and that hasn't been followed up on yet — soonest first.
-  const dueFollowUps = useMemo(() => {
-    const rows = applications.data ?? [];
-    return rows
-      .filter(
-        (a) =>
-          a.status !== "saved" &&
-          a.status !== "rejected" &&
-          !a.follow_up_sent &&
-          a.follow_up_date &&
-          a.follow_up_date <= today,
-      )
-      .sort((a, b) => (a.follow_up_date! < b.follow_up_date! ? -1 : 1));
-  }, [applications.data, today]);
+	// Anything past "saved" and not yet rejected, whose follow-up date has
+	// arrived and that hasn't been followed up on yet — soonest first.
+	const dueFollowUps = useMemo(() => {
+		const rows = applications.data ?? [];
+		return rows
+			.filter(
+				(a) =>
+					a.status !== "saved" &&
+					a.status !== "rejected" &&
+					!a.follow_up_sent &&
+					a.follow_up_date &&
+					a.follow_up_date <= today,
+			)
+			.sort((a, b) => (a.follow_up_date! < b.follow_up_date! ? -1 : 1));
+	}, [applications.data, today]);
 
-  const activeJobs = useMemo(
-    () => (jobs.data ?? []).filter((job) => !job.archived_at),
-    [jobs.data],
-  );
+	const activeJobs = useMemo(
+		() => (jobs.data ?? []).filter((job) => !job.archived_at),
+		[jobs.data],
+	);
 
-  const visibleJobs = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    const rows = activeJobs.filter((job) =>
-      term
-        ? [job.title, job.company, job.location]
-            .filter(Boolean)
-            .some((v) => v!.toLowerCase().includes(term))
-        : true,
-    );
-    const sorted = [...rows];
-    if (sort === "title") sorted.sort((a, b) => a.title.localeCompare(b.title));
-    if (sort === "company") sorted.sort((a, b) => (a.company ?? "").localeCompare(b.company ?? ""));
-    return sorted;
-  }, [activeJobs, search, sort]);
+	const visibleJobs = useMemo(() => {
+		const term = search.trim().toLowerCase();
+		const rows = activeJobs.filter((job) =>
+			term
+				? [job.title, job.company, job.location]
+						.filter(Boolean)
+						.some((v) => v!.toLowerCase().includes(term))
+				: true,
+		);
+		const sorted = [...rows];
+		if (sort === "title") sorted.sort((a, b) => a.title.localeCompare(b.title));
+		if (sort === "company")
+			sorted.sort((a, b) => (a.company ?? "").localeCompare(b.company ?? ""));
+		return sorted;
+	}, [activeJobs, search, sort]);
 
-  // One next step per saved posting, driven by its application status:
-  // saved → tailor, then apply; applied → follow up, then wait;
-  // interview → follow up or prep; offer → decide. Rejected drops off.
-  const needs = useMemo(() => {
-    const tailoredIds = new Set(tailored.data ?? []);
-    const appByJob = new Map((applications.data ?? []).map((a) => [a.job_id, a]));
+	// One next step per saved posting, driven by its application status:
+	// saved → tailor, then apply; applied → follow up, then wait;
+	// interview → follow up or prep; offer → decide. Rejected drops off.
+	const needs = useMemo(() => {
+		const tailoredIds = new Set(tailored.data ?? []);
+		const appByJob = new Map(
+			(applications.data ?? []).map((a) => [a.job_id, a]),
+		);
 
-    return activeJobs
-      .map((job): Need | null => {
-        const app = appByJob.get(job.id);
-        const status = (app?.status ?? "saved") as ApplicationStatus;
-        const base = { job, status };
-        const followUpDue =
-          app && !app.follow_up_sent && app.follow_up_date && app.follow_up_date <= today
-            ? app.follow_up_date
-            : null;
+		return activeJobs
+			.map((job): Need | null => {
+				const app = appByJob.get(job.id);
+				const status = (app?.status ?? "saved") as ApplicationStatus;
+				const base = { job, status };
+				const followUpDue =
+					app &&
+					!app.follow_up_sent &&
+					app.follow_up_date &&
+					app.follow_up_date <= today
+						? app.follow_up_date
+						: null;
 
-        switch (status) {
-          case "rejected":
-            return null;
-          case "saved":
-            return tailoredIds.has(job.id)
-              ? {
-                  ...base,
-                  step: "Apply",
-                  hint: "Your tailored version is ready — send it, then mark it applied.",
-                  action: "mark-applied",
-                  rank: 2,
-                }
-              : {
-                  ...base,
-                  step: "Tailor your resume",
-                  hint: "No tailored version yet — start one for this role.",
-                  action: "tailor",
-                  rank: 3,
-                };
-          case "applied":
-            if (followUpDue)
-              return {
-                ...base,
-                step: "Follow up",
-                hint: `Follow-up due ${formatDate(followUpDue)}`,
-                action: "follow-up",
-                rank: 0,
-              };
-            if (app && !app.follow_up_sent && app.follow_up_date)
-              return {
-                ...base,
-                step: "Follow up",
-                hint: `Follow up on ${formatDate(app.follow_up_date)}`,
-                action: "follow-up",
-                rank: 4,
-              };
-            return {
-              ...base,
-              step: "Waiting to hear back",
-              hint: "Followed up — move it to Interview when they reply.",
-              action: null,
-              rank: 5,
-            };
-          case "interviewing":
-            if (followUpDue)
-              return {
-                ...base,
-                step: "Follow up",
-                hint: `Follow-up due ${formatDate(followUpDue)}`,
-                action: "follow-up",
-                rank: 0,
-              };
-            return {
-              ...base,
-              step: "Prep for interview",
-              hint: "Review your tailored resume and the posting before you talk.",
-              action: "tailor",
-              rank: 1,
-            };
-          case "offer":
-            return {
-              ...base,
-              step: "Decide on offer",
-              hint: "You have an offer — review it and reply.",
-              action: null,
-              rank: 1,
-            };
-        }
-      })
-      .filter((n): n is Need => n !== null)
-      .sort((a, b) => a.rank - b.rank);
-  }, [activeJobs, applications.data, tailored.data, today]);
+				switch (status) {
+					case "rejected":
+						return null;
+					case "saved":
+						return tailoredIds.has(job.id)
+							? {
+									...base,
+									step: "Apply",
+									hint: "Your tailored version is ready — send it, then mark it applied.",
+									action: "mark-applied",
+									rank: 2,
+								}
+							: {
+									...base,
+									step: "Tailor your resume",
+									hint: "No tailored version yet — start one for this role.",
+									action: "tailor",
+									rank: 3,
+								};
+					case "applied":
+						if (followUpDue)
+							return {
+								...base,
+								step: "Follow up",
+								hint: `Follow-up due ${formatDate(followUpDue)}`,
+								action: "follow-up",
+								rank: 0,
+							};
+						if (app && !app.follow_up_sent && app.follow_up_date)
+							return {
+								...base,
+								step: "Follow up",
+								hint: `Follow up on ${formatDate(app.follow_up_date)}`,
+								action: "follow-up",
+								rank: 4,
+							};
+						return {
+							...base,
+							step: "Waiting to hear back",
+							hint: "Followed up — move it to Interview when they reply.",
+							action: null,
+							rank: 5,
+						};
+					case "interviewing":
+						if (followUpDue)
+							return {
+								...base,
+								step: "Follow up",
+								hint: `Follow-up due ${formatDate(followUpDue)}`,
+								action: "follow-up",
+								rank: 0,
+							};
+						return {
+							...base,
+							step: "Prep for interview",
+							hint: "Review your tailored resume and the posting before you talk.",
+							action: "tailor",
+							rank: 1,
+						};
+					case "offer":
+						return {
+							...base,
+							step: "Decide on offer",
+							hint: "You have an offer — review it and reply.",
+							action: null,
+							rank: 1,
+						};
+				}
+			})
+			.filter((n): n is Need => n !== null)
+			.sort((a, b) => a.rank - b.rank);
+	}, [activeJobs, applications.data, tailored.data, today]);
 
-  const qc = useQueryClient();
-  const changeStatus = useServerFn(setJobStatus);
-  const statusMutation = useMutation({
-    mutationFn: (input: { jobId: string; status: ApplicationStatus }) =>
-      changeStatus({ data: input }),
-    onSuccess: (_r, v) => {
-      toast.success(`Marked ${STATUS_LABELS[v.status].toLowerCase()}`);
-      void qc.invalidateQueries({ queryKey: ["applications"] });
-      void qc.invalidateQueries({ queryKey: ["application-stats"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+	const qc = useQueryClient();
+	const changeStatus = useServerFn(setJobStatus);
+	const statusMutation = useMutation({
+		mutationFn: (input: { jobId: string; status: ApplicationStatus }) =>
+			changeStatus({ data: input }),
+		onSuccess: (_r, v) => {
+			toast.success(`Marked ${STATUS_LABELS[v.status].toLowerCase()}`);
+			void qc.invalidateQueries({ queryKey: ["applications"] });
+			void qc.invalidateQueries({ queryKey: ["application-stats"] });
+		},
+		onError: (e: Error) => toast.error(e.message),
+	});
 
-  const markFollowUpSent = useServerFn(updateApplicationFollowUp);
-  const followUpMutation = useMutation({
-    mutationFn: (id: string) => markFollowUpSent({ data: { id, follow_up_sent: true } }),
-    onSuccess: () => {
-      toast.success("Follow-up marked sent");
-      void qc.invalidateQueries({ queryKey: ["applications"] });
-      void qc.invalidateQueries({ queryKey: ["application-stats"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+	const markFollowUpSent = useServerFn(updateApplicationFollowUp);
+	const followUpMutation = useMutation({
+		mutationFn: (id: string) =>
+			markFollowUpSent({ data: { id, follow_up_sent: true } }),
+		onSuccess: () => {
+			toast.success("Follow-up marked sent");
+			void qc.invalidateQueries({ queryKey: ["applications"] });
+			void qc.invalidateQueries({ queryKey: ["application-stats"] });
+		},
+		onError: (e: Error) => toast.error(e.message),
+	});
 
-  const hasResume = Boolean(resume.data);
-  const hasJobs = activeJobs.length > 0;
-  const hasApplications = (applications.data?.length ?? 0) > 0;
-  const setupDone = hasResume && hasJobs && hasApplications;
-  const setupLoaded = !resume.isLoading && !jobs.isLoading && !applications.isLoading;
-  // A failed fetch must not read as "you haven't done this yet" — the checklist
-  // would nag people who already have a resume, saved postings and applications.
-  const setupFailed = resume.isError || jobs.isError || applications.isError;
+	const hasResume = Boolean(resume.data);
+	const hasJobs = activeJobs.length > 0;
+	const hasApplications = (applications.data?.length ?? 0) > 0;
+	const setupDone = hasResume && hasJobs && hasApplications;
+	const setupLoaded =
+		!resume.isLoading && !jobs.isLoading && !applications.isLoading;
+	// A failed fetch must not read as "you haven't done this yet" — the checklist
+	// would nag people who already have a resume, saved postings and applications.
+	const setupFailed = resume.isError || jobs.isError || applications.isError;
 
-  const steps = [
-    {
-      done: hasResume,
-      label: "Add your resume",
-      hint: "We pull out your titles and skills so matching has something to work with.",
-      to: "/resume" as const,
-      cta: "Add resume",
-    },
-    {
-      done: hasJobs,
-      label: "Save a job posting",
-      hint: "Paste a posting or its link — from your laptop or your phone.",
-      to: "/jobs" as const,
-      cta: "Save a posting",
-    },
-    {
-      done: hasApplications,
-      label: "Track your first application",
-      hint: "Mark a role as applied and we'll set a follow-up date for you.",
-      to: "/applications" as const,
-      cta: "Open tracker",
-    },
-  ];
+	const steps = [
+		{
+			done: hasResume,
+			label: "Add your resume",
+			hint: "We pull out your titles and skills so matching has something to work with.",
+			to: "/resume" as const,
+			cta: "Add resume",
+		},
+		{
+			done: hasJobs,
+			label: "Save a job posting",
+			hint: "Paste a posting or its link — from your laptop or your phone.",
+			to: "/jobs" as const,
+			cta: "Save a posting",
+		},
+		{
+			done: hasApplications,
+			label: "Track your first application",
+			hint: "Mark a role as applied and we'll set a follow-up date for you.",
+			to: "/applications" as const,
+			cta: "Open tracker",
+		},
+	];
 
-  return (
-    <div className="space-y-6">
-      <div className="panel p-6 sm:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-              What needs you today, and every posting you've saved — added on your phone, waiting on
-              your laptop.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="secondary">
-              <Link to="/posting-search">Compare several postings</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/save">Quick save a posting</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
+	return (
+		<div className="space-y-6">
+			<div className="panel p-6 sm:p-8">
+				<div className="flex flex-wrap items-start justify-between gap-4">
+					<div>
+						<h1 className="text-2xl font-semibold">Dashboard</h1>
+						<p className="mt-2 max-w-xl text-sm text-muted-foreground">
+							What needs you today, and every posting you've saved — added on
+							your phone, waiting on your laptop.
+						</p>
+					</div>
+					<div className="flex flex-wrap gap-2">
+						<Button asChild variant="secondary">
+							<Link to="/posting-search">Compare several postings</Link>
+						</Button>
+						<Button asChild>
+							<Link to="/save">Quick save a posting</Link>
+						</Button>
+					</div>
+				</div>
+			</div>
 
-      {/* Needs attention — follow-ups whose date has arrived. */}
-      <section className="panel p-6 sm:p-8" aria-labelledby="attention-heading">
-        <h2 id="attention-heading" className="font-display text-lg font-semibold">
-          Needs attention
-        </h2>
-        {applications.isLoading ? (
-          <div className="mt-4">
-            <ListSkeleton />
-          </div>
-        ) : applications.isError ? (
-          <div className="mt-4">
-            <LoadFailed what="applications" onRetry={() => void applications.refetch()} />
-          </div>
-        ) : dueFollowUps.length === 0 ? (
-          <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
-            Nothing due right now — no follow-ups are waiting on you.
-          </p>
-        ) : (
-          <ul className="mt-4 divide-y divide-border">
-            {dueFollowUps.map((app) => {
-              const job = jobOf(app);
-              const overdue = app.follow_up_date! < today;
-              return (
-                <li
-                  key={app.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                >
-                  <div className="flex items-start gap-2">
-                    <AlertCircle
-                      className={`mt-0.5 h-4 w-4 ${overdue ? "text-destructive" : "text-primary"}`}
-                    />
-                    <div>
-                      <p className="font-medium">{job?.title ?? "Saved role"}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {job?.company ? `${job.company} · ` : ""}
-                        {overdue ? "Follow-up overdue since " : "Follow up today — due "}
-                        {formatDate(app.follow_up_date!)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
-                      disabled={followUpMutation.isPending && followUpMutation.variables === app.id}
-                      onClick={() => followUpMutation.mutate(app.id)}
-                    >
-                      Mark sent
-                    </Button>
-                    <Button asChild size="sm" variant="secondary">
-                      <Link
-                        to="/applications"
-                        aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
-                      >
-                        Follow up
-                      </Link>
-                    </Button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+			{/* Needs attention — follow-ups whose date has arrived. */}
+			<section className="panel p-6 sm:p-8" aria-labelledby="attention-heading">
+				<h2
+					id="attention-heading"
+					className="font-display text-lg font-semibold"
+				>
+					Needs attention
+				</h2>
+				{applications.isLoading ? (
+					<div className="mt-4">
+						<ListSkeleton />
+					</div>
+				) : applications.isError ? (
+					<div className="mt-4">
+						<LoadFailed
+							what="applications"
+							onRetry={() => void applications.refetch()}
+						/>
+					</div>
+				) : dueFollowUps.length === 0 ? (
+					<p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+						<CheckCircle2 className="h-4 w-4 text-primary" />
+						Nothing due right now — no follow-ups are waiting on you.
+					</p>
+				) : (
+					<ul className="mt-4 divide-y divide-border">
+						{dueFollowUps.map((app) => {
+							const job = jobOf(app);
+							const overdue = app.follow_up_date! < today;
+							return (
+								<li
+									key={app.id}
+									className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+								>
+									<div className="flex items-start gap-2">
+										<AlertCircle
+											className={`mt-0.5 h-4 w-4 ${overdue ? "text-destructive" : "text-primary"}`}
+										/>
+										<div>
+											<p className="font-medium">
+												{job?.title ?? "Saved role"}
+											</p>
+											<p className="text-xs text-muted-foreground">
+												{job?.company ? `${job.company} · ` : ""}
+												{overdue
+													? "Follow-up overdue since "
+													: "Follow up today — due "}
+												{formatDate(app.follow_up_date!)}
+											</p>
+										</div>
+									</div>
+									<div className="flex items-center gap-2">
+										<Button
+											size="sm"
+											variant="secondary"
+											aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
+											disabled={
+												followUpMutation.isPending &&
+												followUpMutation.variables === app.id
+											}
+											onClick={() => followUpMutation.mutate(app.id)}
+										>
+											Mark sent
+										</Button>
+										<Button asChild size="sm" variant="secondary">
+											<Link
+												to="/applications"
+												aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
+											>
+												Follow up
+											</Link>
+										</Button>
+									</div>
+								</li>
+							);
+						})}
+					</ul>
+				)}
+			</section>
 
-      {/* Needs list — the single next step for every posting still in play. */}
-      <section className="panel p-6 sm:p-8" aria-labelledby="needs-heading">
-        <h2 id="needs-heading" className="font-display text-lg font-semibold">
-          Needs
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          The next step for each posting you're still working on.
-        </p>
-        {jobs.isLoading || applications.isLoading || tailored.isLoading ? (
-          <div className="mt-4">
-            <ListSkeleton />
-          </div>
-        ) : jobs.isError || applications.isError || tailored.isError ? (
-          <div className="mt-4">
-            <LoadFailed
-              what="next steps"
-              onRetry={() => {
-                void jobs.refetch();
-                void applications.refetch();
-                void tailored.refetch();
-              }}
-            />
-          </div>
-        ) : needs.length === 0 ? (
-          <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
-            Nothing waiting — every saved posting is up to date.
-          </p>
-        ) : (
-          <ul className="mt-4 divide-y divide-border">
-            {needs.map((need) => {
-              const urgent = need.rank === 0;
-              const pending =
-                statusMutation.isPending && statusMutation.variables?.jobId === need.job.id;
-              return (
-                <li
-                  key={need.job.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium">
-                      {need.job.title}
-                      <span
-                        className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
-                          urgent
-                            ? "bg-destructive/10 text-destructive"
-                            : "bg-secondary text-secondary-foreground"
-                        }`}
-                      >
-                        {need.step}
-                      </span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {need.job.company ? `${need.job.company} · ` : ""}
-                      {need.hint}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      value={need.status}
-                      disabled={pending}
-                      onValueChange={(value) =>
-                        statusMutation.mutate({
-                          jobId: need.job.id,
-                          status: value as ApplicationStatus,
-                        })
-                      }
-                    >
-                      <SelectTrigger
-                        className="h-8 w-[120px] text-xs"
-                        aria-label={`Status for ${need.job.title}`}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {APPLICATION_STATUSES.map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {STATUS_LABELS[s]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {need.action === "mark-applied" ? (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        aria-label={`Mark applied for ${need.job.title}`}
-                        disabled={pending}
-                        onClick={() =>
-                          statusMutation.mutate({ jobId: need.job.id, status: "applied" })
-                        }
-                      >
-                        Mark applied
-                      </Button>
-                    ) : need.action === "tailor" ? (
-                      <Button asChild size="sm" variant="secondary">
-                        <Link
-                          to="/jobs/$jobId"
-                          params={{ jobId: need.job.id }}
-                          aria-label={
-                            need.status === "interviewing"
-                              ? `Open ${need.job.title}`
-                              : `Tailor resume for ${need.job.title}`
-                          }
-                        >
-                          {need.status === "interviewing" ? "Open" : "Tailor"}
-                        </Link>
-                      </Button>
-                    ) : need.action === "follow-up" ? (
-                      <Button asChild size="sm" variant="secondary">
-                        <Link to="/applications" aria-label={`Follow up on ${need.job.title}`}>
-                          Follow up
-                        </Link>
-                      </Button>
-                    ) : null}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+			{/* Needs list — the single next step for every posting still in play. */}
+			<section className="panel p-6 sm:p-8" aria-labelledby="needs-heading">
+				<h2 id="needs-heading" className="font-display text-lg font-semibold">
+					Needs
+				</h2>
+				<p className="mt-1 text-sm text-muted-foreground">
+					The next step for each posting you're still working on.
+				</p>
+				{jobs.isLoading || applications.isLoading || tailored.isLoading ? (
+					<div className="mt-4">
+						<ListSkeleton />
+					</div>
+				) : jobs.isError || applications.isError || tailored.isError ? (
+					<div className="mt-4">
+						<LoadFailed
+							what="next steps"
+							onRetry={() => {
+								void jobs.refetch();
+								void applications.refetch();
+								void tailored.refetch();
+							}}
+						/>
+					</div>
+				) : needs.length === 0 ? (
+					<p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+						<CheckCircle2 className="h-4 w-4 text-primary" />
+						Nothing waiting — every saved posting is up to date.
+					</p>
+				) : (
+					<ul className="mt-4 divide-y divide-border">
+						{needs.map((need) => {
+							const urgent = need.rank === 0;
+							const pending =
+								statusMutation.isPending &&
+								statusMutation.variables?.jobId === need.job.id;
+							return (
+								<li
+									key={need.job.id}
+									className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+								>
+									<div className="min-w-0">
+										<p className="font-medium">
+											{need.job.title}
+											<span
+												className={`ml-2 rounded-full px-2 py-0.5 text-xs font-medium ${
+													urgent
+														? "bg-destructive/10 text-destructive"
+														: "bg-secondary text-secondary-foreground"
+												}`}
+											>
+												{need.step}
+											</span>
+										</p>
+										<p className="text-xs text-muted-foreground">
+											{need.job.company ? `${need.job.company} · ` : ""}
+											{need.hint}
+										</p>
+									</div>
+									<div className="flex items-center gap-2">
+										<Select
+											value={need.status}
+											disabled={pending}
+											onValueChange={(value) =>
+												statusMutation.mutate({
+													jobId: need.job.id,
+													status: value as ApplicationStatus,
+												})
+											}
+										>
+											<SelectTrigger
+												className="h-8 w-[120px] text-xs"
+												aria-label={`Status for ${need.job.title}`}
+											>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{APPLICATION_STATUSES.map((s) => (
+													<SelectItem key={s} value={s}>
+														{STATUS_LABELS[s]}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										{need.action === "mark-applied" ? (
+											<Button
+												size="sm"
+												variant="secondary"
+												aria-label={`Mark applied for ${need.job.title}`}
+												disabled={pending}
+												onClick={() =>
+													statusMutation.mutate({
+														jobId: need.job.id,
+														status: "applied",
+													})
+												}
+											>
+												Mark applied
+											</Button>
+										) : need.action === "tailor" ? (
+											<Button asChild size="sm" variant="secondary">
+												<Link
+													to="/jobs/$jobId"
+													params={{ jobId: need.job.id }}
+													aria-label={
+														need.status === "interviewing"
+															? `Open ${need.job.title}`
+															: `Tailor resume for ${need.job.title}`
+													}
+												>
+													{need.status === "interviewing" ? "Open" : "Tailor"}
+												</Link>
+											</Button>
+										) : need.action === "follow-up" ? (
+											<Button asChild size="sm" variant="secondary">
+												<Link
+													to="/applications"
+													aria-label={`Follow up on ${need.job.title}`}
+												>
+													Follow up
+												</Link>
+											</Button>
+										) : null}
+									</div>
+								</li>
+							);
+						})}
+					</ul>
+				)}
+			</section>
 
-      {/* First-run checklist — disappears once the basics are in place. */}
-      {setupLoaded && !setupDone && (
-        <section className="panel p-6 sm:p-8" aria-labelledby="setup-heading">
-          <h2 id="setup-heading" className="font-display text-lg font-semibold">
-            Get set up
-          </h2>
-          {setupFailed ? (
-            <div className="mt-3">
-              <LoadFailed
-                what="setup details"
-                onRetry={() => {
-                  void resume.refetch();
-                  void jobs.refetch();
-                  void applications.refetch();
-                }}
-              />
-            </div>
-          ) : (
-            <>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Three steps and JobLanded can start matching and tailoring for you.
-              </p>
-              <ol className="mt-4 space-y-3">
-            {steps.map((step, i) => (
-              <li key={step.label} className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <span
-                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                      step.done
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-secondary-foreground"
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {step.done ? "✓" : i + 1}
-                  </span>
-                  <div>
-                    <p className={`font-medium ${step.done ? "text-muted-foreground" : ""}`}>
-                      {step.label}
-                      <span className="sr-only">{step.done ? " (done)" : " (not done yet)"}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">{step.hint}</p>
-                  </div>
-                </div>
-                {!step.done && (
-                  <Button asChild size="sm" variant="secondary">
-                    <Link to={step.to}>{step.cta}</Link>
-                  </Button>
-                )}
-                </li>
-              ))}
-            </ol>
-            </>
-          )}
-        </section>
-      )}
+			{/* First-run checklist — disappears once the basics are in place. */}
+			{setupLoaded && !setupDone && (
+				<section className="panel p-6 sm:p-8" aria-labelledby="setup-heading">
+					<h2 id="setup-heading" className="font-display text-lg font-semibold">
+						Get set up
+					</h2>
+					{setupFailed ? (
+						<div className="mt-3">
+							<LoadFailed
+								what="setup details"
+								onRetry={() => {
+									void resume.refetch();
+									void jobs.refetch();
+									void applications.refetch();
+								}}
+							/>
+						</div>
+					) : (
+						<>
+							<p className="mt-1 text-sm text-muted-foreground">
+								Three steps and JobLanded can start matching and tailoring for
+								you.
+							</p>
+							<ol className="mt-4 space-y-3">
+								{steps.map((step, i) => (
+									<li
+										key={step.label}
+										className="flex flex-wrap items-center justify-between gap-3"
+									>
+										<div className="flex items-start gap-3">
+											<span
+												className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+													step.done
+														? "bg-primary text-primary-foreground"
+														: "bg-secondary text-secondary-foreground"
+												}`}
+												aria-hidden="true"
+											>
+												{step.done ? "✓" : i + 1}
+											</span>
+											<div>
+												<p
+													className={`font-medium ${step.done ? "text-muted-foreground" : ""}`}
+												>
+													{step.label}
+													<span className="sr-only">
+														{step.done ? " (done)" : " (not done yet)"}
+													</span>
+												</p>
+												<p className="text-xs text-muted-foreground">
+													{step.hint}
+												</p>
+											</div>
+										</div>
+										{!step.done && (
+											<Button asChild size="sm" variant="secondary">
+												<Link to={step.to}>{step.cta}</Link>
+											</Button>
+										)}
+									</li>
+								))}
+							</ol>
+						</>
+					)}
+				</section>
+			)}
 
-      <section className="panel p-6 sm:p-8" aria-labelledby="postings-heading">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="postings-heading" className="font-display text-lg font-semibold">
-            Saved postings
-          </h2>
-          {hasJobs && (
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative">
-                <Search
-                  className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search title, company, location"
-                  aria-label="Search saved postings"
-                  className="h-9 w-64 pl-8"
-                />
-              </div>
-              <Select value={sort} onValueChange={(v) => setSort(v as typeof sort)}>
-                <SelectTrigger className="h-9 w-40" aria-label="Sort saved postings">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most recent</SelectItem>
-                  <SelectItem value="title">Role title A–Z</SelectItem>
-                  <SelectItem value="company">Company A–Z</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
+			<section className="panel p-6 sm:p-8" aria-labelledby="postings-heading">
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<h2
+						id="postings-heading"
+						className="font-display text-lg font-semibold"
+					>
+						Saved postings
+					</h2>
+					{hasJobs && (
+						<div className="flex flex-wrap items-center gap-2">
+							<div className="relative">
+								<Search
+									className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+									aria-hidden="true"
+								/>
+								<Input
+									value={search}
+									onChange={(e) => setSearch(e.target.value)}
+									placeholder="Search title, company, location"
+									aria-label="Search saved postings"
+									className="h-9 w-64 pl-8"
+								/>
+							</div>
+							<Select
+								value={sort}
+								onValueChange={(v) => setSort(v as typeof sort)}
+							>
+								<SelectTrigger
+									className="h-9 w-40"
+									aria-label="Sort saved postings"
+								>
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="recent">Most recent</SelectItem>
+									<SelectItem value="title">Role title A–Z</SelectItem>
+									<SelectItem value="company">Company A–Z</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+					)}
+				</div>
 
-        <div className="mt-5">
-          {jobs.isLoading ? (
-            <ListSkeleton />
-          ) : jobs.isError ? (
-            <LoadFailed what="saved postings" onRetry={() => void jobs.refetch()} />
-          ) : !hasJobs ? (
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                No postings saved yet. Add one and it will show up here, ready for matching.
-              </p>
-              <Button asChild variant="secondary" size="sm">
-                <Link to="/jobs">Add a job posting</Link>
-              </Button>
-            </div>
-          ) : visibleJobs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No postings match “{search}”. Try a different word.
-            </p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {visibleJobs.map((job) => (
-                <li
-                  key={job.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
-                >
-                  <div>
-                    <p className="font-medium">{job.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {[job.company, job.location].filter(Boolean).join(" · ") ||
-                        "No company listed"}
-                      {job.pay_min || job.pay_max
-                        ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
-                            job.pay_max && job.pay_min ? `–$${job.pay_max.toLocaleString()}` : ""
-                          }`
-                        : ""}
-                    </p>
-                  </div>
-                  <Button asChild size="sm">
-                    <Link
-                      to="/jobs/$jobId"
-                      params={{ jobId: job.id }}
-                      aria-label={`Match my resume against ${job.title}`}
-                    >
-                      <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" /> Match my resume
-                    </Link>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-    </div>
-  );
+				<div className="mt-5">
+					{jobs.isLoading ? (
+						<ListSkeleton />
+					) : jobs.isError ? (
+						<LoadFailed
+							what="saved postings"
+							onRetry={() => void jobs.refetch()}
+						/>
+					) : !hasJobs ? (
+						<div className="space-y-3">
+							<p className="text-sm text-muted-foreground">
+								No postings saved yet. Add one and it will show up here, ready
+								for matching.
+							</p>
+							<Button asChild variant="secondary" size="sm">
+								<Link to="/jobs">Add a job posting</Link>
+							</Button>
+						</div>
+					) : visibleJobs.length === 0 ? (
+						<p className="text-sm text-muted-foreground">
+							No postings match “{search}”. Try a different word.
+						</p>
+					) : (
+						<ul className="divide-y divide-border">
+							{visibleJobs.map((job) => (
+								<li
+									key={job.id}
+									className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
+								>
+									<div>
+										<p className="font-medium">{job.title}</p>
+										<p className="text-xs text-muted-foreground">
+											{[job.company, job.location]
+												.filter(Boolean)
+												.join(" · ") || "No company listed"}
+											{job.pay_min || job.pay_max
+												? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
+														job.pay_max && job.pay_min
+															? `–$${job.pay_max.toLocaleString()}`
+															: ""
+													}`
+												: ""}
+										</p>
+									</div>
+									<Button asChild size="sm">
+										<Link
+											to="/jobs/$jobId"
+											params={{ jobId: job.id }}
+											aria-label={`Match my resume against ${job.title}`}
+										>
+											<Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />{" "}
+											Match my resume
+										</Link>
+									</Button>
+								</li>
+							))}
+						</ul>
+					)}
+				</div>
+			</section>
+		</div>
+	);
 }
