@@ -337,7 +337,7 @@ function DashboardPage() {
           </div>
         ) : dueFollowUps.length === 0 ? (
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
+            <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-primary" />
             Nothing due right now — no follow-ups are waiting on you.
           </p>
         ) : (
@@ -414,7 +414,7 @@ function DashboardPage() {
           </div>
         ) : needs.length === 0 ? (
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-primary" />
+            <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-primary" />
             Nothing waiting — every saved posting is up to date.
           </p>
         ) : (

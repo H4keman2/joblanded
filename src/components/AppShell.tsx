@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Open menu">
-                  <Menu className="size-5" />
+                  <Menu aria-hidden="true" className="size-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-72">

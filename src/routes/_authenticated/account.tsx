@@ -167,8 +167,11 @@ function AccountPage() {
   async function signOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
-    await supabase.auth.signOut({ scope: "local" });
-    navigate({ to: "/auth", replace: true });
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } finally {
+      navigate({ to: "/auth", replace: true });
+    }
   }
 
   const signOutEverywhereMutation = useMutation({
@@ -311,7 +314,7 @@ function AccountPage() {
                   onClick={() => emailMutation.mutate(newEmail.trim())}
                 >
                   {emailMutation.isPending ? (
-                    <Loader2 className="mr-1.5 size-4 animate-spin" />
+                    <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
                   ) : null}
                   Send confirmation
                 </Button>
@@ -365,7 +368,7 @@ function AccountPage() {
               <div className="flex gap-2">
                 <Button type="submit" size="sm" disabled={passwordMutation.isPending}>
                   {passwordMutation.isPending ? (
-                    <Loader2 className="mr-1.5 size-4 animate-spin" />
+                    <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
                   ) : null}
                   Update password
                 </Button>
@@ -418,7 +421,7 @@ function AccountPage() {
               disabled={signOutEverywhereMutation.isPending}
             >
               {signOutEverywhereMutation.isPending ? (
-                <Loader2 className="mr-1.5 size-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
               ) : null}
               Sign out everywhere
             </Button>
@@ -440,9 +443,9 @@ function AccountPage() {
           disabled={exportMutation.isPending}
         >
           {exportMutation.isPending ? (
-            <Loader2 className="mr-1.5 size-4 animate-spin" />
+            <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
           ) : (
-            <Download className="mr-1.5 size-4" />
+            <Download aria-hidden="true" className="mr-1.5 size-4" />
           )}
           Download your data
         </Button>
@@ -497,7 +500,7 @@ function AccountPage() {
                 }}
               >
                 {deleteMutation.isPending ? (
-                  <Loader2 className="mr-1.5 size-4 animate-spin" />
+                  <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
                 ) : null}
                 Delete my account
               </AlertDialogAction>
@@ -562,7 +565,7 @@ function ProLicenseSection() {
             spellCheck={false}
           />
           <Button type="submit" disabled={pro.checking || value.trim().length < 8}>
-            {pro.checking && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+            {pro.checking && <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />}
             Activate
           </Button>
         </form>

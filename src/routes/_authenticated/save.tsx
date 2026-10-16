@@ -120,7 +120,7 @@ function QuickSavePage() {
           />
         </div>
         <Button type="submit" className="w-full sm:w-auto" disabled={save.isPending}>
-          {save.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+          {save.isPending && <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />}
           Save posting
         </Button>
       </form>

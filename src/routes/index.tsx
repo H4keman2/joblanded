@@ -1378,7 +1378,11 @@ function Pricing() {
           <ul className="mt-4 space-y-3">
             {freeFeatures.map((f) => (
               <li key={f} className="flex gap-2 text-sm">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" /> {f}
+                <Check
+                  aria-hidden="true"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                />{" "}
+                {f}
               </li>
             ))}
           </ul>
@@ -1399,7 +1403,7 @@ function Pricing() {
           <ul className="mt-4 space-y-3">
             {proFeatures.map((f) => (
               <li key={f} className="flex gap-2 text-sm">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {f}
+                <Check aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-primary" /> {f}
               </li>
             ))}
           </ul>

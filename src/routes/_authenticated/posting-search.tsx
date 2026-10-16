@@ -89,9 +89,9 @@ function PostingSearchPage() {
             </div>
             <Button type="submit" disabled={match.isPending || text.trim().length < 80}>
               {match.isPending ? (
-                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
               ) : (
-                <Search className="mr-1.5 h-4 w-4" />
+                <Search aria-hidden="true" className="mr-1.5 h-4 w-4" />
               )}
               Compare postings
             </Button>

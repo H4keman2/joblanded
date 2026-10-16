@@ -214,7 +214,7 @@ function ApplicationsPage() {
               "Cancel"
             ) : (
               <>
-                <Plus className="mr-1.5 h-4 w-4" /> Add application
+                <Plus aria-hidden="true" className="mr-1.5 h-4 w-4" /> Add application
               </>
             )}
           </Button>
@@ -266,7 +266,9 @@ function ApplicationsPage() {
               </p>
             </div>
             <Button type="submit" disabled={addMutation.isPending}>
-              {addMutation.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+              {addMutation.isPending && (
+                <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
+              )}
               Save & add application
             </Button>
           </form>

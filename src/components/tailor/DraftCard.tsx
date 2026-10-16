@@ -257,7 +257,7 @@ export function DraftCard({
                 }
               }}
             >
-              <Copy className="size-4" />
+              <Copy aria-hidden="true" className="size-4" />
               Copy
             </Button>
           </Hint>
@@ -274,7 +274,7 @@ export function DraftCard({
                 }
               }}
             >
-              <Download className="size-4" />
+              <Download aria-hidden="true" className="size-4" />
               Download PDF
             </Button>
           </Hint>

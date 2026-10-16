@@ -381,9 +381,9 @@ function JobDetailPage() {
                     disabled={gen.isPending || genAll.isPending || needsConfirm}
                   >
                     {gen.isPending ? (
-                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                      <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
                     ) : (
-                      <Sparkles className="mr-1.5 h-4 w-4" />
+                      <Sparkles aria-hidden="true" className="mr-1.5 h-4 w-4" />
                     )}
                     {versions.length === 0 ? "Generate first version" : "Regenerate"}
                   </Button>
@@ -398,9 +398,9 @@ function JobDetailPage() {
                       onClick={() => genAll.mutate()}
                     >
                       {genAll.isPending ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                        <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
                       ) : (
-                        <Layers className="mr-1.5 h-4 w-4" />
+                        <Layers aria-hidden="true" className="mr-1.5 h-4 w-4" />
                       )}
                       Tailor all roles
                     </Button>

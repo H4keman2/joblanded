@@ -127,7 +127,7 @@ function JobsPage() {
               "Cancel"
             ) : (
               <>
-                <Plus className="mr-1.5 h-4 w-4" /> Add job
+                <Plus aria-hidden="true" className="mr-1.5 h-4 w-4" /> Add job
               </>
             )}
           </Button>
@@ -183,7 +183,9 @@ function JobsPage() {
               </p>
             </div>
             <Button type="submit" disabled={addMutation.isPending}>
-              {addMutation.isPending && <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />}
+              {addMutation.isPending && (
+                <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
+              )}
               Save job
             </Button>
           </form>
@@ -324,7 +326,7 @@ function JobsPage() {
                             onClick={() => deleteMutation.mutate(job.id)}
                           >
                             {deleteMutation.isPending ? (
-                              <Loader2 className="mr-1.5 size-4 animate-spin" />
+                              <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
                             ) : null}
                             Delete job
                           </AlertDialogAction>

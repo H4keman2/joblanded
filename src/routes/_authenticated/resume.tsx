@@ -164,9 +164,9 @@ function ResumePage() {
           />
           <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={extracting}>
             {extracting ? (
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
             ) : (
-              <Upload className="size-4" />
+              <Upload aria-hidden="true" className="size-4" />
             )}
             Upload PDF
           </Button>
@@ -191,9 +191,9 @@ function ResumePage() {
                 disabled={parseMutation.isPending || rawText.trim().length < 30}
               >
                 {parseMutation.isPending ? (
-                  <Loader2 className="size-4 animate-spin" />
+                  <Loader2 aria-hidden="true" className="size-4 animate-spin" />
                 ) : (
-                  <Sparkles className="size-4" />
+                  <Sparkles aria-hidden="true" className="size-4" />
                 )}
                 {parseMutation.isPending ? "Parsing…" : "Parse resume again"}
               </Button>
@@ -220,9 +220,9 @@ function ResumePage() {
               disabled={parseMutation.isPending || rawText.trim().length < 30}
             >
               {parseMutation.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
               ) : (
-                <Sparkles className="size-4" />
+                <Sparkles aria-hidden="true" className="size-4" />
               )}
               {parseMutation.isPending ? "Parsing…" : "Parse resume"}
             </Button>
@@ -401,7 +401,7 @@ function ResumePage() {
                     }
                     className="mt-0.5 shrink-0"
                   >
-                    <X className="h-4 w-4" />
+                    <X aria-hidden="true" className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
