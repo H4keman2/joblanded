@@ -103,7 +103,10 @@ function DashboardPage() {
     queryKey: ["applications"],
     queryFn: () => fetchApplications(),
   });
-  const resume = useQuery({ queryKey: ["resume", "latest"], queryFn: () => fetchResume() });
+  const resume = useQuery({
+    queryKey: ["resume", "latest"],
+    queryFn: () => fetchResume(),
+  });
   const tailored = useQuery({
     queryKey: ["tailored", "job-ids"],
     queryFn: () => fetchTailoredJobIds(),
@@ -269,6 +272,9 @@ function DashboardPage() {
   const hasApplications = (applications.data?.length ?? 0) > 0;
   const setupDone = hasResume && hasJobs && hasApplications;
   const setupLoaded = !resume.isLoading && !jobs.isLoading && !applications.isLoading;
+  // A failed fetch must not read as "you haven't done this yet" — the checklist
+  // would nag people who already have a resume, saved postings and applications.
+  const setupFailed = resume.isError || jobs.isError || applications.isError;
 
   const steps = [
     {
@@ -472,7 +478,10 @@ function DashboardPage() {
                         aria-label={`Mark applied for ${need.job.title}`}
                         disabled={pending}
                         onClick={() =>
-                          statusMutation.mutate({ jobId: need.job.id, status: "applied" })
+                          statusMutation.mutate({
+                            jobId: need.job.id,
+                            status: "applied",
+                          })
                         }
                       >
                         Mark applied
@@ -512,39 +521,59 @@ function DashboardPage() {
           <h2 id="setup-heading" className="font-display text-lg font-semibold">
             Get set up
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Three steps and JobLanded can start matching and tailoring for you.
-          </p>
-          <ol className="mt-4 space-y-3">
-            {steps.map((step, i) => (
-              <li key={step.label} className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <span
-                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                      step.done
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-secondary text-secondary-foreground"
-                    }`}
-                    aria-hidden="true"
+          {setupFailed ? (
+            <div className="mt-3">
+              <LoadFailed
+                what="setup details"
+                onRetry={() => {
+                  void resume.refetch();
+                  void jobs.refetch();
+                  void applications.refetch();
+                }}
+              />
+            </div>
+          ) : (
+            <>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Three steps and JobLanded can start matching and tailoring for you.
+              </p>
+              <ol className="mt-4 space-y-3">
+                {steps.map((step, i) => (
+                  <li
+                    key={step.label}
+                    className="flex flex-wrap items-center justify-between gap-3"
                   >
-                    {step.done ? "✓" : i + 1}
-                  </span>
-                  <div>
-                    <p className={`font-medium ${step.done ? "text-muted-foreground" : ""}`}>
-                      {step.label}
-                      <span className="sr-only">{step.done ? " (done)" : " (not done yet)"}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">{step.hint}</p>
-                  </div>
-                </div>
-                {!step.done && (
-                  <Button asChild size="sm" variant="secondary">
-                    <Link to={step.to}>{step.cta}</Link>
-                  </Button>
-                )}
-              </li>
-            ))}
-          </ol>
+                    <div className="flex items-start gap-3">
+                      <span
+                        className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                          step.done
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {step.done ? "✓" : i + 1}
+                      </span>
+                      <div>
+                        <p className={`font-medium ${step.done ? "text-muted-foreground" : ""}`}>
+                          {step.label}
+                          <span className="sr-only">
+                            {step.done ? " (done)" : " (not done yet)"}
+                          </span>
+                        </p>
+                        <p className="text-xs text-muted-foreground">{step.hint}</p>
+                      </div>
+                    </div>
+                    {!step.done && (
+                      <Button asChild size="sm" variant="secondary">
+                        <Link to={step.to}>{step.cta}</Link>
+                      </Button>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
         </section>
       )}
 
