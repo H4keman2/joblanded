@@ -140,7 +140,12 @@ function ApplicationsPage() {
     queryFn: () => fetchStats(),
   });
 
-  const { data: resume, isLoading: loadingResume } = useQuery({
+  const {
+    data: resume,
+    isLoading: loadingResume,
+    isError: resumeError,
+    refetch: refetchResume,
+  } = useQuery({
     queryKey: ["latest-resume"],
     queryFn: () => fetchResume(),
   });
@@ -268,18 +273,30 @@ function ApplicationsPage() {
         )}
       </div>
 
-      {!loadingResume && !resume && (
-        <div className="panel flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Upload your resume</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              We&apos;ll extract your skills, titles and experience so jobs can be matched.
-            </p>
-          </div>
-          <Button asChild>
-            <Link to="/resume">Add resume</Link>
+      {resumeError ? (
+        <div className="panel flex flex-wrap items-center gap-3 p-5">
+          <p className="text-sm text-muted-foreground">
+            We couldn&apos;t load your resume status. Your connection may have dropped.
+          </p>
+          <Button size="sm" variant="secondary" onClick={() => void refetchResume()}>
+            Try again
           </Button>
         </div>
+      ) : (
+        !loadingResume &&
+        !resume && (
+          <div className="panel flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Upload your resume</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                We&apos;ll extract your skills, titles and experience so jobs can be matched.
+              </p>
+            </div>
+            <Button asChild>
+              <Link to="/resume">Add resume</Link>
+            </Button>
+          </div>
+        )
       )}
 
       {statsError ? (

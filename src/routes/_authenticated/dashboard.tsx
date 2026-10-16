@@ -269,6 +269,9 @@ function DashboardPage() {
   const hasApplications = (applications.data?.length ?? 0) > 0;
   const setupDone = hasResume && hasJobs && hasApplications;
   const setupLoaded = !resume.isLoading && !jobs.isLoading && !applications.isLoading;
+  // A failed fetch must not read as "you haven't done this yet" — the checklist
+  // would nag people who already have a resume, saved postings and applications.
+  const setupFailed = resume.isError || jobs.isError || applications.isError;
 
   const steps = [
     {
@@ -512,10 +515,23 @@ function DashboardPage() {
           <h2 id="setup-heading" className="font-display text-lg font-semibold">
             Get set up
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Three steps and JobLanded can start matching and tailoring for you.
-          </p>
-          <ol className="mt-4 space-y-3">
+          {setupFailed ? (
+            <div className="mt-3">
+              <LoadFailed
+                what="setup details"
+                onRetry={() => {
+                  void resume.refetch();
+                  void jobs.refetch();
+                  void applications.refetch();
+                }}
+              />
+            </div>
+          ) : (
+            <>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Three steps and JobLanded can start matching and tailoring for you.
+              </p>
+              <ol className="mt-4 space-y-3">
             {steps.map((step, i) => (
               <li key={step.label} className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-start gap-3">
@@ -542,9 +558,11 @@ function DashboardPage() {
                     <Link to={step.to}>{step.cta}</Link>
                   </Button>
                 )}
-              </li>
-            ))}
-          </ol>
+                </li>
+              ))}
+            </ol>
+            </>
+          )}
         </section>
       )}
 
