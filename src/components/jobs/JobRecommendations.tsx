@@ -70,7 +70,7 @@ export function JobRecommendations() {
     }) => fetchRecommended({ data: { ...input, licenseKey: pro.key ?? "" } }),
     onSuccess: (rows) => setResults(rows as RecommendedJob[]),
     onError: (e: Error) => {
-      setResults([]);
+      setResults(null);
       toastProError(e);
     },
   });
@@ -199,9 +199,9 @@ export function JobRecommendations() {
         <div className="lg:col-span-4">
           <Button type="submit" disabled={search.isPending}>
             {search.isPending ? (
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
             ) : (
-              <Search className="size-4" />
+              <Search aria-hidden="true" className="size-4" />
             )}
             Search
           </Button>
@@ -210,70 +210,84 @@ export function JobRecommendations() {
 
       {search.isPending && !results ? (
         <p className="text-sm text-muted-foreground">Finding roles that fit…</p>
+      ) : search.isError && !results ? (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            We couldn't load recommendations. Your connection may have dropped.
+          </p>
+          <Button size="sm" variant="secondary" onClick={runSearch} disabled={search.isPending}>
+            Try again
+          </Button>
+        </div>
       ) : results && results.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           No matches found. Try a broader keyword or clearing the location/salary filters.
         </p>
       ) : results && results.length > 0 ? (
-        <div className="-mx-2 flex gap-4 overflow-x-auto px-2 pb-2">
-          {results.map((job) => (
-            <Card key={job.id} className="w-72 shrink-0 space-y-3 p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-medium leading-snug">{job.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {[job.company, job.location].filter(Boolean).join(" · ") ||
-                      "Company not listed"}
-                  </p>
+        <div className="space-y-2">
+          <p role="status" className="text-sm text-muted-foreground">
+            {results.length} {results.length === 1 ? "match" : "matches"}, ranked by fit
+          </p>
+          <div className="-mx-2 flex gap-4 overflow-x-auto px-2 pb-2">
+            {results.map((job) => (
+              <Card key={job.id} className="w-72 shrink-0 space-y-3 p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="font-medium leading-snug">{job.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[job.company, job.location].filter(Boolean).join(" · ") ||
+                        "Company not listed"}
+                    </p>
+                  </div>
+                  {job.fit != null && (
+                    <Hint tip="How closely this posting matches your resume's skills and job titles.">
+                      <span
+                        className={`shrink-0 cursor-help rounded-full px-2 py-0.5 text-xs font-semibold ${fitTone(job.fit)}`}
+                      >
+                        {job.fit}%
+                      </span>
+                    </Hint>
+                  )}
                 </div>
-                {job.fit != null && (
-                  <Hint tip="How closely this posting matches your resume's skills and job titles.">
-                    <span
-                      className={`shrink-0 cursor-help rounded-full px-2 py-0.5 text-xs font-semibold ${fitTone(job.fit)}`}
-                    >
-                      {job.fit}%
-                    </span>
-                  </Hint>
+
+                {payLine(job.salaryMin, job.salaryMax) && (
+                  <p className="text-xs font-medium text-foreground">
+                    {payLine(job.salaryMin, job.salaryMax)}
+                  </p>
                 )}
-              </div>
 
-              {payLine(job.salaryMin, job.salaryMax) && (
-                <p className="text-xs font-medium text-foreground">
-                  {payLine(job.salaryMin, job.salaryMax)}
-                </p>
-              )}
+                <p className="text-xs text-muted-foreground">{job.reason}</p>
 
-              <p className="text-xs text-muted-foreground">{job.reason}</p>
+                {job.snippet && (
+                  <p className="line-clamp-3 text-xs text-muted-foreground">{job.snippet}</p>
+                )}
 
-              {job.snippet && (
-                <p className="line-clamp-3 text-xs text-muted-foreground">{job.snippet}</p>
-              )}
-
-              <div className="flex items-center justify-between gap-2 pt-1">
-                <a
-                  href={job.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={`View posting: ${job.title}${job.company ? ` at ${job.company}` : ""} (opens in new tab)`}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                >
-                  View posting <ExternalLink className="size-3" aria-hidden="true" />
-                </a>
-                <Hint tip="Save this posting to your Jobs list so you can tailor a resume against it.">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-label={`Save ${job.title} to your Jobs list`}
-                    onClick={() => add.mutate(job)}
-                    disabled={add.isPending}
+                <div className="flex items-center justify-between gap-2 pt-1">
+                  <a
+                    href={job.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`View posting: ${job.title}${job.company ? ` at ${job.company}` : ""} (opens in new tab)`}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                   >
-                    <Plus className="size-4" />
-                    Add job
-                  </Button>
-                </Hint>
-              </div>
-            </Card>
-          ))}
+                    View posting <ExternalLink className="size-3" aria-hidden="true" />
+                  </a>
+                  <Hint tip="Save this posting to your Jobs list so you can tailor a resume against it.">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      aria-label={`Save ${job.title} to your Jobs list`}
+                      onClick={() => add.mutate(job)}
+                      disabled={add.isPending}
+                    >
+                      <Plus aria-hidden="true" className="size-4" />
+                      Add job
+                    </Button>
+                  </Hint>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>
