@@ -146,6 +146,11 @@ function Landing() {
             See how it works ↓
           </a>
         </div>
+        <div className="mt-4 flex justify-center">
+          <Button asChild variant="outline" size="lg">
+            <Link to="/pro">Get Pro — $4.99 once</Link>
+          </Button>
+        </div>
         <p className="mt-3 text-xs text-muted-foreground">
           Free forever · Pro $4.99 one-time · No subscription.
         </p>
