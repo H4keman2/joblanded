@@ -281,8 +281,8 @@ function DashboardPage() {
           label="Active applications"
           to="/applications"
           icon={Briefcase}
-          gradient="from-cyan-500 to-blue-500"
-          glow="hover:shadow-cyan-500/25"
+          gradient="from-sky-500 to-blue-600"
+          glow="hover:shadow-sky-500/25"
         />
         <StatCard
           value={String(stats.interviews)}

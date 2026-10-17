@@ -21,6 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { Hint } from "@/components/ui/hint";
 import { setJobArchived } from "@/lib/jobs.functions";
 import { RejectArchiveDialog } from "@/components/jobs/RejectArchiveDialog";
+import { ProAssist } from "@/components/applications/ProAssist";
 import { toast } from "sonner";
 import { Loader2, Plus, FileText, Briefcase, ClipboardList } from "lucide-react";
 
@@ -254,6 +255,8 @@ function ApplicationsPage() {
 
   return (
     <div className="space-y-6">
+      <ProAssist />
+
       <div className="panel p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
