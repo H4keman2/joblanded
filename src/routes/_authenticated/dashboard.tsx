@@ -17,7 +17,16 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hint } from "@/components/ui/hint";
 import { RejectArchiveDialog } from "@/components/jobs/RejectArchiveDialog";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  BellRing,
+  Bookmark,
+  Briefcase,
+  CheckCircle2,
+  Loader2,
+  Users,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -80,23 +89,46 @@ function StatCard({
   label,
   to,
   hash,
-  accent,
+  icon: Icon,
+  gradient,
+  glow,
+  alert,
 }: {
   value: string;
   label: string;
   to: string;
   hash?: string;
-  accent?: boolean;
+  icon: LucideIcon;
+  gradient: string;
+  glow: string;
+  alert?: boolean;
 }) {
   return (
     <Link
       to={to}
       {...(hash ? { hash } : {})}
-      className={`panel block p-4 transition-shadow hover:shadow-md ${accent ? "border-destructive/40" : ""}`}
+      className={`group block rounded-2xl border bg-card p-5 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-xl ${glow} ${
+        alert ? "border-rose-500/60" : "border-border"
+      }`}
     >
-      <p className={`text-2xl font-semibold ${accent ? "text-destructive" : ""}`}>{value}</p>
-      <p className="mt-0.5 text-xs text-muted-foreground">
-        {label} <span aria-hidden="true">&rarr;</span>
+      <div className="flex items-center justify-between">
+        <p
+          className={`bg-gradient-to-r ${gradient} bg-clip-text text-4xl font-extrabold tracking-tight text-transparent`}
+        >
+          {value}
+        </p>
+        <span className={`rounded-xl bg-gradient-to-br ${gradient} p-2 text-white shadow-md`}>
+          <Icon aria-hidden="true" className="h-5 w-5" />
+        </span>
+      </div>
+      <p className="mt-2 text-sm font-medium text-muted-foreground">
+        {label}{" "}
+        <span
+          aria-hidden="true"
+          className="inline-block transition-transform duration-200 group-hover:translate-x-1"
+        >
+          &rarr;
+        </span>
       </p>
     </Link>
   );
@@ -252,21 +284,19 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="panel p-6 sm:p-8">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 p-6 text-white shadow-xl shadow-violet-500/25 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">Dashboard</h1>
-            <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
+            <p className="mt-2 max-w-xl text-sm text-white/85">
               Your job hunt at a glance — tap any number to dig into the details.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="secondary">
-              <Link to="/posting-search">Compare several postings</Link>
-            </Button>
-            <Button asChild>
-              <Link to="/save">Quick save a posting</Link>
-            </Button>
+          <div className="hidden items-center gap-2 sm:flex" aria-hidden="true">
+            <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-300" />
+            <span className="text-xs font-medium uppercase tracking-widest text-white/70">
+              Live
+            </span>
           </div>
         </div>
       </div>
@@ -278,15 +308,35 @@ function DashboardPage() {
           label="Follow-ups due"
           to="/dashboard"
           hash="attention"
-          accent={stats.followUpsDue > 0}
+          icon={BellRing}
+          gradient="from-rose-500 to-orange-400"
+          glow="hover:shadow-rose-500/25"
+          alert={stats.followUpsDue > 0}
         />
         <StatCard
           value={String(stats.activeApplications)}
           label="Active applications"
           to="/applications"
+          icon={Briefcase}
+          gradient="from-cyan-500 to-blue-500"
+          glow="hover:shadow-cyan-500/25"
         />
-        <StatCard value={String(stats.interviews)} label="Interviews" to="/applications" />
-        <StatCard value={String(stats.savedPostings)} label="Saved postings" to="/jobs" />
+        <StatCard
+          value={String(stats.interviews)}
+          label="Interviews"
+          to="/applications"
+          icon={Users}
+          gradient="from-amber-500 to-yellow-400"
+          glow="hover:shadow-amber-500/25"
+        />
+        <StatCard
+          value={String(stats.savedPostings)}
+          label="Saved postings"
+          to="/jobs"
+          icon={Bookmark}
+          gradient="from-violet-500 to-fuchsia-500"
+          glow="hover:shadow-violet-500/25"
+        />
       </div>
 
       {/* Needs attention — follow-ups whose date has arrived. */}

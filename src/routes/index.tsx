@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
+import { AppShell } from "@/components/AppShell";
 
 function Hint({ children, tip }: { children: React.ReactNode; tip: string }) {
   return (
@@ -101,34 +102,27 @@ const steps = [
 function Landing() {
   const signedIn = useSignedIn();
 
-  return (
+  const page = (
     <div className="min-h-screen">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-        <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
-        <div className="flex items-center gap-5">
-          <Link
-            to="/pro"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Pro
-          </Link>
-          {signedIn ? (
+      {!signedIn && (
+        <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
+          <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
+          <div className="flex items-center gap-5">
             <Link
-              to="/dashboard"
+              to="/pro"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              Dashboard
+              Pro
             </Link>
-          ) : (
             <Link
               to="/auth"
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Sign in
             </Link>
-          )}
-        </div>
-      </header>
+          </div>
+        </header>
+      )}
 
       <section className="mx-auto max-w-3xl px-4 pb-14 pt-12 text-center sm:pt-20">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
@@ -142,13 +136,11 @@ function Landing() {
           letter, and tracks every follow-up. Free to start — $4.99 once for the AI.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-5">
-          <Button asChild size="lg">
-            {signedIn ? (
-              <Link to="/dashboard">Go to dashboard</Link>
-            ) : (
+          {!signedIn && (
+            <Button asChild size="lg">
               <Link to="/auth">Get started free</Link>
-            )}
-          </Button>
+            </Button>
+          )}
           <a href="#how" className="text-sm text-muted-foreground hover:text-foreground">
             See how it works ↓
           </a>
@@ -196,6 +188,7 @@ function Landing() {
       <Footer />
     </div>
   );
+  return signedIn ? <AppShell>{page}</AppShell> : page;
 }
 
 const exampleSteps = [
