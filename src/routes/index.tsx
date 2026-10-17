@@ -1336,6 +1336,7 @@ function FounderTrust() {
           href="https://www.linkedin.com/in/ryanhake1/"
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Connect on LinkedIn (opens in new tab)"
           className="mt-4 inline-block text-sm text-primary hover:underline"
         >
           Connect on LinkedIn →

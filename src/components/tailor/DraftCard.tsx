@@ -179,14 +179,13 @@ export function DraftCard({
 
       <div className="mt-3 grid gap-3 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">
         <div>
-          <Hint tip={draft.ats.note}>
-            <p className="cursor-help text-xs font-medium uppercase tracking-wide text-muted-foreground underline decoration-dotted underline-offset-2">
-              ATS readability
-            </p>
-          </Hint>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            ATS readability
+          </p>
           <div className="mt-1.5">
             <ScoreBar score={draft.ats.score} />
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">{draft.ats.note}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {draft.ats.flags.map((f) => (
               <span
@@ -199,14 +198,13 @@ export function DraftCard({
           </div>
         </div>
         <div>
-          <Hint tip={draft.keywords.note}>
-            <p className="cursor-help text-xs font-medium uppercase tracking-wide text-muted-foreground underline decoration-dotted underline-offset-2">
-              Keyword coverage
-            </p>
-          </Hint>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Keyword coverage
+          </p>
           <div className="mt-1.5">
             <ScoreBar score={draft.keywords.score} />
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">{draft.keywords.note}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {draft.keywords.hits.map((k) => (
               <Hint key={k} tip={`"${k}" appears in the posting and in this version.`}>
