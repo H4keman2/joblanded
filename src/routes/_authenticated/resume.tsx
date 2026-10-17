@@ -155,6 +155,12 @@ function ResumePage() {
         </p>
       </div>
 
+      <ResumeReview
+        resumeId={resumeId}
+        hasResume={Boolean(draft && resumeId)}
+        onUseSummary={(s) => update("summary", s)}
+      />
+
       <section className="panel space-y-4 p-6">
         <div className="flex flex-wrap items-center gap-3">
           <input
@@ -443,12 +449,6 @@ function ResumePage() {
           </div>
         </section>
       )}
-
-      <ResumeReview
-        resumeId={resumeId}
-        hasResume={Boolean(draft && resumeId)}
-        onUseSummary={(s) => update("summary", s)}
-      />
     </div>
   );
 }
