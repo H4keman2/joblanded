@@ -3,20 +3,13 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { listJobs, setJobArchived } from "@/lib/jobs.functions";
-import {
-  listApplications,
-  setJobStatus,
-  STATUS_LABELS,
-  updateApplicationFollowUp,
-  type ApplicationStatus,
-} from "@/lib/applications.functions";
+import { listJobs } from "@/lib/jobs.functions";
+import { listApplications, updateApplicationFollowUp } from "@/lib/applications.functions";
 import { formatDate, todayStr } from "@/lib/dates";
 import { getLatestResume } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Hint } from "@/components/ui/hint";
-import { RejectArchiveDialog } from "@/components/jobs/RejectArchiveDialog";
 import {
   AlertCircle,
   BellRing,
@@ -160,6 +153,7 @@ function DashboardPage() {
       status: string;
       follow_up_sent: boolean;
       follow_up_date: string | null;
+      date_applied: string | null;
       jobs: unknown;
     }[];
     return rows
@@ -192,29 +186,6 @@ function DashboardPage() {
   }, [applications.data, dueFollowUps, activeJobs]);
 
   const qc = useQueryClient();
-  const changeStatus = useServerFn(setJobStatus);
-  const statusMutation = useMutation({
-    mutationFn: (input: { jobId: string; status: ApplicationStatus }) =>
-      changeStatus({ data: input }),
-    onSuccess: (_r, v) => {
-      toast.success(`Marked ${STATUS_LABELS[v.status].toLowerCase()}`);
-      void qc.invalidateQueries({ queryKey: ["applications"] });
-      void qc.invalidateQueries({ queryKey: ["application-stats"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const archiveJob = useServerFn(setJobArchived);
-  const archiveMutation = useMutation({
-    mutationFn: (input: { id: string; archived: boolean }) => archiveJob({ data: input }),
-    onSuccess: (_r, v) => {
-      if (v.archived) toast.success("Posting archived");
-      void qc.invalidateQueries({ queryKey: ["jobs"] });
-      void qc.invalidateQueries({ queryKey: ["applications"] });
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
   // Mark-sent updates the list the instant it's tapped (optimistic), so the
   // row clears even on a slow connection; a failure rolls back with an error.
   const markFollowUpSent = useServerFn(updateApplicationFollowUp);
@@ -240,14 +211,6 @@ function DashboardPage() {
       void qc.invalidateQueries({ queryKey: ["application-stats"] });
     },
   });
-
-  const [rejectTarget, setRejectTarget] = useState<{ jobId: string; title: string } | null>(null);
-  function handleRejectDecide(archiveIt: boolean) {
-    if (!rejectTarget) return;
-    statusMutation.mutate({ jobId: rejectTarget.jobId, status: "rejected" });
-    if (archiveIt) archiveMutation.mutate({ id: rejectTarget.jobId, archived: true });
-    setRejectTarget(null);
-  }
 
   const hasResume = Boolean(resume.data);
   const hasJobs = activeJobs.length > 0;
@@ -367,6 +330,13 @@ function DashboardPage() {
               const job = jobOf(app);
               const overdue = app.follow_up_date! < today;
               const marking = followUpMutation.isPending && followUpMutation.variables === app.id;
+              const daysAgo = app.date_applied
+                ? Math.round(
+                    (new Date(`${today}T00:00:00`).getTime() -
+                      new Date(`${app.date_applied}T00:00:00`).getTime()) /
+                      86_400_000,
+                  )
+                : null;
               return (
                 <li
                   key={app.id}
@@ -392,46 +362,30 @@ function DashboardPage() {
                         {overdue ? "Follow-up overdue since " : "Follow up today — due "}
                         {formatDate(app.follow_up_date!)}
                       </p>
+                      {daysAgo !== null && (
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Applied {formatDate(app.date_applied!)} ({daysAgo}{" "}
+                          {daysAgo === 1 ? "day" : "days"} ago). We recommend following up 2–3
+                          business days after{" "}
+                          {app.status === "interviewing" ? "an interview" : "applying"}.
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Hint tip="Marks the follow-up as sent and clears it from this list.">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
-                        disabled={marking}
-                        onClick={() => followUpMutation.mutate(app.id)}
-                      >
-                        {marking && (
-                          <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                        )}
-                        Mark sent
-                      </Button>
-                    </Hint>
-                    <Hint tip="Open the tracker to follow up on this application.">
-                      <Button asChild size="sm" variant="secondary">
-                        <Link
-                          to="/applications"
-                          aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
-                        >
-                          Follow up
-                        </Link>
-                      </Button>
-                    </Hint>
-                    <Hint tip="Mark this application as rejected — you can archive the posting too.">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        aria-label={`Mark ${job?.title ?? "Saved role"} as rejected`}
-                        onClick={() =>
-                          setRejectTarget({ jobId: app.job_id, title: job?.title ?? "Saved role" })
-                        }
-                      >
-                        Didn&apos;t get it
-                      </Button>
-                    </Hint>
-                  </div>
+                  <Hint tip="Marks your follow-up as sent and clears this reminder.">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
+                      disabled={marking}
+                      onClick={() => followUpMutation.mutate(app.id)}
+                    >
+                      {marking && (
+                        <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      )}
+                      Follow up
+                    </Button>
+                  </Hint>
                 </li>
               );
             })}
@@ -500,14 +454,6 @@ function DashboardPage() {
           )}
         </section>
       )}
-
-      <RejectArchiveDialog
-        open={Boolean(rejectTarget)}
-        onOpenChange={(o) => !o && setRejectTarget(null)}
-        jobTitle={rejectTarget?.title ?? ""}
-        pending={statusMutation.isPending || archiveMutation.isPending}
-        onDecide={handleRejectDecide}
-      />
     </div>
   );
 }
