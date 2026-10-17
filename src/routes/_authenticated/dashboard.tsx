@@ -352,6 +352,7 @@ function DashboardPage() {
                 >
                   <div className="flex items-start gap-2">
                     <AlertCircle
+                      aria-hidden="true"
                       className={`mt-0.5 h-4 w-4 ${overdue ? "text-destructive" : "text-primary"}`}
                     />
                     <div>

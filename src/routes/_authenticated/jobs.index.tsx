@@ -273,7 +273,7 @@ function JobsPage() {
                         aria-label={`Edit ${job.title}`}
                         onClick={() => setEditing(job)}
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Pencil aria-hidden="true" className="h-4 w-4" />
                       </Button>
                     </Hint>
                     <Hint
@@ -293,9 +293,9 @@ function JobsPage() {
                         }
                       >
                         {job.archived_at ? (
-                          <ArchiveRestore className="h-4 w-4" />
+                          <ArchiveRestore aria-hidden="true" className="h-4 w-4" />
                         ) : (
-                          <Archive className="h-4 w-4" />
+                          <Archive aria-hidden="true" className="h-4 w-4" />
                         )}
                       </Button>
                     </Hint>
@@ -303,7 +303,7 @@ function JobsPage() {
                       <Hint tip="Delete this saved job and its tailored versions.">
                         <AlertDialogTrigger asChild>
                           <Button size="icon" variant="ghost" aria-label={`Delete ${job.title}`}>
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 aria-hidden="true" className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
                       </Hint>

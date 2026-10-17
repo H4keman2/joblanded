@@ -568,7 +568,7 @@ function StatCard({
 }) {
   const body = (
     <>
-      <Icon className="size-5 text-primary" />
+      <Icon aria-hidden="true" className="size-5 text-primary" />
       <p className="mt-3 text-sm text-muted-foreground">{label}</p>
       <p className="text-lg font-semibold">{value}</p>
       {sublabel && <p className="mt-0.5 text-xs text-muted-foreground">{sublabel}</p>}
