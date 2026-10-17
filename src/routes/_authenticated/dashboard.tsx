@@ -106,7 +106,7 @@ function StatCard({
     >
       <div className="flex items-center justify-between">
         <p
-          className={`bg-gradient-to-r ${gradient} bg-clip-text text-4xl font-extrabold tracking-tight text-transparent`}
+          className={`bg-gradient-to-r ${gradient} bg-clip-text font-display text-5xl font-extrabold tracking-tight text-transparent`}
         >
           {value}
         </p>
@@ -114,7 +114,7 @@ function StatCard({
           <Icon aria-hidden="true" className="h-5 w-5" />
         </span>
       </div>
-      <p className="mt-2 text-sm font-medium text-muted-foreground">
+      <p className="mt-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
         {label}{" "}
         <span
           aria-hidden="true"
@@ -247,17 +247,43 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-700 to-emerald-400 p-6 text-white shadow-xl shadow-green-500/25 sm:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-green-700 to-emerald-400 p-6 text-white shadow-xl shadow-green-500/25 sm:p-8">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px)",
+            backgroundSize: "36px 36px",
+            maskImage: "radial-gradient(ellipse 90% 120% at 20% 0%, black 30%, transparent 75%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 90% 120% at 20% 0%, black 30%, transparent 75%)",
+          }}
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-300/30 blur-3xl"
+        />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">JobLanded Dashboard</h1>
-            <p className="mt-2 max-w-xl text-base text-white/85">
-              Your job hunt at a glance — tap any number to dig into the details.
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-emerald-200/80">
+              {"// job search, automated"}
+            </p>
+            <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
+              JobLanded Dashboard
+            </h1>
+            <p className="mt-3 font-mono text-xs text-white/75 sm:text-sm">
+              {stats.activeApplications} ACTIVE · {stats.followUpsDue} FOLLOW-UPS DUE ·{" "}
+              {stats.interviews} INTERVIEWS · {stats.savedPostings} SAVED
+              <span
+                aria-hidden="true"
+                className="ml-1 inline-block h-3.5 w-2 animate-pulse bg-emerald-200/80 align-[-2px]"
+              />
             </p>
           </div>
           <div className="hidden items-center gap-2 sm:flex" aria-hidden="true">
             <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-300" />
-            <span className="text-xs font-medium uppercase tracking-widest text-white/70">
+            <span className="font-mono text-[11px] uppercase tracking-widest text-white/70">
               Live
             </span>
           </div>
@@ -308,7 +334,7 @@ function DashboardPage() {
         className="panel scroll-mt-6 p-6 sm:p-8"
         aria-labelledby="attention-heading"
       >
-        <h2 id="attention-heading" className="font-display text-lg font-semibold">
+        <h2 id="attention-heading" className="font-display text-xl font-bold tracking-tight">
           Needs attention
         </h2>
         {applications.isLoading ? (
