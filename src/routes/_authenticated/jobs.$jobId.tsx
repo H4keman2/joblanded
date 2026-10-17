@@ -193,9 +193,7 @@ function JobDetailPage() {
         return;
       }
       if (failed.length === 0) {
-        toast.success(
-          `Tailored a new version for ${done} other role${done === 1 ? "" : "s"}`,
-        );
+        toast.success(`Tailored a new version for ${done} other role${done === 1 ? "" : "s"}`);
         return;
       }
       toast.success(`Tailored ${done} of ${total} roles`);
