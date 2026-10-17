@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
 
 function Hint({ children, tip }: { children: React.ReactNode; tip: string }) {
   return (
@@ -18,6 +19,21 @@ function Hint({ children, tip }: { children: React.ReactNode; tip: string }) {
       <TooltipContent className="max-w-xs text-left">{tip}</TooltipContent>
     </Tooltip>
   );
+}
+
+/** Signed-in visitors get here via the JobLanded brand button — they came to
+ *  re-read the worked examples, not to sign up, so auth CTAs become
+ *  dashboard links instead. */
+function useSignedIn() {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSignedIn(Boolean(data.session)));
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
+      setSignedIn(Boolean(session)),
+    );
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  return signedIn;
 }
 
 export const Route = createFileRoute("/")({
@@ -83,6 +99,8 @@ const steps = [
 ];
 
 function Landing() {
+  const signedIn = useSignedIn();
+
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
@@ -94,12 +112,21 @@ function Landing() {
           >
             Pro
           </Link>
-          <Link
-            to="/auth"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Sign in
-          </Link>
+          {signedIn ? (
+            <Link
+              to="/dashboard"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Sign in
+            </Link>
+          )}
         </div>
       </header>
 
@@ -116,7 +143,11 @@ function Landing() {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-5">
           <Button asChild size="lg">
-            <Link to="/auth">Get started free</Link>
+            {signedIn ? (
+              <Link to="/dashboard">Go to dashboard</Link>
+            ) : (
+              <Link to="/auth">Get started free</Link>
+            )}
           </Button>
           <a href="#how" className="text-sm text-muted-foreground hover:text-foreground">
             See how it works ↓
@@ -342,6 +373,7 @@ const exampleSteps = [
 ];
 
 function WorkedExample() {
+  const signedIn = useSignedIn();
   const [active, setActive] = useState(0);
   const current = exampleSteps[active]!;
 
@@ -413,7 +445,11 @@ function WorkedExample() {
 
           <div className="mt-10 flex justify-center">
             <Button asChild size="lg">
-              <Link to="/auth">Try it with your resume</Link>
+              {signedIn ? (
+                <Link to="/resume">Try it with your resume</Link>
+              ) : (
+                <Link to="/auth">Try it with your resume</Link>
+              )}
             </Button>
           </div>
         </div>
@@ -1520,6 +1556,7 @@ function Faq() {
 }
 
 function Footer() {
+  const signedIn = useSignedIn();
   return (
     <footer className="border-t border-border bg-secondary/30">
       <div className="mx-auto max-w-5xl px-4 py-10">
@@ -1558,18 +1595,29 @@ function Footer() {
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Get started
             </p>
-            <Link
-              to="/auth"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Create an account
-            </Link>
-            <Link
-              to="/auth"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Sign in
-            </Link>
+            {signedIn ? (
+              <Link
+                to="/dashboard"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  to="/auth"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Create an account
+                </Link>
+                <Link
+                  to="/auth"
+                  className="text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  Sign in
+                </Link>
+              </>
+            )}
           </nav>
         </div>
         <p className="mt-10 border-t border-border pt-6 text-xs text-muted-foreground">

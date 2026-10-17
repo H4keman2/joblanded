@@ -6,6 +6,7 @@ import { getLatestResume, parseResume, saveParsedResume } from "@/lib/resume.fun
 import { extractPdfText } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/ui/hint";
+import { ResumeReview } from "@/components/resume/ResumeReview";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -442,6 +443,12 @@ function ResumePage() {
           </div>
         </section>
       )}
+
+      <ResumeReview
+        resumeId={resumeId}
+        hasResume={Boolean(draft && resumeId)}
+        onUseSummary={(s) => update("summary", s)}
+      />
     </div>
   );
 }
