@@ -479,8 +479,15 @@ function AccountPage() {
               <AlertDialogTitle>Delete your account?</AlertDialogTitle>
               <AlertDialogDescription>
                 This permanently deletes your profile, resumes, saved jobs, matches, tailored
-                documents and applications, and signs you out everywhere. This can't be undone. Type{" "}
-                <span className="font-medium text-foreground">{authUser?.email}</span> to confirm.
+                documents and applications, and signs you out everywhere. This can't be undone.{" "}
+                {authUserError ? (
+                  "Your sign-in email could not be loaded — refresh the page before deleting your account."
+                ) : (
+                  <>
+                    Type <span className="font-medium text-foreground">{authUser?.email}</span> to
+                    confirm.
+                  </>
+                )}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <Input
