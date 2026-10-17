@@ -167,16 +167,40 @@ function JobDetailPage() {
   const genAll = useMutation({
     mutationFn: async () => {
       const targets = roleOptions.filter((r) => r.id !== jobId);
+      const failed: string[] = [];
+      let done = 0;
+      let firstError: Error | null = null;
+      // One role failing must not strand the roles after it, so each generate is
+      // reported on its own instead of aborting the whole run.
       for (const r of targets) {
-        await generate({ data: { jobId: r.id, licenseKey: pro.key ?? "" } });
-        await qc.invalidateQueries({ queryKey: ["drafts", r.id] });
+        try {
+          await generate({ data: { jobId: r.id, licenseKey: pro.key ?? "" } });
+          await qc.invalidateQueries({ queryKey: ["drafts", r.id] });
+          done += 1;
+        } catch (err) {
+          failed.push(r.title);
+          firstError ??= err instanceof Error ? err : new Error("Couldn't tailor this role.");
+        }
       }
-      return targets.length;
+      // Nothing worked: report it exactly as before through onError.
+      if (targets.length > 0 && done === 0)
+        throw firstError ?? new Error("Couldn't tailor these roles.");
+      return { total: targets.length, done, failed };
     },
-    onSuccess: (count) =>
-      count === 0
-        ? toast.info("Add more roles on the Jobs page to tailor several at once.")
-        : toast.success(`Tailored a new version for ${count} other role${count === 1 ? "" : "s"}`),
+    onSuccess: ({ total, done, failed }) => {
+      if (total === 0) {
+        toast.info("Add more roles on the Jobs page to tailor several at once.");
+        return;
+      }
+      if (failed.length === 0) {
+        toast.success(
+          `Tailored a new version for ${done} other role${done === 1 ? "" : "s"}`,
+        );
+        return;
+      }
+      toast.success(`Tailored ${done} of ${total} roles`);
+      toast.error(`Couldn't tailor: ${failed.join(", ")} — try them individually.`);
+    },
     onError: toastProError,
   });
 
