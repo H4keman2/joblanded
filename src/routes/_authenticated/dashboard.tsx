@@ -298,7 +298,7 @@ function DashboardPage() {
           to="/jobs"
           icon={Bookmark}
           gradient="from-violet-500 to-fuchsia-500"
-          glow="hover:shadow-cyan-500/25"
+          glow="hover:shadow-violet-500/25"
         />
       </div>
 
