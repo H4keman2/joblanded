@@ -242,6 +242,7 @@ function ApplicationsPage() {
               <Label htmlFor="app-description">Job description (optional if you add a URL)</Label>
               <Textarea
                 id="app-description"
+                autoFocus
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={10}
@@ -397,13 +398,10 @@ function ApplicationsPage() {
           <p className="text-sm text-muted-foreground">Loading your applications…</p>
         ) : applications.isError ? (
           <div className="space-y-3">
-            <p className="text-sm text-destructive">
-              Couldn't load your applications:{" "}
-              {applications.error instanceof Error
-                ? applications.error.message
-                : "something went wrong."}
+            <p className="text-sm text-muted-foreground">
+              We couldn't load your applications. Your connection may have dropped.
             </p>
-            <Button size="sm" variant="outline" onClick={() => void applications.refetch()}>
+            <Button size="sm" variant="secondary" onClick={() => void applications.refetch()}>
               Try again
             </Button>
           </div>
