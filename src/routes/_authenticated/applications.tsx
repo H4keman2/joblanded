@@ -19,13 +19,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Hint } from "@/components/ui/hint";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { setJobArchived } from "@/lib/jobs.functions";
+import { RejectArchiveDialog } from "@/components/jobs/RejectArchiveDialog";
 import { toast } from "sonner";
 import { Loader2, Plus, FileText, Briefcase, ClipboardList } from "lucide-react";
 
@@ -180,6 +175,33 @@ function ApplicationsPage() {
     onSuccess: invalidateAll,
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const archiveFn = useServerFn(setJobArchived);
+  const archiveMutation = useMutation({
+    mutationFn: (input: { id: string; archived: boolean }) => archiveFn({ data: input }),
+    onSuccess: (_r, v) => {
+      if (v.archived) toast.success("Posting archived");
+      invalidateAll();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const [rejectTarget, setRejectTarget] = useState<{
+    appId: string;
+    jobId: string;
+    title: string;
+  } | null>(null);
+
+  function handleRejectDecide(archiveIt: boolean) {
+    if (!rejectTarget) return;
+    statusMutation.mutate({ id: rejectTarget.appId, status: "rejected" });
+    if (archiveIt) {
+      archiveMutation.mutate({ id: rejectTarget.jobId, archived: true });
+    } else {
+      toast.success("Marked rejected");
+    }
+    setRejectTarget(null);
+  }
 
   const funnelTotal = stats
     ? FUNNEL_STAGES.reduce((sum, s) => sum + stats.applications[s.key], 0)
@@ -455,45 +477,33 @@ function ApplicationsPage() {
                           Tailor
                         </Link>
                       </Button>
-                      {submitted && (
-                        <Select
-                          value={app.status}
-                          onValueChange={(value) =>
-                            statusMutation.mutate({
-                              id: app.id,
-                              status: value as ApplicationStatus,
-                            })
-                          }
-                        >
-                          <SelectTrigger
-                            className="h-8 w-40 text-xs"
-                            aria-label={`Status for ${job?.title ?? "Untitled role"}`}
-                          >
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="applied">Applied</SelectItem>
-                            <SelectItem value="interviewing">Interviewing</SelectItem>
-                            <SelectItem value="offer">Offer</SelectItem>
-                            <SelectItem value="rejected">Rejected</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      )}
-                      <Hint tip="Toggle on once you've actually submitted this application to start tracking its status.">
-                        <label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                          <Switch
-                            checked={submitted}
+                      <div
+                        className="flex flex-wrap items-center gap-1"
+                        role="group"
+                        aria-label={`Status for ${job?.title ?? "Untitled role"}`}
+                      >
+                        {(["applied", "interviewing", "offer", "rejected"] as const).map((s) => (
+                          <Button
+                            key={s}
+                            size="sm"
+                            variant={app.status === s ? "default" : "outline"}
+                            className="h-8 text-xs"
                             disabled={statusMutation.isPending}
-                            onCheckedChange={(checked) =>
-                              statusMutation.mutate({
-                                id: app.id,
-                                status: checked ? "applied" : "saved",
-                              })
+                            aria-pressed={app.status === s}
+                            onClick={() =>
+                              s === "rejected"
+                                ? setRejectTarget({
+                                    appId: app.id,
+                                    jobId: app.job_id,
+                                    title: job?.title ?? "Untitled role",
+                                  })
+                                : statusMutation.mutate({ id: app.id, status: s })
                             }
-                          />
-                          {STATUS_LABELS[app.status as ApplicationStatus] ?? app.status}
-                        </label>
-                      </Hint>
+                          >
+                            {STATUS_LABELS[s]}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   </div>
 
@@ -547,6 +557,14 @@ function ApplicationsPage() {
           </ul>
         )}
       </div>
+
+      <RejectArchiveDialog
+        open={Boolean(rejectTarget)}
+        onOpenChange={(o) => !o && setRejectTarget(null)}
+        jobTitle={rejectTarget?.title ?? ""}
+        pending={statusMutation.isPending || archiveMutation.isPending}
+        onDecide={handleRejectDecide}
+      />
     </div>
   );
 }

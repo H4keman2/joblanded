@@ -22,7 +22,22 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Pay-range buckets for the smart filters. Only buckets that actually match
+// at least one saved posting are offered, so the filters always fit the list.
+const PAY_BUCKETS = [
+  { id: "under150", label: "Under $150K", test: (p: number) => p < 150_000 },
+  { id: "150to200", label: "$150K – $200K", test: (p: number) => p >= 150_000 && p < 200_000 },
+  { id: "200plus", label: "$200K+", test: (p: number) => p >= 200_000 },
+] as const;
 
 // The server checks the link too, but a bare "example.com/jobs" is almost always
 // a missing https:// rather than a real posting — catch it here with copy a person
@@ -65,6 +80,10 @@ function JobsPage() {
   const [open, setOpen] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [editing, setEditing] = useState<EditableJob | null>(null);
+  const [search, setSearch] = useState("");
+  const [payFilter, setPayFilter] = useState<string>("any");
+  const [companyFilter, setCompanyFilter] = useState<string>("any");
+  const [locationFilter, setLocationFilter] = useState<string>("any");
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
 
@@ -72,10 +91,74 @@ function JobsPage() {
     () => (jobs.data ?? []).filter((j) => j.archived_at).length,
     [jobs.data],
   );
-  const visibleJobs = useMemo(
+  const baseJobs = useMemo(
     () => (jobs.data ?? []).filter((j) => (showArchived ? j.archived_at : !j.archived_at)),
     [jobs.data, showArchived],
   );
+
+  // Smart filters, generated from the postings actually in the list.
+  const companies = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const j of baseJobs) {
+      if (j.company) counts.set(j.company, (counts.get(j.company) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [baseJobs]);
+  const locations = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const j of baseJobs) {
+      if (j.location) counts.set(j.location, (counts.get(j.location) ?? 0) + 1);
+    }
+    return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [baseJobs]);
+  const payOptions = useMemo(() => {
+    const buckets = PAY_BUCKETS.filter((b) =>
+      baseJobs.some((j) => {
+        const p = j.pay_min ?? j.pay_max;
+        return p != null && b.test(p);
+      }),
+    );
+    const noPay = baseJobs.some((j) => (j.pay_min ?? j.pay_max) == null);
+    return { buckets, noPay };
+  }, [baseJobs]);
+
+  const filteredJobs = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return baseJobs.filter((job) => {
+      if (
+        term &&
+        ![job.title, job.company, job.location]
+          .filter(Boolean)
+          .some((v) => v!.toLowerCase().includes(term))
+      )
+        return false;
+      if (companyFilter !== "any" && job.company !== companyFilter) return false;
+      if (locationFilter !== "any" && job.location !== locationFilter) return false;
+      if (payFilter !== "any") {
+        const pay = job.pay_min ?? job.pay_max;
+        if (payFilter === "none") {
+          if (pay != null) return false;
+        } else {
+          const bucket = PAY_BUCKETS.find((b) => b.id === payFilter);
+          if (pay == null || !bucket || !bucket.test(pay)) return false;
+        }
+      }
+      return true;
+    });
+  }, [baseJobs, search, companyFilter, locationFilter, payFilter]);
+
+  const filtersActive =
+    search.trim() !== "" ||
+    payFilter !== "any" ||
+    companyFilter !== "any" ||
+    locationFilter !== "any";
+
+  function clearFilters() {
+    setSearch("");
+    setPayFilter("any");
+    setCompanyFilter("any");
+    setLocationFilter("any");
+  }
 
   const archiveMutation = useMutation({
     mutationFn: (input: { id: string; archived: boolean }) => archive({ data: input }),
@@ -223,120 +306,217 @@ function JobsPage() {
                 Try again
               </Button>
             </div>
-          ) : visibleJobs.length === 0 ? (
+          ) : baseJobs.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               {showArchived
                 ? "Nothing archived."
                 : "No jobs saved yet. Paste your first posting above to start tailoring against it."}
             </p>
           ) : (
-            <ul className="divide-y divide-border">
-              {visibleJobs.map((job) => (
-                <li
-                  key={job.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
-                >
-                  <div>
-                    <Link
-                      to="/jobs/$jobId"
-                      params={{ jobId: job.id }}
-                      className="font-medium hover:text-primary"
-                    >
-                      {job.title}
-                    </Link>
-                    <p className="text-xs text-muted-foreground">
-                      {[job.company, job.location].filter(Boolean).join(" · ") ||
-                        "No company listed"}
-                      {job.pay_min || job.pay_max
-                        ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
-                            job.pay_max && job.pay_min ? `–$${job.pay_max.toLocaleString()}` : ""
-                          }`
-                        : ""}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {!job.archived_at && (
-                      <Button asChild size="sm" variant="secondary">
-                        <Link
-                          to="/jobs/$jobId"
-                          params={{ jobId: job.id }}
-                          aria-label={`Tailor resume and compare drafts for ${job.title}`}
-                        >
-                          Tailor & compare
-                        </Link>
-                      </Button>
-                    )}
-                    <Hint tip="Fix the title, company, pay or link we read from this posting.">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        aria-label={`Edit ${job.title}`}
-                        onClick={() => setEditing(job)}
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative min-w-0 flex-1 basis-48">
+                  <Search
+                    className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search title, company, location"
+                    aria-label="Search saved postings"
+                    className="h-9 w-full pl-8"
+                  />
+                </div>
+                {payOptions.buckets.length > 0 && (
+                  <Select value={payFilter} onValueChange={setPayFilter}>
+                    <SelectTrigger className="h-9 w-40" aria-label="Filter by pay range">
+                      <SelectValue placeholder="Pay range" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">Any pay</SelectItem>
+                      {payOptions.buckets.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.label}
+                        </SelectItem>
+                      ))}
+                      {payOptions.noPay && <SelectItem value="none">No pay listed</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                )}
+                {companies.length > 1 && (
+                  <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                    <SelectTrigger className="h-9 w-44" aria-label="Filter by company">
+                      <SelectValue placeholder="Company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">All companies</SelectItem>
+                      {companies.map(([name, count]) => (
+                        <SelectItem key={name} value={name}>
+                          {name} ({count})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {locations.length > 1 && (
+                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                    <SelectTrigger className="h-9 w-44" aria-label="Filter by location">
+                      <SelectValue placeholder="Location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">All locations</SelectItem>
+                      {locations.map(([name, count]) => (
+                        <SelectItem key={name} value={name}>
+                          {name} ({count})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                {filtersActive && (
+                  <Button size="sm" variant="ghost" onClick={clearFilters}>
+                    Clear
+                  </Button>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">
+                {filteredJobs.length} of {baseJobs.length}{" "}
+                {baseJobs.length === 1 ? "posting" : "postings"}
+              </p>
+              {filteredJobs.length === 0 ? (
+                <p className="mt-3 text-sm text-muted-foreground">
+                  No postings match those filters.{" "}
+                  <button
+                    type="button"
+                    className="text-primary underline underline-offset-4"
+                    onClick={clearFilters}
+                  >
+                    Clear filters
+                  </button>
+                </p>
+              ) : (
+                <div className="mt-2 max-h-[560px] overflow-y-auto pr-1">
+                  <ul className="divide-y divide-border">
+                    {filteredJobs.map((job) => (
+                      <li
+                        key={job.id}
+                        className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
                       >
-                        <Pencil aria-hidden="true" className="h-4 w-4" />
-                      </Button>
-                    </Hint>
-                    <Hint
-                      tip={
-                        job.archived_at
-                          ? "Put this posting back in your active list."
-                          : "Hide this posting from your active list. Nothing is deleted."
-                      }
-                    >
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        aria-label={`${job.archived_at ? "Restore" : "Archive"} ${job.title}`}
-                        disabled={archiveMutation.isPending}
-                        onClick={() =>
-                          archiveMutation.mutate({ id: job.id, archived: !job.archived_at })
-                        }
-                      >
-                        {job.archived_at ? (
-                          <ArchiveRestore aria-hidden="true" className="h-4 w-4" />
-                        ) : (
-                          <Archive aria-hidden="true" className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </Hint>
-                    <AlertDialog>
-                      <Hint tip="Delete this saved job and its tailored versions.">
-                        <AlertDialogTrigger asChild>
-                          <Button size="icon" variant="ghost" aria-label={`Delete ${job.title}`}>
-                            <Trash2 aria-hidden="true" className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                      </Hint>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete this job?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This removes "{job.title}"{job.company ? ` at ${job.company}` : ""}{" "}
-                            along with every tailored resume and cover letter generated for it. This
-                            can't be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel disabled={deleteMutation.isPending}>
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                            disabled={deleteMutation.isPending}
-                            onClick={() => deleteMutation.mutate(job.id)}
+                        <div>
+                          <Link
+                            to="/jobs/$jobId"
+                            params={{ jobId: job.id }}
+                            className="font-medium hover:text-primary"
                           >
-                            {deleteMutation.isPending ? (
-                              <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
-                            ) : null}
-                            Delete job
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                            {job.title}
+                          </Link>
+                          <p className="text-xs text-muted-foreground">
+                            {[job.company, job.location].filter(Boolean).join(" · ") ||
+                              "No company listed"}
+                            {job.pay_min || job.pay_max
+                              ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
+                                  job.pay_max && job.pay_min
+                                    ? `–$${job.pay_max.toLocaleString()}`
+                                    : ""
+                                }`
+                              : ""}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {!job.archived_at && (
+                            <Button asChild size="sm" variant="secondary">
+                              <Link
+                                to="/jobs/$jobId"
+                                params={{ jobId: job.id }}
+                                aria-label={`Tailor resume and compare drafts for ${job.title}`}
+                              >
+                                Tailor & compare
+                              </Link>
+                            </Button>
+                          )}
+                          <Hint tip="Fix the title, company, pay or link we read from this posting.">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label={`Edit ${job.title}`}
+                              onClick={() => setEditing(job)}
+                            >
+                              <Pencil aria-hidden="true" className="h-4 w-4" />
+                            </Button>
+                          </Hint>
+                          <Hint
+                            tip={
+                              job.archived_at
+                                ? "Put this posting back in your active list."
+                                : "Hide this posting from your active list. Nothing is deleted."
+                            }
+                          >
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              aria-label={`${job.archived_at ? "Restore" : "Archive"} ${job.title}`}
+                              disabled={archiveMutation.isPending}
+                              onClick={() =>
+                                archiveMutation.mutate({ id: job.id, archived: !job.archived_at })
+                              }
+                            >
+                              {job.archived_at ? (
+                                <ArchiveRestore aria-hidden="true" className="h-4 w-4" />
+                              ) : (
+                                <Archive aria-hidden="true" className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </Hint>
+                          <AlertDialog>
+                            <Hint tip="Delete this saved job and its tailored versions.">
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  aria-label={`Delete ${job.title}`}
+                                >
+                                  <Trash2 aria-hidden="true" className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                            </Hint>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete this job?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This removes "{job.title}"
+                                  {job.company ? ` at ${job.company}` : ""} along with every
+                                  tailored resume and cover letter generated for it. This can't be
+                                  undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel disabled={deleteMutation.isPending}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  disabled={deleteMutation.isPending}
+                                  onClick={() => deleteMutation.mutate(job.id)}
+                                >
+                                  {deleteMutation.isPending ? (
+                                    <Loader2
+                                      aria-hidden="true"
+                                      className="mr-1.5 size-4 animate-spin"
+                                    />
+                                  ) : null}
+                                  Delete job
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
