@@ -165,8 +165,41 @@ function ApplicationsPage() {
 
   const statusMutation = useMutation({
     mutationFn: (input: { id: string; status: ApplicationStatus }) => setStatus({ data: input }),
+    // Update the list and the funnel instantly; the server refetch on success
+    // is the source of truth and a failure rolls everything back.
+    onMutate: async (input) => {
+      await qc.cancelQueries({ queryKey: ["applications"] });
+      await qc.cancelQueries({ queryKey: ["application-stats"] });
+      const prevApps = qc.getQueryData(["applications"]);
+      const prevStats = qc.getQueryData(["application-stats"]);
+      const prevApp = Array.isArray(prevApps)
+        ? (prevApps as { id: string; status: string }[]).find((a) => a.id === input.id)
+        : undefined;
+      qc.setQueryData(["applications"], (old: unknown) =>
+        Array.isArray(old)
+          ? old.map((a: { id: string }) => (a.id === input.id ? { ...a, status: input.status } : a))
+          : old,
+      );
+      if (prevApp && prevApp.status !== input.status) {
+        qc.setQueryData(["application-stats"], (old: unknown) => {
+          if (!old || typeof old !== "object") return old;
+          const o = old as { applications: Record<string, number> };
+          const applications = { ...o.applications };
+          const from = applications[prevApp.status];
+          const to = applications[input.status];
+          if (typeof from === "number") applications[prevApp.status] = from - 1;
+          if (typeof to === "number") applications[input.status] = to + 1;
+          return { ...o, applications };
+        });
+      }
+      return { prevApps, prevStats };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prevApps) qc.setQueryData(["applications"], ctx.prevApps);
+      if (ctx?.prevStats) qc.setQueryData(["application-stats"], ctx.prevStats);
+      toast.error(e.message || "Couldn't update the status — try again.");
+    },
     onSuccess: invalidateAll,
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const followUpMutation = useMutation({
