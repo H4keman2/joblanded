@@ -73,7 +73,7 @@ function AccountPage() {
     queryFn: () => fetchProfile(),
   });
 
-  const { data: authUser } = useQuery({
+  const { data: authUser, isError: authUserError } = useQuery({
     queryKey: ["auth-user"],
     queryFn: async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -296,7 +296,10 @@ function AccountPage() {
 
         <div className="space-y-2 border-t border-border pt-5">
           <Label>Email address</Label>
-          <p className="text-sm text-foreground">{authUser?.email ?? "Loading…"}</p>
+          <p className="text-sm text-foreground">
+            {authUser?.email ??
+              (authUserError ? "Couldn't load your sign-in email." : "Loading…")}
+          </p>
           {changingEmail ? (
             <div className="mt-2 space-y-3">
               <Input
