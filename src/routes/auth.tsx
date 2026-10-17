@@ -77,12 +77,26 @@ function AuthPage() {
           setLoading(false);
           return;
         }
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: `${window.location.origin}/applications` },
         });
         if (error) throw error;
+        if (data.user?.identities?.length === 0) {
+          // Supabase deliberately sends no confirmation email when the address
+          // is already registered — say so instead of pretending one is coming.
+          toast.error("An account with this email already exists.", {
+            description: "Sign in instead — or reset your password if you've forgotten it.",
+            action: {
+              label: "Sign in",
+              onClick: () => switchMode("signin"),
+            },
+            duration: 10000,
+          });
+          setLoading(false);
+          return;
+        }
         toast.success("Account created. Let's set up your resume.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
