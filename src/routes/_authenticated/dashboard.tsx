@@ -289,8 +289,8 @@ function DashboardPage() {
           label="Interviews"
           to="/applications"
           icon={Users}
-          gradient="from-amber-500 to-yellow-400"
-          glow="hover:shadow-amber-500/25"
+          gradient="from-green-400 to-emerald-600"
+          glow="hover:shadow-emerald-500/25"
         />
         <StatCard
           value={String(stats.savedPostings)}
