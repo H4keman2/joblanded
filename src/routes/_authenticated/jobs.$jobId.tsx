@@ -231,7 +231,7 @@ function JobDetailPage() {
             to="/jobs"
             className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="mr-1 h-3.5 w-3.5" /> All jobs
+            <ArrowLeft aria-hidden="true" className="mr-1 h-3.5 w-3.5" /> All jobs
           </Link>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
@@ -415,7 +415,7 @@ function JobDetailPage() {
                       disabled={gen.isPending}
                       onClick={() => gen.mutate({ optimizeFromId: primaryEntry.id })}
                     >
-                      <Wand2 className="mr-1.5 h-4 w-4" />
+                      <Wand2 aria-hidden="true" className="mr-1.5 h-4 w-4" />
                       ATS-optimize this draft
                     </Button>
                   </Hint>
