@@ -10,9 +10,9 @@ import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Hint } from "@/components/ui/hint";
 import { toast } from "sonner";
-import { ProUpsell } from "@/components/ProUpsell";
+import { ProFeatureSection } from "@/components/ProFeatureSection";
 import { usePro, toastProError } from "@/lib/pro-store";
-import { ExternalLink, Loader2, Plus, Search } from "lucide-react";
+import { Briefcase, ExternalLink, Loader2, Plus, Search } from "lucide-react";
 
 type Parsed = { titles?: string[]; location?: string | null };
 
@@ -121,7 +121,49 @@ export function JobRecommendations() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  if (pro.loaded && !pro.isPro) return <ProUpsell feature="AI job recommendations" />;
+  if (pro.loaded && !pro.isPro) {
+    return (
+      <ProFeatureSection
+        icon={<Briefcase className="h-5 w-5" />}
+        title="AI job recommendations"
+        description="Live postings pulled and ranked against your resume — so you stop scrolling and start applying to the right roles."
+        benefits={[
+          {
+            title: "Ranked against your resume",
+            body: "Every posting gets a fit score with the reason spelled out — no more guessing which roles are worth your time.",
+          },
+          {
+            title: "Refine by keyword, location, pay",
+            body: "Narrow the search to the roles, places, and salary bands you actually want.",
+          },
+          {
+            title: "One-tap save",
+            body: "Good match? Save it straight to your Jobs page for tailoring.",
+          },
+        ]}
+        feature="AI job recommendations"
+        preview={
+          <>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium">AI Product Manager · $160K–$200K</p>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                92% fit
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Your multimodal data-capture background maps directly to their AI roadmap…
+            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-medium">Product Manager, Applied AI · Remote</p>
+              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600">
+                64% fit
+              </span>
+            </div>
+          </>
+        }
+      />
+    );
+  }
 
   return (
     <div className="panel space-y-5 p-8">

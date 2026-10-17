@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { usePro, toastProError } from "@/lib/pro-store";
 import { getResumeReview, getTailoringPreview } from "@/lib/resume-review.functions";
 import { listJobs } from "@/lib/jobs.functions";
-import { ProUpsell } from "@/components/ProUpsell";
+import { ProFeatureSection } from "@/components/ProFeatureSection";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Hint } from "@/components/ui/hint";
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, Gauge, Lightbulb, Wand2, Eye, Check, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, Gauge, Lightbulb, Wand2, ArrowRight } from "lucide-react";
 
 type SkillGroup = { label: string; skills: string[] };
 type Suggestion = { priority: "high" | "medium" | "low"; area: string; issue: string; fix: string };
@@ -116,28 +116,16 @@ const PRO_BENEFITS = [
   },
 ];
 
-function LockedPreview() {
+function ReviewLocked() {
   return (
-    <div className="space-y-6">
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {PRO_BENEFITS.map((b) => (
-          <li
-            key={b.title}
-            className="flex items-start gap-2.5 rounded-lg border border-border p-3"
-          >
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Check aria-hidden="true" className="h-3 w-3 text-primary" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold">{b.title}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{b.body}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
-
-      <div className="relative overflow-hidden rounded-lg border border-border">
-        <div className="pointer-events-none select-none p-4 blur-sm" aria-hidden="true">
+    <ProFeatureSection
+      icon={<Sparkles className="h-5 w-5" />}
+      title="AI Resume Review"
+      description="A deeper AI pass over your resume: richer extraction, an ATS score, ranked improvements — and a live look at how Pro tailoring rewrites your lines for a real posting."
+      benefits={PRO_BENEFITS}
+      feature="AI Resume Review"
+      preview={
+        <>
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-900">
               Technical
@@ -156,16 +144,9 @@ function LockedPreview() {
           <p className="mt-2 text-sm text-muted-foreground">
             Suggestion: your summary buries the $1B product launch — lead with it…
           </p>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center bg-background/40">
-          <Badge className="text-xs">
-            <Eye aria-hidden="true" className="mr-1 h-3 w-3" /> Preview
-          </Badge>
-        </div>
-      </div>
-
-      <ProUpsell feature="AI Resume Review" />
-    </div>
+        </>
+      }
+    />
   );
 }
 
@@ -245,7 +226,7 @@ export function ResumeReview({
       {!pro.loaded ? (
         <p className="text-sm text-muted-foreground">Checking your Pro status…</p>
       ) : !pro.isPro ? (
-        <LockedPreview />
+        <ReviewLocked />
       ) : !hasResume ? (
         <p className="text-sm text-muted-foreground">
           Upload and parse your resume above first — the AI review needs something to read.

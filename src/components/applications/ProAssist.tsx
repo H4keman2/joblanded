@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { usePro, toastProError } from "@/lib/pro-store";
 import { getInterviewPrep, getOfferCheck } from "@/lib/application-assist.functions";
 import { listJobs } from "@/lib/jobs.functions";
-import { ProUpsell } from "@/components/ProUpsell";
+import { ProFeatureSection } from "@/components/ProFeatureSection";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,15 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Sparkles,
-  Loader2,
-  MessagesSquare,
-  BadgeDollarSign,
-  Check,
-  Eye,
-  ChevronDown,
-} from "lucide-react";
+import { Sparkles, Loader2, MessagesSquare, BadgeDollarSign, ChevronDown } from "lucide-react";
 
 type PrepQuestion = { question: string; why: string; angle: string };
 type PrepResult = {
@@ -100,48 +92,33 @@ const PRO_BENEFITS = [
   },
 ];
 
-function LockedPreview() {
+function AssistLocked() {
   return (
-    <div className="space-y-6">
-      <ul className="grid gap-3 sm:grid-cols-2">
-        {PRO_BENEFITS.map((b) => (
-          <li
-            key={b.title}
-            className="flex items-start gap-2.5 rounded-lg border border-border p-3"
-          >
-            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
-              <Check aria-hidden="true" className="h-3 w-3 text-primary" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold">{b.title}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{b.body}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
-
-      <div className="relative overflow-hidden rounded-lg border border-border">
-        <div className="pointer-events-none select-none space-y-2 p-4 blur-sm" aria-hidden="true">
-          <p className="text-sm font-medium">“Walk me through a product you shipped end-to-end.”</p>
+    <ProFeatureSection
+      icon={<Sparkles className="h-5 w-5" />}
+      title="Interview prep & offer check"
+      description="When a posting turns into interviews \u2014 or an offer \u2014 Pro helps you walk in ready and negotiate with numbers."
+      benefits={PRO_BENEFITS}
+      feature="Interview prep & offer check"
+      preview={
+        <>
+          <p className="text-sm font-medium">
+            \u201cWalk me through a product you shipped end-to-end.\u201d
+          </p>
           <p className="text-xs text-muted-foreground">
-            Why they ask: ownership and follow-through…
+            Why they ask: ownership and follow-through\u2026
           </p>
           <p className="text-sm">
             <span className="rounded bg-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-950">
               In line
             </span>{" "}
-            <span className="text-muted-foreground">$165K sits mid-range — negotiating room…</span>
+            <span className="text-muted-foreground">
+              $165K sits mid-range \u2014 negotiating room\u2026
+            </span>
           </p>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center bg-background/40">
-          <Badge className="text-xs">
-            <Eye aria-hidden="true" className="mr-1 h-3 w-3" /> Preview
-          </Badge>
-        </div>
-      </div>
-
-      <ProUpsell feature="Interview prep & offer check" />
-    </div>
+        </>
+      }
+    />
   );
 }
 
@@ -197,6 +174,15 @@ export function ProAssist() {
 
   const baseValid = Number(base) > 0;
 
+  if (!pro.loaded) {
+    return (
+      <section className="panel p-6" aria-label="Interview prep & offer check">
+        <p className="text-sm text-muted-foreground">Checking your Pro status…</p>
+      </section>
+    );
+  }
+  if (!pro.isPro) return <AssistLocked />;
+
   return (
     <section className="panel space-y-6 p-6" aria-labelledby="pro-assist-heading">
       <div>
@@ -213,11 +199,7 @@ export function ProAssist() {
         </p>
       </div>
 
-      {!pro.loaded ? (
-        <p className="text-sm text-muted-foreground">Checking your Pro status…</p>
-      ) : !pro.isPro ? (
-        <LockedPreview />
-      ) : (
+      {
         <div className="grid gap-6 lg:grid-cols-2">
           {/* Interview prep */}
           <div className="space-y-4 rounded-lg border border-border p-4">
@@ -437,7 +419,7 @@ export function ProAssist() {
             )}
           </div>
         </div>
-      )}
+      }
     </section>
   );
 }

@@ -16,7 +16,7 @@ import { ArrowLeft, Loader2, Layers, Sparkles, Wand2 } from "lucide-react";
 import { generateDraft, getJob, listDrafts, listJobs, rankRoles } from "@/lib/jobs.functions";
 import { DraftCard, Hint, type TailorDraft } from "@/components/tailor/DraftCard";
 import { ApplyPanel } from "@/components/jobs/ApplyPanel";
-import { ProUpsell } from "@/components/ProUpsell";
+import { ProFeatureSection } from "@/components/ProFeatureSection";
 import { usePro, toastProError } from "@/lib/pro-store";
 
 export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
@@ -328,67 +328,96 @@ function JobDetailPage() {
           )}
         </div>
 
-        <div className="panel p-8">
-          {needsConfirm && (
-            <div className="mb-5 rounded-lg border border-border bg-secondary/40 p-4">
-              <p className="text-sm font-medium">Confirm the role before generating</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {bestMatch && bestMatch.id !== jobId
-                  ? `Your resume doesn't clearly favour one posting — ${bestMatch.title} scores ${bestMatch.fit}% fit, close to the others. Tailor for this role or switch?`
-                  : "Your resume doesn't clearly favour one posting. Confirm you want to tailor for this role."}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" onClick={() => setConfirmedRole(jobId)}>
-                  Yes, tailor for {job.data?.title ?? "this role"}
-                </Button>
-                {bestMatch && bestMatch.id !== jobId && (
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => {
-                      pickedManually.current = true;
-                      setConfirmedRole(bestMatch.id);
-                      setSelected(0);
-                      setCompare(null);
-                      void navigate({ to: "/jobs/$jobId", params: { jobId: bestMatch.id } });
-                    }}
-                  >
-                    Use {bestMatch.title} instead
+        {!pro.isPro && pro.loaded ? (
+          <ProFeatureSection
+            icon={<Wand2 className="h-5 w-5" />}
+            title="AI resume tailoring"
+            description="Generate tailored resume versions for this posting — each with a different framing angle — and compare them side by side."
+            benefits={[
+              {
+                title: "Framing angles, not just keywords",
+                body: "Each version reframes the same resume for this role, so you can pick the story that lands.",
+              },
+              {
+                title: "Side-by-side compare",
+                body: "Word-level diffs show exactly what changed between versions.",
+              },
+              {
+                title: "ATS-optimize any draft",
+                body: "One tap rewrites a version to fix its weakest readability flags and missing keywords.",
+              },
+            ]}
+            feature="Tailoring for this job"
+            preview={
+              <>
+                <p className="text-sm font-medium">Version 2 · Leadership angle</p>
+                <p className="text-sm">
+                  Led a <mark className="rounded bg-emerald-200 px-0.5">cross-functional</mark>{" "}
+                  launch of an industry-first{" "}
+                  <mark className="rounded bg-emerald-200 px-0.5">multimodal data capture</mark>{" "}
+                  platform…
+                </p>
+                <p className="text-xs text-muted-foreground">ATS: 84 · 12 keywords matched</p>
+              </>
+            }
+          />
+        ) : (
+          <div className="panel p-8">
+            {needsConfirm && (
+              <div className="mb-5 rounded-lg border border-border bg-secondary/40 p-4">
+                <p className="text-sm font-medium">Confirm the role before generating</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {bestMatch && bestMatch.id !== jobId
+                    ? `Your resume doesn't clearly favour one posting — ${bestMatch.title} scores ${bestMatch.fit}% fit, close to the others. Tailor for this role or switch?`
+                    : "Your resume doesn't clearly favour one posting. Confirm you want to tailor for this role."}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button size="sm" onClick={() => setConfirmedRole(jobId)}>
+                    Yes, tailor for {job.data?.title ?? "this role"}
                   </Button>
-                )}
+                  {bestMatch && bestMatch.id !== jobId && (
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        pickedManually.current = true;
+                        setConfirmedRole(bestMatch.id);
+                        setSelected(0);
+                        setCompare(null);
+                        void navigate({ to: "/jobs/$jobId", params: { jobId: bestMatch.id } });
+                      }}
+                    >
+                      Use {bestMatch.title} instead
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Version history
-            </span>
-            {versions.map((v, i) => (
-              <Hint
-                key={v.id}
-                tip={`Angle: ${normalize(v.content).angle}. Same resume and posting — only the framing changes.`}
-              >
-                <button
-                  onClick={() => setSelected(i)}
-                  aria-pressed={i === selected}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    i === selected
-                      ? "bg-primary text-primary-foreground"
-                      : i === compare
-                        ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
-                        : "bg-background text-muted-foreground hover:text-foreground"
-                  }`}
+            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Version history
+              </span>
+              {versions.map((v, i) => (
+                <Hint
+                  key={v.id}
+                  tip={`Angle: ${normalize(v.content).angle}. Same resume and posting — only the framing changes.`}
                 >
-                  {label(i)}
-                </button>
-              </Hint>
-            ))}
+                  <button
+                    onClick={() => setSelected(i)}
+                    aria-pressed={i === selected}
+                    className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                      i === selected
+                        ? "bg-primary text-primary-foreground"
+                        : i === compare
+                          ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
+                          : "bg-background text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {label(i)}
+                  </button>
+                </Hint>
+              ))}
 
-            {!pro.isPro && pro.loaded ? (
-              <div className="w-full">
-                <ProUpsell feature="Tailoring for this job" />
-              </div>
-            ) : (
               <>
                 <Hint
                   tip={
@@ -443,100 +472,100 @@ function JobDetailPage() {
                   </Hint>
                 )}
               </>
-            )}
 
-            {versions.length > 1 && (
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-pressed={compare !== null}
-                onClick={() =>
-                  setCompare((c) =>
-                    c === null
-                      ? (versions.map((_, i) => i).find((i) => i !== selected) ?? null)
-                      : null,
-                  )
-                }
-              >
-                {compare === null ? "Compare" : "Exit compare"}
-              </Button>
-            )}
-
-            {compare !== null && (
-              <Hint tip="Word-level diff between the two versions: text only in the other version is struck through, text unique to this one is highlighted.">
+              {versions.length > 1 && (
                 <Button
                   size="sm"
-                  variant={showDiff ? "secondary" : "ghost"}
-                  aria-pressed={showDiff}
-                  onClick={() => setShowDiff((d) => !d)}
+                  variant="ghost"
+                  aria-pressed={compare !== null}
+                  onClick={() =>
+                    setCompare((c) =>
+                      c === null
+                        ? (versions.map((_, i) => i).find((i) => i !== selected) ?? null)
+                        : null,
+                    )
+                  }
                 >
-                  {showDiff ? "Hide changes" : "Highlight changes"}
+                  {compare === null ? "Compare" : "Exit compare"}
                 </Button>
-              </Hint>
-            )}
-          </div>
+              )}
 
-          {drafts.isLoading ? (
-            <p className="mt-6 text-sm text-muted-foreground">Loading versions…</p>
-          ) : drafts.isError ? (
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <p className="text-sm text-muted-foreground">
-                We could not load your tailored versions. Your connection may have dropped.
-              </p>
-              <Button size="sm" variant="secondary" onClick={() => void drafts.refetch()}>
-                Try again
-              </Button>
-            </div>
-          ) : !primary ? (
-            <p className="mt-6 max-w-xl text-sm text-muted-foreground">
-              No tailored versions yet. Generate one to run your parsed resume against this posting
-              — you'll get a rewritten summary, cover opener, ATS readability score and keyword
-              coverage. Make sure your{" "}
-              <Link to="/resume" className="text-primary underline">
-                resume
-              </Link>{" "}
-              is uploaded and parsed first.
-            </p>
-          ) : (
-            <div className={`mt-5 grid gap-6 ${secondary ? "md:grid-cols-2" : ""}`}>
-              <DraftCard
-                label={label(selected)}
-                draft={primary}
-                diffAgainst={secondary && showDiff ? secondary : undefined}
-                fileNameHint={fileNameFor(job.data?.title, label(selected))}
-              />
-              {secondary && compare !== null && (
-                <div className="border-t border-border pt-6 md:border-l md:border-t-0 md:pt-0 md:pl-6">
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {versions.map((v, i) =>
-                      i === selected ? null : (
-                        <button
-                          key={v.id}
-                          onClick={() => setCompare(i)}
-                          aria-pressed={i === compare}
-                          aria-label={`Compare with version ${i + 1}`}
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${
-                            i === compare
-                              ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
-                              : "bg-background text-muted-foreground hover:text-foreground"
-                          }`}
-                        >
-                          {label(i)}
-                        </button>
-                      ),
-                    )}
-                  </div>
-                  <DraftCard
-                    label={label(compare)}
-                    draft={secondary}
-                    diffAgainst={showDiff ? primary : undefined}
-                    fileNameHint={fileNameFor(job.data?.title, label(compare))}
-                  />
-                </div>
+              {compare !== null && (
+                <Hint tip="Word-level diff between the two versions: text only in the other version is struck through, text unique to this one is highlighted.">
+                  <Button
+                    size="sm"
+                    variant={showDiff ? "secondary" : "ghost"}
+                    aria-pressed={showDiff}
+                    onClick={() => setShowDiff((d) => !d)}
+                  >
+                    {showDiff ? "Hide changes" : "Highlight changes"}
+                  </Button>
+                </Hint>
               )}
             </div>
-          )}
-        </div>
+
+            {drafts.isLoading ? (
+              <p className="mt-6 text-sm text-muted-foreground">Loading versions…</p>
+            ) : drafts.isError ? (
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  We could not load your tailored versions. Your connection may have dropped.
+                </p>
+                <Button size="sm" variant="secondary" onClick={() => void drafts.refetch()}>
+                  Try again
+                </Button>
+              </div>
+            ) : !primary ? (
+              <p className="mt-6 max-w-xl text-sm text-muted-foreground">
+                No tailored versions yet. Generate one to run your parsed resume against this
+                posting — you'll get a rewritten summary, cover opener, ATS readability score and
+                keyword coverage. Make sure your{" "}
+                <Link to="/resume" className="text-primary underline">
+                  resume
+                </Link>{" "}
+                is uploaded and parsed first.
+              </p>
+            ) : (
+              <div className={`mt-5 grid gap-6 ${secondary ? "md:grid-cols-2" : ""}`}>
+                <DraftCard
+                  label={label(selected)}
+                  draft={primary}
+                  diffAgainst={secondary && showDiff ? secondary : undefined}
+                  fileNameHint={fileNameFor(job.data?.title, label(selected))}
+                />
+                {secondary && compare !== null && (
+                  <div className="border-t border-border pt-6 md:border-l md:border-t-0 md:pt-0 md:pl-6">
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {versions.map((v, i) =>
+                        i === selected ? null : (
+                          <button
+                            key={v.id}
+                            onClick={() => setCompare(i)}
+                            aria-pressed={i === compare}
+                            aria-label={`Compare with version ${i + 1}`}
+                            className={`rounded-full px-3 py-1 text-xs font-medium ${
+                              i === compare
+                                ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
+                                : "bg-background text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {label(i)}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                    <DraftCard
+                      label={label(compare)}
+                      draft={secondary}
+                      diffAgainst={showDiff ? primary : undefined}
+                      fileNameHint={fileNameFor(job.data?.title, label(compare))}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </TooltipProvider>
   );

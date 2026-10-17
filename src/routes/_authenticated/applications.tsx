@@ -59,13 +59,14 @@ export const Route = createFileRoute("/_authenticated/applications")({
 });
 
 // The application funnel bar — saved → applied → interviewing → offer, in the
-// order a role actually progresses. Rejected is shown as a separate count
-// instead of a stage, since it's an exit rather than a step forward.
+// order a role actually progresses. Rejected is an exit rather than a step
+// forward, but it gets its own segment so the bar always adds up.
 const FUNNEL_STAGES = [
   { key: "saved", label: "Saved", barClass: "bg-secondary-foreground/20" },
   { key: "applied", label: "Applied", barClass: "bg-primary/50" },
   { key: "interviewing", label: "Interviewing", barClass: "bg-amber-500" },
   { key: "offer", label: "Offer", barClass: "bg-primary" },
+  { key: "rejected", label: "Rejected", barClass: "bg-destructive/60" },
 ] as const;
 
 type JobInfo = {
@@ -418,11 +419,6 @@ function ApplicationsPage() {
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
               Application funnel
             </h2>
-            {stats.applications.rejected > 0 && (
-              <span className="text-xs text-muted-foreground">
-                {stats.applications.rejected} rejected
-              </span>
-            )}
           </div>
 
           {funnelTotal > 0 && (
