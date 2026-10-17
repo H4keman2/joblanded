@@ -297,8 +297,7 @@ function AccountPage() {
         <div className="space-y-2 border-t border-border pt-5">
           <Label>Email address</Label>
           <p className="text-sm text-foreground">
-            {authUser?.email ??
-              (authUserError ? "Couldn't load your sign-in email." : "Loading…")}
+            {authUser?.email ?? (authUserError ? "Couldn't load your sign-in email." : "Loading…")}
           </p>
           {changingEmail ? (
             <div className="mt-2 space-y-3">
