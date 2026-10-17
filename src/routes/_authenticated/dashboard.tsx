@@ -284,7 +284,7 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 p-6 text-white shadow-xl shadow-violet-500/25 sm:p-8">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-teal-700 via-cyan-600 to-sky-500 p-6 text-white shadow-xl shadow-cyan-500/25 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
@@ -335,7 +335,7 @@ function DashboardPage() {
           to="/jobs"
           icon={Bookmark}
           gradient="from-violet-500 to-fuchsia-500"
-          glow="hover:shadow-violet-500/25"
+          glow="hover:shadow-cyan-500/25"
         />
       </div>
 

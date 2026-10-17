@@ -39,13 +39,13 @@ function isFullUrl(value: string) {
 export const Route = createFileRoute("/_authenticated/applications")({
   head: () => ({
     meta: [
-      { title: "Applications — JobLanded" },
+      { title: "Application Tracker — JobLanded" },
       {
         name: "description",
         content:
           "Your job search at a glance: resume status, saved jobs, application status and follow-ups due.",
       },
-      { property: "og:title", content: "Applications — JobLanded" },
+      { property: "og:title", content: "Application Tracker — JobLanded" },
       {
         property: "og:description",
         content: "Stats, status, notes and follow-ups for every application.",
@@ -224,7 +224,7 @@ function ApplicationsPage() {
       <div className="panel p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">Applications</h1>
+            <h1 className="text-2xl font-semibold">Application Tracker</h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">{heroLine}</p>
           </div>
           <Button
