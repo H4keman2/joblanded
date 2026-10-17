@@ -147,7 +147,7 @@ function Landing() {
           </a>
         </div>
         <div className="mt-4 flex justify-center">
-          <Button asChild variant="outline" size="lg">
+          <Button asChild size="lg">
             <Link to="/pro">Get Pro — $4.99 once</Link>
           </Button>
         </div>
