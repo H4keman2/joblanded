@@ -425,15 +425,17 @@ function JobsPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           {!job.archived_at && (
-                            <Button asChild size="sm" variant="secondary">
-                              <Link
-                                to="/jobs/$jobId"
-                                params={{ jobId: job.id }}
-                                aria-label={`Tailor resume and compare drafts for ${job.title}`}
-                              >
-                                Tailor & compare
-                              </Link>
-                            </Button>
+                            <Hint tip="Open this posting to tailor your resume against it and compare versions side by side.">
+                              <Button asChild size="sm" variant="secondary">
+                                <Link
+                                  to="/jobs/$jobId"
+                                  params={{ jobId: job.id }}
+                                  aria-label={`Tailor resume and compare drafts for ${job.title}`}
+                                >
+                                  Tailor & compare
+                                </Link>
+                              </Button>
+                            </Hint>
                           )}
                           <Hint tip="Fix the title, company, pay or link we read from this posting.">
                             <Button

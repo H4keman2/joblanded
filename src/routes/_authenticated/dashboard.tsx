@@ -345,36 +345,42 @@ function DashboardPage() {
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
-                      disabled={marking}
-                      onClick={() => followUpMutation.mutate(app.id)}
-                    >
-                      {marking && (
-                        <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      )}
-                      Mark sent
-                    </Button>
-                    <Button asChild size="sm" variant="secondary">
-                      <Link
-                        to="/applications"
-                        aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
+                    <Hint tip="Marks the follow-up as sent and clears it from this list.">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
+                        disabled={marking}
+                        onClick={() => followUpMutation.mutate(app.id)}
                       >
-                        Follow up
-                      </Link>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      aria-label={`Mark ${job?.title ?? "Saved role"} as rejected`}
-                      onClick={() =>
-                        setRejectTarget({ jobId: app.job_id, title: job?.title ?? "Saved role" })
-                      }
-                    >
-                      Didn&apos;t get it
-                    </Button>
+                        {marking && (
+                          <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        )}
+                        Mark sent
+                      </Button>
+                    </Hint>
+                    <Hint tip="Open the tracker to follow up on this application.">
+                      <Button asChild size="sm" variant="secondary">
+                        <Link
+                          to="/applications"
+                          aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
+                        >
+                          Follow up
+                        </Link>
+                      </Button>
+                    </Hint>
+                    <Hint tip="Mark this application as rejected — you can archive the posting too.">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        aria-label={`Mark ${job?.title ?? "Saved role"} as rejected`}
+                        onClick={() =>
+                          setRejectTarget({ jobId: app.job_id, title: job?.title ?? "Saved role" })
+                        }
+                      >
+                        Didn&apos;t get it
+                      </Button>
+                    </Hint>
                   </div>
                 </li>
               );

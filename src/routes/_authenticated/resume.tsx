@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { getLatestResume, parseResume, saveParsedResume } from "@/lib/resume.functions";
 import { extractPdfText } from "@/lib/pdf-text";
 import { Button } from "@/components/ui/button";
+import { Hint } from "@/components/ui/hint";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -162,14 +163,20 @@ function ResumePage() {
             className="hidden"
             onChange={onFile}
           />
-          <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={extracting}>
-            {extracting ? (
-              <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-            ) : (
-              <Upload aria-hidden="true" className="size-4" />
-            )}
-            Upload PDF
-          </Button>
+          <Hint tip="Upload a PDF, TXT or Markdown file — we pull the text out automatically.">
+            <Button
+              variant="outline"
+              onClick={() => fileRef.current?.click()}
+              disabled={extracting}
+            >
+              {extracting ? (
+                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+              ) : (
+                <Upload aria-hidden="true" className="size-4" />
+              )}
+              Upload PDF
+            </Button>
+          </Hint>
           <span className="text-sm text-muted-foreground">or paste the text below</span>
         </div>
 
@@ -186,17 +193,19 @@ function ResumePage() {
                 aria-label="Resume text"
                 className="min-h-56 text-sm leading-relaxed"
               />
-              <Button
-                onClick={() => parseMutation.mutate(rawText)}
-                disabled={parseMutation.isPending || rawText.trim().length < 30}
-              >
-                {parseMutation.isPending ? (
-                  <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-                ) : (
-                  <Sparkles aria-hidden="true" className="size-4" />
-                )}
-                {parseMutation.isPending ? "Parsing…" : "Parse resume again"}
-              </Button>
+              <Hint tip="Reads your resume text and builds the structured profile used for matching.">
+                <Button
+                  onClick={() => parseMutation.mutate(rawText)}
+                  disabled={parseMutation.isPending || rawText.trim().length < 30}
+                >
+                  {parseMutation.isPending ? (
+                    <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                  ) : (
+                    <Sparkles aria-hidden="true" className="size-4" />
+                  )}
+                  {parseMutation.isPending ? "Parsing…" : "Parse resume again"}
+                </Button>
+              </Hint>
               {rawText.trim().length < 30 && !parseMutation.isPending && (
                 <p className="text-xs text-muted-foreground">
                   {30 - rawText.trim().length} more characters needed — paste your full resume text
@@ -215,17 +224,19 @@ function ResumePage() {
               className="min-h-56 text-sm leading-relaxed"
             />
 
-            <Button
-              onClick={() => parseMutation.mutate(rawText)}
-              disabled={parseMutation.isPending || rawText.trim().length < 30}
-            >
-              {parseMutation.isPending ? (
-                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-              ) : (
-                <Sparkles aria-hidden="true" className="size-4" />
-              )}
-              {parseMutation.isPending ? "Parsing…" : "Parse resume"}
-            </Button>
+            <Hint tip="Reads your resume text and builds the structured profile used for matching.">
+              <Button
+                onClick={() => parseMutation.mutate(rawText)}
+                disabled={parseMutation.isPending || rawText.trim().length < 30}
+              >
+                {parseMutation.isPending ? (
+                  <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+                ) : (
+                  <Sparkles aria-hidden="true" className="size-4" />
+                )}
+                {parseMutation.isPending ? "Parsing…" : "Parse resume"}
+              </Button>
+            </Hint>
             {rawText.trim().length < 30 && !parseMutation.isPending && (
               <p className="text-xs text-muted-foreground">
                 {30 - rawText.trim().length} more characters needed — paste your full resume text to

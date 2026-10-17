@@ -436,125 +436,149 @@ function ApplicationsPage() {
             page, or add one above, and it'll show up here.
           </p>
         ) : (
-          <ul className="divide-y divide-border">
-            {applications.data!.map((app) => {
-              const job = jobOf(app);
-              const submitted = app.status !== "saved";
-              const overdue =
-                !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < today;
-              return (
-                <li key={app.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <Link
-                        to="/jobs/$jobId"
-                        params={{ jobId: app.job_id }}
-                        className="font-medium hover:text-primary"
-                      >
-                        {job?.title ?? "Untitled role"}
-                      </Link>
-                      <p className="text-xs text-muted-foreground">{payLine(job)}</p>
-                      {(app.application_url || job?.source_url) && (
-                        <a
-                          href={app.application_url ?? job!.source_url!}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`${app.application_url ? "View application" : "View posting"} (opens in new tab)`}
-                          className="text-xs text-primary underline"
-                        >
-                          {app.application_url ? "View application" : "View posting"}
-                        </a>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <Button asChild size="sm" variant="outline">
+          <div className="max-h-[560px] overflow-y-auto pr-1">
+            <ul className="divide-y divide-border">
+              {applications.data!.map((app) => {
+                const job = jobOf(app);
+                const submitted = app.status !== "saved";
+                const overdue =
+                  !app.follow_up_sent && !!app.follow_up_date && app.follow_up_date < today;
+                return (
+                  <li key={app.id} className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div>
                         <Link
                           to="/jobs/$jobId"
                           params={{ jobId: app.job_id }}
-                          aria-label={`Tailor resume for ${job?.title ?? "Untitled role"}`}
+                          className="font-medium hover:text-primary"
                         >
-                          Tailor
+                          {job?.title ?? "Untitled role"}
                         </Link>
-                      </Button>
-                      <div
-                        className="flex flex-wrap items-center gap-1"
-                        role="group"
-                        aria-label={`Status for ${job?.title ?? "Untitled role"}`}
-                      >
-                        {(["applied", "interviewing", "offer", "rejected"] as const).map((s) => (
-                          <Button
-                            key={s}
-                            size="sm"
-                            variant={app.status === s ? "default" : "outline"}
-                            className="h-8 text-xs"
-                            disabled={statusMutation.isPending}
-                            aria-pressed={app.status === s}
-                            onClick={() =>
-                              s === "rejected"
-                                ? setRejectTarget({
-                                    appId: app.id,
-                                    jobId: app.job_id,
-                                    title: job?.title ?? "Untitled role",
-                                  })
-                                : statusMutation.mutate({ id: app.id, status: s })
-                            }
+                        <p className="text-xs text-muted-foreground">{payLine(job)}</p>
+                        {(app.application_url || job?.source_url) && (
+                          <a
+                            href={app.application_url ?? job!.source_url!}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`${app.application_url ? "View application" : "View posting"} (opens in new tab)`}
+                            className="text-xs text-primary underline"
                           >
-                            {STATUS_LABELS[s]}
+                            {app.application_url ? "View application" : "View posting"}
+                          </a>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <Hint tip="Rewrite your resume for this specific posting.">
+                          <Button asChild size="sm" variant="outline">
+                            <Link
+                              to="/jobs/$jobId"
+                              params={{ jobId: app.job_id }}
+                              aria-label={`Tailor resume for ${job?.title ?? "Untitled role"}`}
+                            >
+                              Tailor
+                            </Link>
                           </Button>
-                        ))}
+                        </Hint>
+                        <div
+                          className="flex flex-wrap items-center gap-1"
+                          role="group"
+                          aria-label={`Status for ${job?.title ?? "Untitled role"}`}
+                        >
+                          {(
+                            [
+                              {
+                                s: "applied",
+                                tip: "You've sent the application — we'll remind you to follow up in 2 business days.",
+                              },
+                              {
+                                s: "interviewing",
+                                tip: "You're talking to them — track it here through to a decision.",
+                              },
+                              {
+                                s: "offer",
+                                tip: "They made an offer — time to weigh it and reply.",
+                              },
+                              {
+                                s: "rejected",
+                                tip: "Didn't get it — marks the application rejected and offers to archive the posting.",
+                              },
+                            ] as const
+                          ).map(({ s, tip }) => (
+                            <Hint key={s} tip={tip}>
+                              <Button
+                                size="sm"
+                                variant={app.status === s ? "default" : "outline"}
+                                className="h-8 text-xs"
+                                disabled={statusMutation.isPending}
+                                aria-pressed={app.status === s}
+                                onClick={() =>
+                                  s === "rejected"
+                                    ? setRejectTarget({
+                                        appId: app.id,
+                                        jobId: app.job_id,
+                                        title: job?.title ?? "Untitled role",
+                                      })
+                                    : statusMutation.mutate({ id: app.id, status: s })
+                                }
+                              >
+                                {STATUS_LABELS[s]}
+                              </Button>
+                            </Hint>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {submitted && (app.date_applied || app.follow_up_date) && (
-                    <div className="flex flex-wrap items-center gap-3 rounded-md bg-secondary/40 px-3 py-2 text-xs">
-                      {app.date_applied && (
-                        <span className="text-muted-foreground">
-                          Applied {formatDate(app.date_applied)}
-                        </span>
-                      )}
-                      {app.follow_up_date && (
-                        <>
-                          <span
-                            className={
-                              app.follow_up_sent
-                                ? "text-muted-foreground"
-                                : overdue
-                                  ? "font-medium text-destructive"
-                                  : "font-medium text-amber-600"
-                            }
-                          >
-                            {app.follow_up_sent
-                              ? `Follow-up sent for ${formatDate(app.follow_up_date)} check-in`
-                              : overdue
-                                ? `Follow-up overdue — was due ${formatDate(app.follow_up_date)}`
-                                : `Follow up by ${formatDate(app.follow_up_date)}`}
+                    {submitted && (app.date_applied || app.follow_up_date) && (
+                      <div className="flex flex-wrap items-center gap-3 rounded-md bg-secondary/40 px-3 py-2 text-xs">
+                        {app.date_applied && (
+                          <span className="text-muted-foreground">
+                            Applied {formatDate(app.date_applied)}
                           </span>
-                          <Hint tip="Recommended 2 business days after you applied. Toggle on once you've actually sent the follow-up email.">
-                            <label className="flex items-center gap-1.5 font-medium text-muted-foreground">
-                              <Switch
-                                aria-label={`Mark follow-up sent for ${job?.title ?? "Untitled role"}`}
-                                checked={app.follow_up_sent}
-                                disabled={followUpMutation.isPending}
-                                onCheckedChange={(checked) =>
-                                  followUpMutation.mutate({
-                                    id: app.id,
-                                    follow_up_sent: checked,
-                                  })
-                                }
-                              />
-                              {app.follow_up_sent ? "Sent" : "Mark sent"}
-                            </label>
-                          </Hint>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+                        )}
+                        {app.follow_up_date && (
+                          <>
+                            <span
+                              className={
+                                app.follow_up_sent
+                                  ? "text-muted-foreground"
+                                  : overdue
+                                    ? "font-medium text-destructive"
+                                    : "font-medium text-amber-600"
+                              }
+                            >
+                              {app.follow_up_sent
+                                ? `Follow-up sent for ${formatDate(app.follow_up_date)} check-in`
+                                : overdue
+                                  ? `Follow-up overdue — was due ${formatDate(app.follow_up_date)}`
+                                  : `Follow up by ${formatDate(app.follow_up_date)}`}
+                            </span>
+                            <Hint tip="Recommended 2 business days after you applied. Toggle on once you've actually sent the follow-up email.">
+                              <label className="flex items-center gap-1.5 font-medium text-muted-foreground">
+                                <Switch
+                                  aria-label={`Mark follow-up sent for ${job?.title ?? "Untitled role"}`}
+                                  checked={app.follow_up_sent}
+                                  disabled={followUpMutation.isPending}
+                                  onCheckedChange={(checked) =>
+                                    followUpMutation.mutate({
+                                      id: app.id,
+                                      follow_up_sent: checked,
+                                    })
+                                  }
+                                />
+                                {app.follow_up_sent ? "Sent" : "Mark sent"}
+                              </label>
+                            </Hint>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         )}
       </div>
 
