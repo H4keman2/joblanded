@@ -1,0 +1,1 @@
+ALTER FUNCTION public.send_due_followup_emails() SET search_path = public;
