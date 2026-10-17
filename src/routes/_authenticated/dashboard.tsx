@@ -247,7 +247,7 @@ function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-teal-700 via-cyan-600 to-sky-500 p-6 text-white shadow-xl shadow-cyan-500/25 sm:p-8">
+      <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-blue-950 via-blue-700 to-sky-400 p-6 text-white shadow-xl shadow-blue-500/25 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
