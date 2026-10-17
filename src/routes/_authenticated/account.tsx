@@ -484,8 +484,7 @@ function AccountPage() {
                   "Your sign-in email could not be loaded — refresh the page before deleting your account."
                 ) : (
                   <>
-                    Type{" "}
-                    <span className="font-medium text-foreground">{authUser?.email}</span> to
+                    Type <span className="font-medium text-foreground">{authUser?.email}</span> to
                     confirm.
                   </>
                 )}
