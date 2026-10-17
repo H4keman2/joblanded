@@ -133,7 +133,8 @@ function Landing() {
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
           JobLanded scores every posting against your resume, writes you a tailored resume and cover
-          letter, and tracks every follow-up. Free to start — $4.99 once for the AI.
+          letter, and tracks every follow-up. Free to start — $4.99 once for the AI features to
+          simplify your job search.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-5">
           {!signedIn && (
