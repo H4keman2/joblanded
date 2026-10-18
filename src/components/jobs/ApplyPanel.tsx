@@ -104,7 +104,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
           href={link}
           target="_blank"
           rel="noreferrer"
-          aria-label={`${link} (opens in new tab)`}
+          aria-label="View application (opens in new tab)"
           className="mt-1 block truncate text-xs text-primary underline"
         >
           {link}
@@ -112,6 +112,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
       )}
       {(!applied || !link) && (
         <form
+          noValidate
           className="mt-3 flex flex-col gap-2 sm:flex-row"
           onSubmit={(e) => {
             e.preventDefault();
