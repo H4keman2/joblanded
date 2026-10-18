@@ -109,7 +109,7 @@ function PostingSearchPage() {
         <>
           <div className="panel overflow-x-auto p-8">
             <h2 className="text-lg font-semibold">Section-by-section fit</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p role="status" className="mt-1 text-sm text-muted-foreground">
               {result.postings.length} posting{result.postings.length === 1 ? "" : "s"} compared
               against {result.sections.length} resume sections. The strongest role for each section
               is outlined.
@@ -118,9 +118,11 @@ function PostingSearchPage() {
             <table className="mt-6 w-full min-w-[640px] border-separate border-spacing-1 text-sm">
               <thead>
                 <tr>
-                  <th className="text-left font-medium text-muted-foreground">Resume section</th>
+                  <th scope="col" className="text-left font-medium text-muted-foreground">
+                    Resume section
+                  </th>
                   {result.postings.map((p) => (
-                    <th key={p.index} className="text-left font-medium">
+                    <th key={p.index} scope="col" className="text-left font-medium">
                       <div>{p.title}</div>
                       <div className="text-xs font-normal text-muted-foreground">
                         {p.company ?? "Company not stated"} · overall {p.overall}%
@@ -138,7 +140,10 @@ function PostingSearchPage() {
                   );
                   return (
                     <tr key={section}>
-                      <th className="whitespace-nowrap pr-4 text-left align-top font-medium">
+                      <th
+                        scope="row"
+                        className="whitespace-nowrap pr-4 text-left align-top font-medium"
+                      >
                         {section}
                       </th>
                       {result.postings.map((p) => {
