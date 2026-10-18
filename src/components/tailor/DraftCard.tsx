@@ -210,6 +210,7 @@ export function DraftCard({
               <Hint key={k} tip={`"${k}" appears in the posting and in this version.`}>
                 <span className="cursor-help rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                   {k}
+                  <span className="sr-only"> (in this version)</span>
                 </span>
               </Hint>
             ))}
@@ -217,6 +218,7 @@ export function DraftCard({
               <Hint key={k} tip={`"${k}" appears in the posting but is missing from this version.`}>
                 <span className="cursor-help rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">
                   {k}
+                  <span className="sr-only"> (missing from this version)</span>
                 </span>
               </Hint>
             ))}
