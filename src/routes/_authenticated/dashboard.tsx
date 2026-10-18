@@ -221,6 +221,12 @@ function DashboardPage() {
   // would nag people who already have a resume, saved postings and applications.
   const setupFailed = resume.isError || jobs.isError || applications.isError;
 
+  // Until both lists have actually arrived, a 0 would read as "nothing here"
+  // when it really means "not loaded yet" — so numbers show a dash instead.
+  const dataReady =
+    !applications.isLoading && !applications.isError && !jobs.isLoading && !jobs.isError;
+  const show = (n: number) => (dataReady ? String(n) : "–");
+
   const steps = [
     {
       done: hasResume,
@@ -273,8 +279,8 @@ function DashboardPage() {
               JobLanded Dashboard
             </h1>
             <p className="mt-3 font-mono text-xs text-white/75 sm:text-sm">
-              {stats.activeApplications} ACTIVE · {stats.followUpsDue} FOLLOW-UPS DUE ·{" "}
-              {stats.interviews} INTERVIEWS · {stats.savedPostings} SAVED
+              {show(stats.activeApplications)} ACTIVE · {show(stats.followUpsDue)} FOLLOW-UPS DUE ·{" "}
+              {show(stats.interviews)} INTERVIEWS · {show(stats.savedPostings)} SAVED
               <span
                 aria-hidden="true"
                 className="ml-1 inline-block h-3.5 w-2 animate-pulse bg-emerald-200/80 align-[-2px]"
@@ -293,7 +299,7 @@ function DashboardPage() {
       {/* Overview — quick numbers, each linking to its full page. */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Overview">
         <StatCard
-          value={String(stats.followUpsDue)}
+          value={show(stats.followUpsDue)}
           label="Follow-ups due"
           to="/dashboard"
           hash="attention"
@@ -303,7 +309,7 @@ function DashboardPage() {
           alert={stats.followUpsDue > 0}
         />
         <StatCard
-          value={String(stats.activeApplications)}
+          value={show(stats.activeApplications)}
           label="Active applications"
           to="/applications"
           icon={Briefcase}
@@ -311,7 +317,7 @@ function DashboardPage() {
           glow="hover:shadow-sky-500/25"
         />
         <StatCard
-          value={String(stats.interviews)}
+          value={show(stats.interviews)}
           label="Interviews"
           to="/applications"
           icon={Users}
@@ -319,7 +325,7 @@ function DashboardPage() {
           glow="hover:shadow-emerald-500/25"
         />
         <StatCard
-          value={String(stats.savedPostings)}
+          value={show(stats.savedPostings)}
           label="Saved postings"
           to="/jobs"
           icon={Bookmark}
@@ -357,10 +363,13 @@ function DashboardPage() {
               const overdue = app.follow_up_date! < today;
               const marking = followUpMutation.isPending && followUpMutation.variables === app.id;
               const daysAgo = app.date_applied
-                ? Math.round(
-                    (new Date(`${today}T00:00:00`).getTime() -
-                      new Date(`${app.date_applied}T00:00:00`).getTime()) /
-                      86_400_000,
+                ? Math.max(
+                    0,
+                    Math.round(
+                      (new Date(`${today}T00:00:00`).getTime() -
+                        new Date(`${app.date_applied}T00:00:00`).getTime()) /
+                        86_400_000,
+                    ),
                   )
                 : null;
               return (
@@ -402,14 +411,14 @@ function DashboardPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      aria-label={`Follow up on ${job?.title ?? "Saved role"}`}
+                      aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
                       disabled={marking}
                       onClick={() => followUpMutation.mutate(app.id)}
                     >
                       {marking && (
                         <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin" />
                       )}
-                      Follow up
+                      Mark sent
                     </Button>
                   </Hint>
                 </li>
