@@ -392,12 +392,34 @@ function WorkedExample() {
             role="tablist"
             aria-label="Worked example steps"
             className="mx-auto mt-8 flex max-w-xl flex-wrap justify-center gap-2"
+            onKeyDown={(e) => {
+              if (
+                e.key !== "ArrowRight" &&
+                e.key !== "ArrowLeft" &&
+                e.key !== "Home" &&
+                e.key !== "End"
+              )
+                return;
+              e.preventDefault();
+              let next = active;
+              if (e.key === "ArrowRight") next = (active + 1) % exampleSteps.length;
+              else if (e.key === "ArrowLeft")
+                next = (active - 1 + exampleSteps.length) % exampleSteps.length;
+              else if (e.key === "Home") next = 0;
+              else next = exampleSteps.length - 1;
+              setActive(next);
+              const nextKey = exampleSteps[next]?.key;
+              if (nextKey) document.getElementById(`example-tab-${nextKey}`)?.focus();
+            }}
           >
             {exampleSteps.map((s, i) => (
               <button
                 key={s.key}
+                id={`example-tab-${s.key}`}
                 role="tab"
                 aria-selected={i === active}
+                aria-controls="example-panel"
+                tabIndex={i === active ? 0 : -1}
                 onClick={() => setActive(i)}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                   i === active
@@ -410,7 +432,12 @@ function WorkedExample() {
             ))}
           </div>
 
-          <div className="mt-6">
+          <div
+            className="mt-6"
+            role="tabpanel"
+            id="example-panel"
+            aria-labelledby={`example-tab-${current.key}`}
+          >
             <ExampleStep
               key={current.key}
               step={current.step}
@@ -430,7 +457,7 @@ function WorkedExample() {
             >
               Back
             </Button>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground" aria-live="polite">
               {active + 1} of {exampleSteps.length}
             </span>
             <Button
