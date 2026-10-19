@@ -346,6 +346,11 @@ function ResumePage() {
                   {s}
                 </Badge>
               ))}
+              {(draft.skills ?? []).length > 24 && (
+                <span className="text-xs text-muted-foreground">
+                  +{(draft.skills ?? []).length - 24} more
+                </span>
+              )}
             </div>
           </Field>
 
