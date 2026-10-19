@@ -197,7 +197,11 @@ function JobDetailPage() {
         return;
       }
       toast.success(`Tailored ${done} of ${total} roles`);
-      toast.error(`Couldn't tailor: ${failed.join(", ")} — try them individually.`);
+      const shown = failed.slice(0, 2);
+      const extra = failed.length - shown.length;
+      toast.error(
+        `Couldn't tailor: ${shown.join(", ")}${extra > 0 ? ` + ${extra} more` : ""} — try them individually.`,
+      );
     },
     onError: toastProError,
   });
