@@ -409,6 +409,7 @@ function JobDetailPage() {
                   <button
                     onClick={() => setSelected(i)}
                     aria-pressed={i === selected}
+                    aria-label={`Version ${i + 1}, angle: ${normalize(v.content).angle}${i === selected ? ", selected" : ""}`}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                       i === selected
                         ? "bg-primary text-primary-foreground"
@@ -546,7 +547,7 @@ function JobDetailPage() {
                             key={v.id}
                             onClick={() => setCompare(i)}
                             aria-pressed={i === compare}
-                            aria-label={`Compare with version ${i + 1}`}
+                            aria-label={`Compare with version ${i + 1}, angle: ${normalize(v.content).angle}`}
                             className={`rounded-full px-3 py-1 text-xs font-medium ${
                               i === compare
                                 ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
