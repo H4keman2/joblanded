@@ -66,7 +66,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   to={to}
                   className="whitespace-nowrap rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                  activeProps={{ className: "bg-secondary text-foreground" }}
+                  activeProps={{
+                    className: "bg-secondary text-foreground",
+                    "aria-current": "page",
+                  }}
                 >
                   {label}
                 </Link>
@@ -93,7 +96,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                       to={to}
                       onClick={() => setMobileNavOpen(false)}
                       className="rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                      activeProps={{ className: "bg-secondary text-foreground" }}
+                      activeProps={{
+                        className: "bg-secondary text-foreground",
+                        "aria-current": "page",
+                      }}
                     >
                       {label}
                     </Link>
@@ -105,7 +111,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                       to={to}
                       onClick={() => setMobileNavOpen(false)}
                       className="rounded-md px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-                      activeProps={{ className: "bg-secondary text-foreground" }}
+                      activeProps={{
+                        className: "bg-secondary text-foreground",
+                        "aria-current": "page",
+                      }}
                     >
                       {label}
                     </Link>
