@@ -234,7 +234,7 @@ export function ResumeReview({
       ) : (
         <div className="space-y-8">
           {reviewMutation.isPending && (
-            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+            <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
               <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
               Reading your resume closely — extraction, ATS check and suggestions…
             </p>
