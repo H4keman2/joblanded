@@ -209,6 +209,7 @@ export function JobRecommendations() {
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="City, State"
+            autoComplete="address-level2"
             className="mt-1.5"
           />
         </div>
