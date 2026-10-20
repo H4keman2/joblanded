@@ -61,7 +61,11 @@ function RangeBar({ min, max, offer }: { min: number; max: number; offer: number
   const pct = (v: number) => Math.max(0, Math.min(100, ((v - lo) / (hi - lo)) * 100));
   return (
     <div>
-      <div className="relative h-3 rounded-full bg-secondary">
+      <div
+        className="relative h-3 rounded-full bg-secondary"
+        role="img"
+        aria-label={`Offer ${money(offer)} against the posted ${money(min)}–${money(max)} range`}
+      >
         <div
           className="absolute inset-y-0 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500"
           style={{ left: `${pct(min)}%`, width: `${Math.max(2, pct(max) - pct(min))}%` }}
@@ -223,7 +227,7 @@ export function ProAssist() {
                   Try again
                 </Button>
               </div>
-            ) : jobs.isPending || jobs.isFetching ? (
+            ) : jobs.isPending || (jobs.isFetching && !jobs.data) ? (
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
                 Loading postings…
@@ -326,7 +330,7 @@ export function ProAssist() {
                   Try again
                 </Button>
               </div>
-            ) : jobs.isPending || jobs.isFetching ? (
+            ) : jobs.isPending || (jobs.isFetching && !jobs.data) ? (
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
                 Loading postings…

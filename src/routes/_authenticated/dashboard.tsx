@@ -297,7 +297,7 @@ function DashboardPage() {
       </div>
 
       {/* Overview — quick numbers, each linking to its full page. */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Overview">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4" role="region" aria-label="Overview">
         <StatCard
           value={show(stats.followUpsDue)}
           label="Follow-ups due"

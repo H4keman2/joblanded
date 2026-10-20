@@ -219,6 +219,7 @@ export function JobRecommendations() {
             <Input
               id="rec-salary-min"
               type="number"
+              inputMode="numeric"
               min={0}
               value={salaryMin}
               onChange={(e) => setSalaryMin(e.target.value)}
@@ -231,6 +232,7 @@ export function JobRecommendations() {
             <Input
               id="rec-salary-max"
               type="number"
+              inputMode="numeric"
               min={0}
               value={salaryMax}
               onChange={(e) => setSalaryMax(e.target.value)}
@@ -252,7 +254,9 @@ export function JobRecommendations() {
       </form>
 
       {search.isPending && !results ? (
-        <p className="text-sm text-muted-foreground">Finding roles that fit…</p>
+        <p className="text-sm text-muted-foreground" role="status">
+          Finding roles that fit…
+        </p>
       ) : search.isError && !results ? (
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">

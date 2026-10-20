@@ -288,6 +288,7 @@ function ResumePage() {
             <Field label="Years of experience">
               <Input
                 type="number"
+                inputMode="numeric"
                 min={0}
                 value={draft.years_experience ?? ""}
                 onChange={(e) =>
