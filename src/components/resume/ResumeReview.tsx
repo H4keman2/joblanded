@@ -181,7 +181,10 @@ export function ResumeReview({
       setReview(data as unknown as ReviewResult);
       toast.success("AI review ready.");
     },
-    onError: (e: Error) => toastProError(e),
+    onError: (e: Error) => {
+      setReview(null);
+      toastProError(e);
+    },
   });
 
   const previewMutation = useMutation({
@@ -190,7 +193,10 @@ export function ResumeReview({
     onSuccess: (data) => {
       setPreview(data as unknown as PreviewResult);
     },
-    onError: (e: Error) => toastProError(e),
+    onError: (e: Error) => {
+      setPreview(null);
+      toastProError(e);
+    },
   });
 
   return (
