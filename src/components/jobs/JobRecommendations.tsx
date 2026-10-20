@@ -320,7 +320,7 @@ export function JobRecommendations() {
                       variant="secondary"
                       aria-label={`Save ${job.title} to your Jobs list`}
                       onClick={() => add.mutate(job)}
-                      disabled={add.isPending}
+                      disabled={add.isPending && add.variables?.id === job.id}
                     >
                       <Plus aria-hidden="true" className="size-4" />
                       Add job

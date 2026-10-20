@@ -18,7 +18,7 @@ export interface TailorDraft {
   keywords: { score: number; note: string; hits: string[]; misses: string[] };
 }
 
-export function ScoreBar({ score }: { score: number }) {
+export function ScoreBar({ score, label }: { score: number; label: string }) {
   const color = score >= 85 ? "bg-primary" : score >= 75 ? "bg-amber-500" : "bg-destructive";
   const val = Math.max(0, Math.min(100, score));
   return (
@@ -26,7 +26,7 @@ export function ScoreBar({ score }: { score: number }) {
       <div
         className="h-1.5 w-24 overflow-hidden rounded-full bg-border"
         role="progressbar"
-        aria-label="Resume match score"
+        aria-label={label}
         aria-valuenow={val}
         aria-valuemin={0}
         aria-valuemax={100}
@@ -183,7 +183,7 @@ export function DraftCard({
             ATS readability
           </p>
           <div className="mt-1.5">
-            <ScoreBar score={draft.ats.score} />
+            <ScoreBar score={draft.ats.score} label="ATS readability" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">{draft.ats.note}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -202,7 +202,7 @@ export function DraftCard({
             Keyword coverage
           </p>
           <div className="mt-1.5">
-            <ScoreBar score={draft.keywords.score} />
+            <ScoreBar score={draft.keywords.score} label="Keyword coverage" />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">{draft.keywords.note}</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
