@@ -207,7 +207,9 @@ export function EditJobDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending && <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />}
+              {mutation.isPending && (
+                <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
+              )}
               Save changes
             </Button>
           </DialogFooter>
