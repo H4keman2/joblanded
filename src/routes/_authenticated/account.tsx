@@ -307,6 +307,7 @@ function AccountPage() {
                 value={newEmail}
                 onChange={(e) => setNewEmail(e.target.value)}
                 placeholder="new@email.com"
+                inputMode="email"
                 autoComplete="email"
               />
               <div className="flex gap-2">

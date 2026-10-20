@@ -14,7 +14,7 @@ export function ProUpsell({ feature }: { feature: string }) {
       </div>
       <Button asChild>
         <Link to="/pro">
-          <Sparkles className="mr-1.5 h-4 w-4" /> Get Pro
+          <Sparkles aria-hidden="true" className="mr-1.5 h-4 w-4" /> Get Pro
         </Link>
       </Button>
     </div>
