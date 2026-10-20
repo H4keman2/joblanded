@@ -102,9 +102,7 @@ function AssistLocked() {
       feature="Interview prep & offer check"
       preview={
         <>
-          <p className="text-sm font-medium">
-            “Walk me through a product you shipped end-to-end.”
-          </p>
+          <p className="text-sm font-medium">“Walk me through a product you shipped end-to-end.”</p>
           <p className="text-xs text-muted-foreground">
             Why they ask: ownership and follow-through…
           </p>
@@ -112,9 +110,7 @@ function AssistLocked() {
             <span className="rounded bg-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-950">
               In line
             </span>{" "}
-            <span className="text-muted-foreground">
-              $165K sits mid-range — negotiating room…
-            </span>
+            <span className="text-muted-foreground">$165K sits mid-range — negotiating room…</span>
           </p>
         </>
       }
