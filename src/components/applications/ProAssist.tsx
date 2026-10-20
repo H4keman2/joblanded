@@ -103,17 +103,17 @@ function AssistLocked() {
       preview={
         <>
           <p className="text-sm font-medium">
-            \u201cWalk me through a product you shipped end-to-end.\u201d
+            “Walk me through a product you shipped end-to-end.”
           </p>
           <p className="text-xs text-muted-foreground">
-            Why they ask: ownership and follow-through\u2026
+            Why they ask: ownership and follow-through…
           </p>
           <p className="text-sm">
             <span className="rounded bg-emerald-200 px-2 py-0.5 text-xs font-medium text-emerald-950">
               In line
             </span>{" "}
             <span className="text-muted-foreground">
-              $165K sits mid-range \u2014 negotiating room\u2026
+              $165K sits mid-range — negotiating room…
             </span>
           </p>
         </>
@@ -227,6 +227,11 @@ export function ProAssist() {
                   Try again
                 </Button>
               </div>
+            ) : jobs.isPending || jobs.isFetching ? (
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                Loading postings…
+              </p>
             ) : activeJobs.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Save a posting on the Jobs page first.
@@ -325,6 +330,11 @@ export function ProAssist() {
                   Try again
                 </Button>
               </div>
+            ) : jobs.isPending || jobs.isFetching ? (
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                Loading postings…
+              </p>
             ) : activeJobs.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Save a posting on the Jobs page first.

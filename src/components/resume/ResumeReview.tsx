@@ -347,7 +347,7 @@ export function ResumeReview({
                       className="mt-3"
                       onClick={() => {
                         onUseSummary(review.suggestedSummary!);
-                        toast.success("Summary applied — review it above, then save.");
+                        toast.success("Summary applied — review it below, then save.");
                       }}
                     >
                       <Wand2 aria-hidden="true" className="mr-1.5 h-4 w-4" />
@@ -382,6 +382,11 @@ export function ResumeReview({
                   Try again
                 </Button>
               </div>
+            ) : jobs.isPending || jobs.isFetching ? (
+              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                Loading postings…
+              </p>
             ) : activeJobs.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">
                 Save a posting on the Jobs page first, then come back to preview the tailoring.
