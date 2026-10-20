@@ -579,7 +579,11 @@ function ProLicenseSection() {
           </Button>
         </form>
       )}
-      {pro.error && <p className="text-sm text-destructive">{pro.error}</p>}
+      {pro.error && (
+        <p role="alert" className="text-sm text-destructive">
+          {pro.error}
+        </p>
+      )}
     </section>
   );
 }
