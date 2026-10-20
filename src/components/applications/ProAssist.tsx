@@ -213,7 +213,21 @@ export function ProAssist() {
               <MessagesSquare aria-hidden="true" className="h-4 w-4 text-primary" />
               Interview prep
             </h3>
-            {activeJobs.length === 0 ? (
+            {jobs.isError ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  We could not load your postings. Your connection may have dropped.
+                </p>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={jobs.isFetching}
+                  onClick={() => jobs.refetch()}
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : activeJobs.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Save a posting on the Jobs page first.
               </p>
@@ -297,7 +311,21 @@ export function ProAssist() {
               <BadgeDollarSign aria-hidden="true" className="h-4 w-4 text-primary" />
               Offer check
             </h3>
-            {activeJobs.length === 0 ? (
+            {jobs.isError ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  We could not load your postings. Your connection may have dropped.
+                </p>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={jobs.isFetching}
+                  onClick={() => jobs.refetch()}
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : activeJobs.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Save a posting on the Jobs page first.
               </p>

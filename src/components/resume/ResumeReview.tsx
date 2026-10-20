@@ -368,7 +368,21 @@ export function ResumeReview({
               Pick a saved posting — the AI rewrites three of your own lines for it, with the added
               keywords highlighted. This is exactly what Pro tailoring does before you apply.
             </p>
-            {activeJobs.length === 0 ? (
+            {jobs.isError ? (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  We could not load your postings. Your connection may have dropped.
+                </p>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  disabled={jobs.isFetching}
+                  onClick={() => jobs.refetch()}
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : activeJobs.length === 0 ? (
               <p className="mt-3 text-sm text-muted-foreground">
                 Save a posting on the Jobs page first, then come back to preview the tailoring.
               </p>
