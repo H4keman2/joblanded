@@ -150,7 +150,10 @@ export function ProAssist() {
       setPrep(data as unknown as PrepResult);
       toast.success("Interview prep ready.");
     },
-    onError: (e: Error) => toastProError(e),
+    onError: (e: Error) => {
+      setPrep(null);
+      toastProError(e);
+    },
   });
 
   const offerMutation = useMutation({
@@ -169,7 +172,10 @@ export function ProAssist() {
       setOffer(data as unknown as OfferResult);
       toast.success("Offer evaluated.");
     },
-    onError: (e: Error) => toastProError(e),
+    onError: (e: Error) => {
+      setOffer(null);
+      toastProError(e);
+    },
   });
 
   const baseValid = Number(base) > 0;
