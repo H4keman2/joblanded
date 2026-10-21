@@ -64,13 +64,21 @@ function ListSkeleton() {
   );
 }
 
-function LoadFailed({ what, onRetry }: { what: string; onRetry: () => void }) {
+function LoadFailed({
+  what,
+  onRetry,
+  pending = false,
+}: {
+  what: string;
+  onRetry: () => void;
+  pending?: boolean;
+}) {
   return (
     <div className="flex flex-wrap items-center gap-3">
       <p className="text-sm text-muted-foreground">
-        We couldn&apos;t load your {what}. Your connection may have dropped.
+        We couldn't load your {what}. Your connection may have dropped.
       </p>
-      <Button size="sm" variant="secondary" onClick={onRetry}>
+      <Button size="sm" variant="secondary" onClick={onRetry} disabled={pending}>
         Try again
       </Button>
     </div>
@@ -349,7 +357,11 @@ function DashboardPage() {
           </div>
         ) : applications.isError ? (
           <div className="mt-4">
-            <LoadFailed what="applications" onRetry={() => void applications.refetch()} />
+            <LoadFailed
+              what="applications"
+              onRetry={() => void applications.refetch()}
+              pending={applications.isFetching}
+            />
           </div>
         ) : dueFollowUps.length === 0 ? (
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
@@ -443,6 +455,7 @@ function DashboardPage() {
                   void jobs.refetch();
                   void applications.refetch();
                 }}
+                pending={resume.isFetching || jobs.isFetching || applications.isFetching}
               />
             </div>
           ) : (

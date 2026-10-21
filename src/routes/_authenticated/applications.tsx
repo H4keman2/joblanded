@@ -131,6 +131,7 @@ function ApplicationsPage() {
     data: stats,
     isLoading: loadingStats,
     isError: statsError,
+    isFetching: fetchingStats,
     refetch: refetchStats,
   } = useQuery({
     queryKey: ["application-stats"],
@@ -141,6 +142,7 @@ function ApplicationsPage() {
     data: resume,
     isLoading: loadingResume,
     isError: resumeError,
+    isFetching: fetchingResume,
     refetch: refetchResume,
   } = useQuery({
     queryKey: ["latest-resume"],
@@ -340,7 +342,12 @@ function ApplicationsPage() {
           <p className="text-sm text-muted-foreground">
             We couldn&apos;t load your resume status. Your connection may have dropped.
           </p>
-          <Button size="sm" variant="secondary" onClick={() => void refetchResume()}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void refetchResume()}
+            disabled={fetchingResume}
+          >
             Try again
           </Button>
         </div>
@@ -366,7 +373,12 @@ function ApplicationsPage() {
           <p className="text-sm text-muted-foreground">
             We could not load your tracker summary. Your connection may have dropped.
           </p>
-          <Button size="sm" variant="secondary" onClick={() => void refetchStats()}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void refetchStats()}
+            disabled={fetchingStats}
+          >
             Try again
           </Button>
         </div>
@@ -455,7 +467,12 @@ function ApplicationsPage() {
             <p className="text-sm text-muted-foreground">
               We couldn't load your applications. Your connection may have dropped.
             </p>
-            <Button size="sm" variant="secondary" onClick={() => void applications.refetch()}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => void applications.refetch()}
+              disabled={applications.isFetching}
+            >
               Try again
             </Button>
           </div>

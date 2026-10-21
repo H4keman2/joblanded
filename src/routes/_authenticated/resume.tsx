@@ -71,6 +71,7 @@ function ResumePage() {
     data: resume,
     isLoading,
     isError,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ["latest-resume"],
@@ -259,7 +260,12 @@ function ResumePage() {
           <p className="text-sm text-muted-foreground">
             We could not load your resume profile. Your connection may have dropped.
           </p>
-          <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void refetch()}
+            disabled={isFetching}
+          >
             Try again
           </Button>
         </div>

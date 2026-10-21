@@ -516,7 +516,12 @@ function JobDetailPage() {
                 <p className="text-sm text-muted-foreground">
                   We could not load your tailored versions. Your connection may have dropped.
                 </p>
-                <Button size="sm" variant="secondary" onClick={() => void drafts.refetch()}>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => void drafts.refetch()}
+                  disabled={drafts.isFetching}
+                >
                   Try again
                 </Button>
               </div>

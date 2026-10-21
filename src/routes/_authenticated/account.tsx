@@ -67,6 +67,7 @@ function AccountPage() {
     data: profile,
     isLoading,
     isError,
+    isFetching,
     refetch,
   } = useQuery({
     queryKey: ["profile"],
@@ -237,7 +238,12 @@ function AccountPage() {
             <p className="text-sm text-muted-foreground">
               We could not load your profile. Your connection may have dropped.
             </p>
-            <Button size="sm" variant="secondary" onClick={() => void refetch()}>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => void refetch()}
+              disabled={isFetching}
+            >
               Try again
             </Button>
           </div>
