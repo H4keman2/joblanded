@@ -151,6 +151,7 @@ function Landing() {
         </header>
       )}
 
+      <LandingMain signedIn={signedIn}>
       <section className="mx-auto max-w-3xl px-4 pb-14 pt-12 text-center sm:pt-20">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Job search workspace
@@ -217,6 +218,7 @@ function Landing() {
       <WorkedExample />
 
       <Faq />
+      </LandingMain>
 
       <Footer />
     </div>
