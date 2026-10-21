@@ -99,11 +99,32 @@ const steps = [
   },
 ];
 
+// The landing page doubles as the signed-in dashboard home (wrapped in AppShell,
+// which already provides a skip link and <main>), so the landing's own landmark
+// only renders for signed-out visitors — otherwise the page ships two <main>s.
+function LandingMain({ signedIn, children }: { signedIn: boolean; children: React.ReactNode }) {
+  return signedIn ? (
+    <>{children}</>
+  ) : (
+    <main id="main" tabIndex={-1}>
+      {children}
+    </main>
+  );
+}
+
 function Landing() {
   const signedIn = useSignedIn();
 
   const page = (
     <div className="min-h-screen">
+      {!signedIn && (
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+        >
+          Skip to content
+        </a>
+      )}
       {!signedIn && (
         <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
           <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
@@ -124,72 +145,74 @@ function Landing() {
         </header>
       )}
 
-      <section className="mx-auto max-w-3xl px-4 pb-14 pt-12 text-center sm:pt-20">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Job search workspace
-        </p>
-        <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
-          Stop applying to <span className="text-primary">jobs you won’t get.</span>
-        </h1>
-        <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
-          JobLanded scores every posting against your resume, writes you a tailored resume and cover
-          letter, and tracks every follow-up. Free to start — $4.99 once for the AI features to
-          simplify your job search.
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-5">
-          {!signedIn && (
+      <LandingMain signedIn={signedIn}>
+        <section className="mx-auto max-w-3xl px-4 pb-14 pt-12 text-center sm:pt-20">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Job search workspace
+          </p>
+          <h1 className="mt-4 text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
+            Stop applying to <span className="text-primary">jobs you won’t get.</span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-base text-muted-foreground">
+            JobLanded scores every posting against your resume, writes you a tailored resume and
+            cover letter, and tracks every follow-up. Free to start — $4.99 once for the AI features
+            to simplify your job search.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-5">
+            {!signedIn && (
+              <Button asChild size="lg">
+                <Link to="/auth">Get started free</Link>
+              </Button>
+            )}
+            <a href="#how" className="text-sm text-muted-foreground hover:text-foreground">
+              See how it works ↓
+            </a>
+          </div>
+          <div className="mt-4 flex justify-center">
             <Button asChild size="lg">
-              <Link to="/auth">Get started free</Link>
+              <Link to="/pro">Get Pro — $4.99 once</Link>
             </Button>
-          )}
-          <a href="#how" className="text-sm text-muted-foreground hover:text-foreground">
-            See how it works ↓
-          </a>
-        </div>
-        <div className="mt-4 flex justify-center">
-          <Button asChild size="lg">
-            <Link to="/pro">Get Pro — $4.99 once</Link>
-          </Button>
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Free forever · Pro $4.99 one-time · No subscription.
-        </p>
-      </section>
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Free forever · Pro $4.99 one-time · No subscription.
+          </p>
+        </section>
 
-      <section id="how" className="mx-auto max-w-5xl scroll-mt-20 px-4 pb-16">
-        <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-          How JobLanded works
-        </h2>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map(({ title, body }) => (
-            <div key={title} className="panel p-5">
-              <h3 className="text-base font-semibold">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+        <section id="how" className="mx-auto max-w-5xl scroll-mt-20 px-4 pb-16">
+          <h2 className="text-center text-sm font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+            How JobLanded works
+          </h2>
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map(({ title, body }) => (
+              <div key={title} className="panel p-5">
+                <h3 className="text-base font-semibold">{title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <section className="mx-auto grid max-w-5xl gap-10 px-4 pb-24 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16">
-        <div className="grid gap-6 sm:grid-cols-2">
-          {outcomes.map(({ title, body }) => (
-            <div key={title}>
-              <h2 className="text-base font-semibold">{title}</h2>
-              <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>
-            </div>
-          ))}
-        </div>
+        <section className="mx-auto grid max-w-5xl gap-10 px-4 pb-24 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-16">
+          <div className="grid gap-6 sm:grid-cols-2">
+            {outcomes.map(({ title, body }) => (
+              <div key={title}>
+                <h2 className="text-base font-semibold">{title}</h2>
+                <p className="mt-1.5 text-sm text-muted-foreground">{body}</p>
+              </div>
+            ))}
+          </div>
 
-        <MatchPreviewCard />
-      </section>
+          <MatchPreviewCard />
+        </section>
 
-      <FounderTrust />
+        <FounderTrust />
 
-      <Pricing />
+        <Pricing />
 
-      <WorkedExample />
+        <WorkedExample />
 
-      <Faq />
+        <Faq />
+      </LandingMain>
 
       <Footer />
     </div>
