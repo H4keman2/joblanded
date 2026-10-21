@@ -302,7 +302,12 @@ function JobsPage() {
               <p className="text-sm text-muted-foreground">
                 We couldn&apos;t load your postings. Your connection may have dropped.
               </p>
-              <Button size="sm" variant="secondary" onClick={() => void jobs.refetch()}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => void jobs.refetch()}
+                disabled={jobs.isFetching}
+              >
                 Try again
               </Button>
             </div>
