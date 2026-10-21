@@ -99,11 +99,38 @@ const steps = [
   },
 ];
 
+// The landing page doubles as the signed-in dashboard home (wrapped in AppShell,
+// which already provides a skip link and <main>), so the landing's own landmark
+// only renders for signed-out visitors — otherwise the page ships two <main>s.
+function LandingMain({
+  signedIn,
+  children,
+}: {
+  signedIn: boolean;
+  children: React.ReactNode;
+}) {
+  return signedIn ? (
+    <>{children}</>
+  ) : (
+    <main id="main" tabIndex={-1}>
+      {children}
+    </main>
+  );
+}
+
 function Landing() {
   const signedIn = useSignedIn();
 
   const page = (
     <div className="min-h-screen">
+      {!signedIn && (
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+        >
+          Skip to content
+        </a>
+      )}
       {!signedIn && (
         <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
           <span className="font-display text-lg font-semibold text-primary">JobLanded</span>
