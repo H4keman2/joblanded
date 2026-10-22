@@ -476,6 +476,16 @@ function JobDetailPage() {
                     </Button>
                   </Hint>
                 )}
+
+                {/* These runs can take 30s+; the buttons only swap icons, so
+                    announce the pending state for screen-reader users. */}
+                {(gen.isPending || genAll.isPending) && (
+                  <span className="sr-only" role="status">
+                    {genAll.isPending
+                      ? "Tailoring all roles — this can take a while."
+                      : "Generating a tailored version — this can take a while."}
+                  </span>
+                )}
               </>
 
               {versions.length > 1 && (
@@ -510,7 +520,9 @@ function JobDetailPage() {
             </div>
 
             {drafts.isLoading ? (
-              <p className="mt-6 text-sm text-muted-foreground">Loading versions…</p>
+              <p className="mt-6 text-sm text-muted-foreground" role="status">
+                Loading versions…
+              </p>
             ) : drafts.isError ? (
               <div className="mt-6 flex flex-wrap items-center gap-3">
                 <p className="text-sm text-muted-foreground">
