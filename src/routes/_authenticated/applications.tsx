@@ -231,11 +231,16 @@ function ApplicationsPage() {
 
   function handleRejectDecide(archiveIt: boolean) {
     if (!rejectTarget) return;
-    statusMutation.mutate({ id: rejectTarget.appId, status: "rejected" });
     if (archiveIt) {
+      statusMutation.mutate({ id: rejectTarget.appId, status: "rejected" });
       archiveMutation.mutate({ id: rejectTarget.jobId, archived: true });
     } else {
-      toast.success("Marked rejected");
+      // Success toast only after the write resolves — a premature toast plus a
+      // failure rollback would show contradictory feedback on a dropped connection.
+      statusMutation.mutate(
+        { id: rejectTarget.appId, status: "rejected" },
+        { onSuccess: () => toast.success("Marked rejected") },
+      );
     }
     setRejectTarget(null);
   }
@@ -296,7 +301,7 @@ function ApplicationsPage() {
                 toast.error("That link needs a full address — paste it starting with https://");
                 return;
               }
-              addMutation.mutate({ description, sourceUrl });
+              addMutation.mutate({ description: description.trim(), sourceUrl: link });
             }}
           >
             <div>
@@ -434,7 +439,15 @@ function ApplicationsPage() {
           </div>
 
           {funnelTotal > 0 && (
-            <div className="flex h-3 w-full overflow-hidden rounded-full bg-secondary">
+            <div
+              className="flex h-3 w-full overflow-hidden rounded-full bg-secondary"
+              role="img"
+              aria-label={`Application funnel: ${FUNNEL_STAGES.filter(
+                (s) => stats.applications[s.key] > 0,
+              )
+                .map((s) => `${stats.applications[s.key]} ${s.label}`)
+                .join(", ")}`}
+            >
               {FUNNEL_STAGES.filter((s) => stats.applications[s.key] > 0).map((s) => (
                 <div
                   key={s.key}
@@ -443,6 +456,7 @@ function ApplicationsPage() {
                     width: `${(stats.applications[s.key] / funnelTotal) * 100}%`,
                   }}
                   title={`${s.label}: ${stats.applications[s.key]}`}
+                  aria-hidden="true"
                 />
               ))}
             </div>
@@ -461,7 +475,9 @@ function ApplicationsPage() {
 
       <div className="panel p-8">
         {applications.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading your applications…</p>
+          <p className="text-sm text-muted-foreground" role="status">
+            Loading your applications…
+          </p>
         ) : applications.isError ? (
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">

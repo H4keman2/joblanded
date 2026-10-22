@@ -233,7 +233,7 @@ function JobsPage() {
                 toast.error("That link needs a full address — paste it starting with https://");
                 return;
               }
-              addMutation.mutate({ description, sourceUrl });
+              addMutation.mutate({ description: description.trim(), sourceUrl: link });
             }}
           >
             <div>
@@ -296,7 +296,9 @@ function JobsPage() {
 
         <div className="mt-5">
           {jobs.isLoading ? (
-            <p className="text-sm text-muted-foreground">Loading your jobs…</p>
+            <p className="text-sm text-muted-foreground" role="status">
+              Loading your jobs…
+            </p>
           ) : jobs.isError ? (
             <div className="flex flex-wrap items-center gap-3">
               <p className="text-sm text-muted-foreground">

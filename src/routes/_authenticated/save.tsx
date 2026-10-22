@@ -58,7 +58,8 @@ function QuickSavePage() {
   const [description, setDescription] = useState(search.text ?? "");
 
   const save = useMutation({
-    mutationFn: () => create({ data: { description, sourceUrl } }),
+    mutationFn: () =>
+      create({ data: { description: description.trim(), sourceUrl: sourceUrl.trim() } }),
     onSuccess: () => {
       toast.success("Saved — it's on your Dashboard now");
       void qc.invalidateQueries({ queryKey: ["jobs"] });
