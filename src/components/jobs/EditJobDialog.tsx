@@ -87,8 +87,10 @@ export function EditJobDialog({
   });
 
   const toNumber = (v: string) => {
-    const n = Number(v.replace(/[^0-9.]/g, ""));
-    return v.trim() && Number.isFinite(n) ? n : null;
+    const digits = v.replace(/[^0-9.]/g, "");
+    const n = Number(digits);
+    // digits must be non-empty: "abc" strips to "" which Number() turns into 0
+    return digits && Number.isFinite(n) ? n : null;
   };
 
   return (
@@ -112,8 +114,16 @@ export function EditJobDialog({
               return;
             }
             const min = toNumber(payMin);
+            if (payMin.trim() && min == null) {
+              toast.error("Pay from didn't look like a number — enter digits only.");
+              return;
+            }
 
             const max = toNumber(payMax);
+            if (payMax.trim() && max == null) {
+              toast.error("Pay to didn't look like a number — enter digits only.");
+              return;
+            }
             if (min != null && max != null && min > max) {
               toast.error("The pay range is flipped — ‘Pay from’ should be lower than ‘Pay to’.");
               return;
