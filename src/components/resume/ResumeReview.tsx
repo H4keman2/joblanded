@@ -383,7 +383,10 @@ export function ResumeReview({
                 </Button>
               </div>
             ) : jobs.isPending || (jobs.isFetching && !jobs.data) ? (
-              <p className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+              <p
+                className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"
+                role="status"
+              >
                 <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
                 Loading postings…
               </p>

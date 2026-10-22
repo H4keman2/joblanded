@@ -271,7 +271,11 @@ function ResumePage() {
         </div>
       )}
 
-      {isLoading && <p className="text-sm text-muted-foreground">Loading your profile…</p>}
+      {isLoading && (
+        <p className="text-sm text-muted-foreground" role="status">
+          Loading your profile…
+        </p>
+      )}
 
       {draft && resumeId && (
         <section className="panel space-y-6 p-6">
