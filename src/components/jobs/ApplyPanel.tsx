@@ -13,9 +13,22 @@ import {
 } from "@/lib/applications.functions";
 import { formatDate } from "@/lib/dates";
 
+// Same client-side pre-check as the other posting-link forms: a bare
+// "example.com/jobs" is almost always a missing https:// rather than a real
+// posting, so catch it here with copy a person can act on.
+function isFullUrl(value: string) {
+  try {
+    const { protocol } = new URL(value);
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 // Lets the user close the loop from the tailoring workspace: once they've sent
 // the tailored resume, mark the posting applied and keep the link to where
 // they applied so the tracker can open it later.
+
 export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: string | null }) {
   const qc = useQueryClient();
   const fetchApps = useServerFn(listApplications);
@@ -116,7 +129,12 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
           className="mt-3 flex flex-col gap-2 sm:flex-row"
           onSubmit={(e) => {
             e.preventDefault();
-            mutation.mutate(url.trim() || undefined);
+            const link = url.trim();
+            if (link && !isFullUrl(link)) {
+              toast.error("That link needs a full address — paste it starting with https://");
+              return;
+            }
+            mutation.mutate(link || undefined);
           }}
         >
           <Input
