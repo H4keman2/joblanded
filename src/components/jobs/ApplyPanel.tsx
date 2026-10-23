@@ -116,7 +116,12 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
           className="mt-3 flex flex-col gap-2 sm:flex-row"
           onSubmit={(e) => {
             e.preventDefault();
-            mutation.mutate(url.trim() || undefined);
+            const link = url.trim();
+            if (link && !isFullUrl(link)) {
+              toast.error("That link needs a full address — paste it starting with https://");
+              return;
+            }
+            mutation.mutate(link || undefined);
           }}
         >
           <Input
