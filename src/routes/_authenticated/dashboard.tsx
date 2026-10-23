@@ -411,9 +411,11 @@ function DashboardPage() {
                       </p>
                       {daysAgo !== null && (
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          Applied {formatDate(app.date_applied!)} ({daysAgo}{" "}
-                          {daysAgo === 1 ? "day" : "days"} ago). We recommend following up 2–3
-                          business days after{" "}
+                          Applied {formatDate(app.date_applied!)} (
+                          {daysAgo === 0
+                            ? "today"
+                            : `${daysAgo} ${daysAgo === 1 ? "day" : "days"} ago`}
+                          ). We recommend following up 2–3 business days after{" "}
                           {app.status === "interviewing" ? "an interview" : "applying"}.
                         </p>
                       )}
