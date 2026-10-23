@@ -49,6 +49,11 @@ export function RejectArchiveDialog({
             {pending && <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />}
             Archive posting
           </Button>
+          {pending && (
+            <span className="sr-only" role="status">
+              Saving…
+            </span>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
