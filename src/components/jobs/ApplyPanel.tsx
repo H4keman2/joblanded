@@ -16,6 +16,7 @@ import { formatDate } from "@/lib/dates";
 // Lets the user close the loop from the tailoring workspace: once they've sent
 // the tailored resume, mark the posting applied and keep the link to where
 // they applied so the tracker can open it later.
+
 export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: string | null }) {
   const qc = useQueryClient();
   const fetchApps = useServerFn(listApplications);
