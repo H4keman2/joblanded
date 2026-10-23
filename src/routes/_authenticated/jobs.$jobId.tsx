@@ -158,6 +158,7 @@ function JobDetailPage() {
   // When confidence is low, ask the user to confirm the role before generating.
   const needsConfirm =
     !confident &&
+    !fits.isError &&
     roleOptions.length > 1 &&
     confirmedRole !== jobId &&
     !pickedManually.current &&
@@ -367,6 +368,21 @@ function JobDetailPage() {
           />
         ) : (
           <div className="panel p-8">
+            {fits.isError && (
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  We couldn't rank your saved roles right now — your connection may have dropped.
+                </p>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => void fits.refetch()}
+                  disabled={fits.isFetching}
+                >
+                  Try again
+                </Button>
+              </div>
+            )}
             {needsConfirm && (
               <div className="mb-5 rounded-lg border border-border bg-secondary/40 p-4">
                 <p className="text-sm font-medium">Confirm the role before generating</p>
