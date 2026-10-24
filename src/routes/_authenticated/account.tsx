@@ -320,7 +320,16 @@ function AccountPage() {
                 <Button
                   size="sm"
                   disabled={emailMutation.isPending || !newEmail.trim()}
-                  onClick={() => emailMutation.mutate(newEmail.trim())}
+                  onClick={() => {
+                    const email = newEmail.trim();
+                    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                      toast.error(
+                        "That doesn't look like an email address — check it and try again.",
+                      );
+                      return;
+                    }
+                    emailMutation.mutate(email);
+                  }}
                 >
                   {emailMutation.isPending ? (
                     <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
