@@ -484,7 +484,7 @@ function JobDetailPage() {
                     <Button
                       size="sm"
                       variant="secondary"
-                      disabled={gen.isPending}
+                      disabled={gen.isPending || genAll.isPending}
                       onClick={() => gen.mutate({ optimizeFromId: primaryEntry.id })}
                     >
                       <Wand2 aria-hidden="true" className="mr-1.5 h-4 w-4" />
