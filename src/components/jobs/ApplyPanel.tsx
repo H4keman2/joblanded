@@ -63,7 +63,12 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
 
   if (apps.isLoading) {
     return (
-      <div className="mt-5 h-16 animate-pulse rounded-lg border border-border bg-secondary/30" />
+      <div
+        role="status"
+        className="mt-5 h-16 animate-pulse rounded-lg border border-border bg-secondary/30"
+      >
+        <span className="sr-only">Loading application status…</span>
+      </div>
     );
   }
 
