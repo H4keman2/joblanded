@@ -301,9 +301,10 @@ function ResumePage() {
                 inputMode="numeric"
                 min={0}
                 value={draft.years_experience ?? ""}
-                onChange={(e) =>
-                  update("years_experience", e.target.value === "" ? null : Number(e.target.value))
-                }
+                onChange={(e) => {
+                  const n = e.target.value === "" ? null : Number(e.target.value);
+                  update("years_experience", n !== null && n < 0 ? null : n);
+                }}
               />
             </Field>
             <Field label="Email">
