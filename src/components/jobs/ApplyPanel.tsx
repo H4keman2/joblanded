@@ -11,7 +11,7 @@ import {
   STATUS_LABELS,
   type ApplicationStatus,
 } from "@/lib/applications.functions";
-import { formatDate } from "@/lib/dates";
+import { formatDate, todayStr } from "@/lib/dates";
 
 // Same client-side pre-check as the other posting-link forms: a bare
 // "example.com/jobs" is almost always a missing https:// rather than a real
@@ -44,6 +44,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
           jobId,
           status: app && app.status !== "saved" ? (app.status as "applied") : "applied",
           ...(applicationUrl ? { applicationUrl } : {}),
+          appliedDate: todayStr(),
         },
       }),
     onSuccess: async () => {

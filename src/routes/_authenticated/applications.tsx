@@ -168,7 +168,8 @@ function ApplicationsPage() {
   });
 
   const statusMutation = useMutation({
-    mutationFn: (input: { id: string; status: ApplicationStatus }) => setStatus({ data: input }),
+    mutationFn: (input: { id: string; status: ApplicationStatus }) =>
+      setStatus({ data: { ...input, appliedDate: todayStr() } }),
     // Update the list and the funnel instantly; the server refetch on success
     // is the source of truth and a failure rolls everything back.
     onMutate: async (input) => {

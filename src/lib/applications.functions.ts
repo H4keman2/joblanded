@@ -118,6 +118,12 @@ export const addApplication = createServerFn({ method: "POST" })
 const updateStatusInput = z.object({
   id: z.string().uuid(),
   status: z.enum(APPLICATION_STATUSES),
+  // Client-supplied local calendar date (YYYY-MM-DD); falls back to the
+  // server date when absent so older callers keep working.
+  appliedDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 
 export const updateApplicationStatus = createServerFn({ method: "POST" })
@@ -137,7 +143,7 @@ export const updateApplicationStatus = createServerFn({ method: "POST" })
     // and recommend a follow-up 2 business days out, so follow-up tracking
     // has a real anchor without asking the user to enter anything.
     const shouldStampApplied = data.status !== "saved" && !existing.date_applied;
-    const appliedDate = new Date().toISOString().slice(0, 10);
+    const appliedDate = data.appliedDate ?? new Date().toISOString().slice(0, 10);
 
     const { data: row, error } = await context.supabase
       .from("applications")
@@ -164,6 +170,12 @@ const jobStatusInput = z.object({
     .max(2000)
     .url()
     .refine((u) => /^https?:\/\//i.test(u), "Link must start with http(s)://")
+    .optional(),
+  // Client-supplied local calendar date (YYYY-MM-DD); falls back to the
+  // server date when absent so older callers keep working.
+  appliedDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
 });
 
@@ -192,7 +204,7 @@ export const setJobStatus = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existingError) throw new Error(existingError.message);
 
-    const appliedDate = new Date().toISOString().slice(0, 10);
+    const appliedDate = data.appliedDate ?? new Date().toISOString().slice(0, 10);
     const shouldStampApplied = data.status !== "saved" && !existing?.date_applied;
     const values = {
       status: data.status,
