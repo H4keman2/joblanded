@@ -301,6 +301,12 @@ function ApplicationsPage() {
                 toast.error("That link needs a full address — paste it starting with https://");
                 return;
               }
+              if (description.trim().length < 80 && !link) {
+                toast.error(
+                  "Paste the full posting — at least 80 characters — or add a posting link instead.",
+                );
+                return;
+              }
               addMutation.mutate({ description: description.trim(), sourceUrl: link });
             }}
           >
