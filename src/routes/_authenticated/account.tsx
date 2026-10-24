@@ -432,18 +432,33 @@ function AccountPage() {
           <Button variant="outline" onClick={signOut}>
             Sign out
           </Button>
-          <Hint tip="Ends every active session for your account, on every device.">
-            <Button
-              variant="outline"
-              onClick={() => signOutEverywhereMutation.mutate()}
-              disabled={signOutEverywhereMutation.isPending}
-            >
-              {signOutEverywhereMutation.isPending ? (
-                <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
-              ) : null}
-              Sign out everywhere
-            </Button>
-          </Hint>
+          <AlertDialog>
+            <Hint tip="Ends every active session for your account, on every device.">
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" disabled={signOutEverywhereMutation.isPending}>
+                  {signOutEverywhereMutation.isPending ? (
+                    <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
+                  ) : null}
+                  Sign out everywhere
+                </Button>
+              </AlertDialogTrigger>
+            </Hint>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Sign out everywhere?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You&apos;ll be signed out on this device and every other device, and will need to
+                  sign in again.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => signOutEverywhereMutation.mutate()}>
+                  Sign out everywhere
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </section>
 
