@@ -471,7 +471,10 @@ function JobsPage() {
                               size="icon"
                               variant="ghost"
                               aria-label={`${job.archived_at ? "Restore" : "Archive"} ${job.title}`}
-                              disabled={archiveMutation.isPending}
+                              disabled={
+                                archiveMutation.isPending &&
+                                archiveMutation.variables?.id === job.id
+                              }
                               onClick={() =>
                                 archiveMutation.mutate({ id: job.id, archived: !job.archived_at })
                               }
