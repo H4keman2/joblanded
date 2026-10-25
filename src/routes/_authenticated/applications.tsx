@@ -582,7 +582,10 @@ function ApplicationsPage() {
                                 size="sm"
                                 variant={app.status === s ? "default" : "outline"}
                                 className="h-8 text-xs"
-                                disabled={statusMutation.isPending}
+                                disabled={
+                                  statusMutation.isPending &&
+                                  statusMutation.variables?.id === app.id
+                                }
                                 aria-pressed={app.status === s}
                                 onClick={() =>
                                   s === "rejected"
@@ -631,7 +634,10 @@ function ApplicationsPage() {
                                 <Switch
                                   aria-label={`Mark follow-up sent for ${job?.title ?? "Untitled role"}`}
                                   checked={app.follow_up_sent}
-                                  disabled={followUpMutation.isPending}
+                                  disabled={
+                                    followUpMutation.isPending &&
+                                    followUpMutation.variables?.id === app.id
+                                  }
                                   onCheckedChange={(checked) =>
                                     followUpMutation.mutate({
                                       id: app.id,
