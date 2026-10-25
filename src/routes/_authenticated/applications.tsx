@@ -583,7 +583,8 @@ function ApplicationsPage() {
                                 variant={app.status === s ? "default" : "outline"}
                                 className="h-8 text-xs"
                                 disabled={
-                                  statusMutation.isPending && statusMutation.variables?.id === app.id
+                                  statusMutation.isPending &&
+                                  statusMutation.variables?.id === app.id
                                 }
                                 aria-pressed={app.status === s}
                                 onClick={() =>
