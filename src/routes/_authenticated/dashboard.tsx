@@ -50,7 +50,8 @@ function jobOf(app: { jobs: unknown }): JobInfo {
 
 function ListSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" role="status">
+      <span className="sr-only">Loading follow-ups…</span>
       {[0, 1, 2].map((i) => (
         <div key={i} className="flex items-center justify-between gap-4">
           <div className="space-y-2">
