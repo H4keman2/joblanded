@@ -368,6 +368,21 @@ function JobDetailPage() {
           />
         ) : (
           <div className="panel p-8">
+            {roles.isError && (
+              <div className="mb-5 flex flex-wrap items-center gap-3">
+                <p className="text-sm text-muted-foreground">
+                  We couldn't load your saved roles right now — your connection may have dropped.
+                </p>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => void roles.refetch()}
+                  disabled={roles.isFetching}
+                >
+                  Try again
+                </Button>
+              </div>
+            )}
             {fits.isError && (
               <div className="mb-5 flex flex-wrap items-center gap-3">
                 <p className="text-sm text-muted-foreground">
