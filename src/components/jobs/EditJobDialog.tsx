@@ -135,9 +135,9 @@ export function EditJobDialog({
             }
             mutation.mutate({
               id: job.id,
-              title,
-              company,
-              location,
+              title: title.trim(),
+              company: company.trim(),
+              location: location.trim(),
               pay_min: min,
               pay_max: max,
               source_url: sourceUrl.trim(),
