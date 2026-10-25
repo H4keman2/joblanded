@@ -47,7 +47,6 @@ function PostingSearchPage() {
     mutationFn: (value: string) => run({ data: { text: value, licenseKey: pro.key ?? "" } }),
     onError: (error) => {
       toastProError(error);
-      match.reset();
     },
   });
 
