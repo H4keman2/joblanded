@@ -416,6 +416,7 @@ function ResumePage() {
                       value={ed.year ?? ""}
                       aria-label={`Education row ${i + 1}: year`}
                       placeholder="Year"
+                      inputMode="numeric"
                       onChange={(e) => {
                         const next = [...(draft.education ?? [])];
                         next[i] = { ...next[i], year: e.target.value };
