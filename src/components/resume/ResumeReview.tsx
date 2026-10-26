@@ -182,7 +182,6 @@ export function ResumeReview({
       toast.success("AI review ready.");
     },
     onError: (e: Error) => {
-      setReview(null);
       toastProError(e);
     },
   });
@@ -194,7 +193,6 @@ export function ResumeReview({
       setPreview(data as unknown as PreviewResult);
     },
     onError: (e: Error) => {
-      setPreview(null);
       toastProError(e);
     },
   });

@@ -151,7 +151,6 @@ export function ProAssist() {
       toast.success("Interview prep ready.");
     },
     onError: (e: Error) => {
-      setPrep(null);
       toastProError(e);
     },
   });
@@ -173,7 +172,6 @@ export function ProAssist() {
       toast.success("Offer evaluated.");
     },
     onError: (e: Error) => {
-      setOffer(null);
       toastProError(e);
     },
   });
