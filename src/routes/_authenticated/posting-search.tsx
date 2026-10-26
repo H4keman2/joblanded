@@ -104,6 +104,22 @@ function PostingSearchPage() {
         )}
       </div>
 
+      {match.isError && !result && (
+        <div className="panel space-y-2 p-8">
+          <p className="text-sm text-muted-foreground">
+            We couldn&apos;t compare those postings. Your connection may have dropped.
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => match.mutate(text)}
+            disabled={match.isPending}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
+
       {result && (
         <>
           <div className="panel overflow-x-auto p-8">
