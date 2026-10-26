@@ -87,6 +87,7 @@ export function EditJobDialog({
   });
 
   const toNumber = (v: string) => {
+    if (v.includes("-")) return null;
     const digits = v.replace(/[^0-9.]/g, "");
     const n = Number(digits);
     // digits must be non-empty: "abc" strips to "" which Number() turns into 0
