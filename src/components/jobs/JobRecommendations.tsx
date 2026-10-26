@@ -70,7 +70,6 @@ export function JobRecommendations() {
     }) => fetchRecommended({ data: { ...input, licenseKey: pro.key ?? "" } }),
     onSuccess: (rows) => setResults(rows as RecommendedJob[]),
     onError: (e: Error) => {
-      setResults(null);
       toastProError(e);
     },
   });
