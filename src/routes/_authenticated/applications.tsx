@@ -336,7 +336,7 @@ function ApplicationsPage() {
                 className="mt-1.5"
               />
               <p className="mt-1.5 text-xs text-muted-foreground">
-                No link handy? Leave this blank and paste the posting text below instead.
+                No link handy? Leave this blank and paste the posting text above instead.
               </p>
             </div>
             <Button type="submit" disabled={addMutation.isPending}>
