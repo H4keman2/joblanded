@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -155,6 +156,9 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
             className="h-9 text-sm"
           />
           <Button type="submit" size="sm" disabled={mutation.isPending || (applied && !url.trim())}>
+            {mutation.isPending && (
+              <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
+            )}
             {applied ? "Save link" : "I applied"}
           </Button>
         </form>
