@@ -528,7 +528,8 @@ function JobsPage() {
                                   }
                                   onClick={() => deleteMutation.mutate(job.id)}
                                 >
-                                  {deleteMutation.isPending && deleteMutation.variables === job.id ? (
+                                  {deleteMutation.isPending &&
+                                  deleteMutation.variables === job.id ? (
                                     <Loader2
                                       aria-hidden="true"
                                       className="mr-1.5 size-4 animate-spin"
