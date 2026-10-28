@@ -48,6 +48,7 @@ function isFullUrl(value: string) {
     return protocol === "http:" || protocol === "https:";
   } catch {
     return false;
+  }
 }
 
 // Legacy rows can hold pay_min > pay_max (the edit dialog only rejects that
@@ -58,7 +59,6 @@ function paySuffix(job: { pay_min?: number | null; pay_max?: number | null }) {
   const lo = Math.min(...values);
   const hi = Math.max(...values);
   return ` · $${lo.toLocaleString()}${values.length > 1 ? `–$${hi.toLocaleString()}` : ""}`;
-}
 }
 
 export const Route = createFileRoute("/_authenticated/jobs/")({
