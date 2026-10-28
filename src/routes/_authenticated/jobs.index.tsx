@@ -513,15 +513,21 @@ function JobsPage() {
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel disabled={deleteMutation.isPending}>
+                                <AlertDialogCancel
+                                  disabled={
+                                    deleteMutation.isPending && deleteMutation.variables === job.id
+                                  }
+                                >
                                   Cancel
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  disabled={deleteMutation.isPending}
+                                  disabled={
+                                    deleteMutation.isPending && deleteMutation.variables === job.id
+                                  }
                                   onClick={() => deleteMutation.mutate(job.id)}
                                 >
-                                  {deleteMutation.isPending ? (
+                                  {deleteMutation.isPending && deleteMutation.variables === job.id ? (
                                     <Loader2
                                       aria-hidden="true"
                                       className="mr-1.5 size-4 animate-spin"
