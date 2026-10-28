@@ -98,12 +98,14 @@ function jobOf(app: ApplicationRow): JobInfo | null {
 function payLine(job: JobInfo | null) {
   if (!job) return "";
   const parts = [job.company, job.location].filter(Boolean).join(" · ") || "No company listed";
-  const pay =
-    job.pay_min || job.pay_max
-      ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
-          job.pay_max && job.pay_min ? `–$${job.pay_max.toLocaleString()}` : ""
-        }`
-      : "";
+  // Legacy rows can hold pay_min > pay_max (the edit dialog only rejects that
+  // from here on), so sort the pair at display rather than printing it backwards.
+  const values = [job.pay_min, job.pay_max].filter((v): v is number => Boolean(v));
+  const pay = values.length
+    ? ` · $${Math.min(...values).toLocaleString()}${
+        values.length > 1 ? `–$${Math.max(...values).toLocaleString()}` : ""
+      }`
+    : "";
   return parts + pay;
 }
 

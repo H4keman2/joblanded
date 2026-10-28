@@ -51,6 +51,16 @@ function isFullUrl(value: string) {
   }
 }
 
+// Legacy rows can hold pay_min > pay_max (the edit dialog only rejects that
+// going forward), so sort the pair at display instead of printing "$150,000–$120,000".
+function paySuffix(job: { pay_min?: number | null; pay_max?: number | null }) {
+  const values = [job.pay_min, job.pay_max].filter((v): v is number => Boolean(v));
+  if (!values.length) return "";
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  return ` · $${lo.toLocaleString()}${values.length > 1 ? `–$${hi.toLocaleString()}` : ""}`;
+}
+
 export const Route = createFileRoute("/_authenticated/jobs/")({
   head: () => ({
     meta: [
@@ -427,13 +437,7 @@ function JobsPage() {
                           <p className="text-xs text-muted-foreground">
                             {[job.company, job.location].filter(Boolean).join(" · ") ||
                               "No company listed"}
-                            {job.pay_min || job.pay_max
-                              ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
-                                  job.pay_max && job.pay_min
-                                    ? `–$${job.pay_max.toLocaleString()}`
-                                    : ""
-                                }`
-                              : ""}
+                            {paySuffix(job)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
