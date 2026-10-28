@@ -79,6 +79,7 @@ function PostingSearchPage() {
               <Label htmlFor="postings">Job postings</Label>
               <Textarea
                 id="postings"
+                aria-describedby={text.trim().length < 80 ? "postings-hint" : undefined}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 rows={14}
@@ -95,7 +96,7 @@ function PostingSearchPage() {
               Compare postings
             </Button>
             {text.trim().length < 80 && (
-              <p className="text-xs text-muted-foreground">
+              <p id="postings-hint" className="text-xs text-muted-foreground">
                 {80 - text.trim().length} more characters needed — paste a fuller posting to
                 compare.
               </p>
