@@ -39,7 +39,8 @@ function fitTone(fit: number | null) {
 function payLine(min: number | null, max: number | null) {
   if (!min && !max) return null;
   const fmt = (n: number) => `$${Math.round(n).toLocaleString()}`;
-  if (min && max && min !== max) return `${fmt(min)}–${fmt(max)}`;
+  // Rank the pair at display time: a flipped range should still read low-to-high.
+  if (min && max && min !== max) return `${fmt(Math.min(min, max))}–${fmt(Math.max(min, max))}`;
   return fmt(min ?? max!);
 }
 
