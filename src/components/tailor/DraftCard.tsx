@@ -140,6 +140,7 @@ export function DiffText({ base, text }: { base?: string | undefined; text: stri
           <span key={i}>{t.text}</span>
         ) : t.type === "add" ? (
           <span key={i} className="rounded-sm bg-primary/15 px-0.5 font-medium text-foreground">
+            <span className="sr-only">Added: </span>
             {t.text}
           </span>
         ) : (
@@ -147,6 +148,7 @@ export function DiffText({ base, text }: { base?: string | undefined; text: stri
             key={i}
             className="rounded-sm bg-destructive/10 px-0.5 text-destructive/70 line-through"
           >
+            <span className="sr-only">Removed: </span>
             {t.text}
           </span>
         ),
