@@ -427,13 +427,7 @@ function JobsPage() {
                           <p className="text-xs text-muted-foreground">
                             {[job.company, job.location].filter(Boolean).join(" · ") ||
                               "No company listed"}
-                            {job.pay_min || job.pay_max
-                              ? ` · $${(job.pay_min ?? job.pay_max)!.toLocaleString()}${
-                                  job.pay_max && job.pay_min
-                                    ? `–$${job.pay_max.toLocaleString()}`
-                                    : ""
-                                }`
-                              : ""}
+                            {paySuffix(job)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
