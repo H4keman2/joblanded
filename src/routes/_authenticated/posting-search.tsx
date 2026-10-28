@@ -54,7 +54,7 @@ function PostingSearchPage() {
 
   return (
     <div className="space-y-6">
-      <div className="panel p-8">
+      <div className="panel p-5 sm:p-8">
         <h1 className="text-2xl font-semibold">Posting search</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Paste several postings at once, separated by a line with three dashes (
@@ -105,7 +105,7 @@ function PostingSearchPage() {
       </div>
 
       {match.isError && !result && (
-        <div className="panel space-y-2 p-8">
+        <div className="panel space-y-2 p-5 sm:p-8">
           <p className="text-sm text-muted-foreground">
             We couldn&apos;t compare those postings. Your connection may have dropped.
           </p>
@@ -122,7 +122,7 @@ function PostingSearchPage() {
 
       {result && (
         <>
-          <div className="panel overflow-x-auto p-8">
+          <div className="panel overflow-x-auto p-5 sm:p-8">
             <h2 className="text-lg font-semibold">Section-by-section fit</h2>
             <p role="status" className="mt-1 text-sm text-muted-foreground">
               {result.postings.length} posting{result.postings.length === 1 ? "" : "s"} compared
@@ -196,7 +196,7 @@ function PostingSearchPage() {
             </table>
           </div>
 
-          <div className="panel p-8">
+          <div className="panel p-5 sm:p-8">
             <h2 className="text-lg font-semibold">Where each section lands best</h2>
             <ul className="mt-4 space-y-3">
               {result.sections.map((section) => {
