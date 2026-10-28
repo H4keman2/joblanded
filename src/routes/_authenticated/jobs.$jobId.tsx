@@ -224,7 +224,7 @@ function JobDetailPage() {
       const idx = input.optimizeFromId
         ? fresh.findIndex((d) => d.id === input.optimizeFromId)
         : fresh.length - 1;
-      setSelected(idx >= 0 ? idx : fresh.length - 1);
+      setSelected(idx >= 0 ? idx : Math.max(0, fresh.length - 1));
       setCompare(input.optimizeFromId ? fresh.length - 1 : null);
       toast.success(input.optimizeFromId ? "ATS-optimized version ready" : "New version ready");
     },
