@@ -102,6 +102,10 @@ export function JobRecommendations() {
       toast.error("Min salary should be lower than Max salary — check your range.");
       return;
     }
+    if ((min != null && min < 0) || (max != null && max < 0)) {
+      toast.error("Salaries can't be negative — check your range.");
+      return;
+    }
     search.mutate({
       keyword: anyTitle ? undefined : keyword.trim() || undefined,
       anyTitle,
