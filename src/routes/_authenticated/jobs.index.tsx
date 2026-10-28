@@ -344,6 +344,7 @@ function JobsPage() {
                     aria-hidden="true"
                   />
                   <Input
+                    type="search"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search title, company, location"
