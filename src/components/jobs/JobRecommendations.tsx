@@ -170,7 +170,7 @@ export function JobRecommendations() {
   }
 
   return (
-    <div className="panel space-y-5 p-8">
+    <div className="panel space-y-5 p-5 sm:p-8">
       <div>
         <h2 className="text-xl font-semibold">Recommended for you</h2>
         <p className="mt-1 text-sm text-muted-foreground">

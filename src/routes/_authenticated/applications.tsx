@@ -268,7 +268,7 @@ function ApplicationsPage() {
     <div className="space-y-6">
       <ProAssist />
 
-      <div className="panel p-8">
+      <div className="panel p-5 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Application Tracker</h1>
@@ -482,7 +482,7 @@ function ApplicationsPage() {
         </div>
       )}
 
-      <div className="panel p-8">
+      <div className="panel p-5 sm:p-8">
         {applications.isLoading ? (
           <p className="text-sm text-muted-foreground" role="status">
             Loading your applications…

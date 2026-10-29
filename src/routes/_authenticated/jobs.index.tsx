@@ -204,7 +204,7 @@ function JobsPage() {
     <div className="space-y-6">
       <JobRecommendations />
 
-      <div className="panel p-8">
+      <div className="panel p-5 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Jobs</h1>
@@ -293,7 +293,7 @@ function JobsPage() {
         )}
       </div>
 
-      <div className="panel p-8">
+      <div className="panel p-5 sm:p-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-lg font-semibold">
             {showArchived ? "Archived postings" : "Saved postings"}
