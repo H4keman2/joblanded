@@ -54,7 +54,7 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
         redirectTo: `${window.location.origin}/auth/reset`,
       });
       if (error) throw error;
@@ -78,7 +78,7 @@ function AuthPage() {
           return;
         }
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: cleanEmail,
           password,
           options: { emailRedirectTo: `${window.location.origin}/applications` },
         });
@@ -99,7 +99,10 @@ function AuthPage() {
         }
         toast.success("Account created. Let's set up your resume.");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
         if (error) throw error;
       }
       const { data } = await supabase.auth.getSession();
@@ -129,7 +132,7 @@ function AuthPage() {
             {resetSent ? (
               <div className="mt-6 space-y-4">
                 <p className="text-sm text-foreground">
-                  Check <span className="font-medium">{email}</span> for a reset link — it'll bring
+                  Check <span className="font-medium">{cleanEmail}</span> for a reset link — it'll bring
                   you back here to set a new password.
                 </p>
                 <Button
