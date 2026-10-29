@@ -182,7 +182,7 @@ function ResumePage() {
               ) : (
                 <Upload aria-hidden="true" className="size-4" />
               )}
-              Upload PDF
+              Upload file
             </Button>
           </Hint>
           <span className="text-sm text-muted-foreground">or paste the text below</span>
