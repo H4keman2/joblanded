@@ -38,6 +38,9 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  // A pasted email often arrives with stray whitespace; send the trimmed value
+  // to the backend and show that same value back to the user.
+  const cleanEmail = email.trim();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
