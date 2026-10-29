@@ -239,7 +239,7 @@ function JobDetailPage() {
 
   if (job.isError) {
     return (
-      <div className="panel p-8">
+      <div className="panel p-5 sm:p-8">
         <p className="text-sm text-muted-foreground">
           We couldn&apos;t load this posting. It may have been deleted.
         </p>
@@ -253,7 +253,7 @@ function JobDetailPage() {
   return (
     <TooltipProvider>
       <div className="space-y-6">
-        <div className="panel p-8">
+        <div className="panel p-5 sm:p-8">
           <Link
             to="/jobs"
             className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground"
@@ -367,7 +367,7 @@ function JobDetailPage() {
             }
           />
         ) : (
-          <div className="panel p-8">
+          <div className="panel p-5 sm:p-8">
             {roles.isError && (
               <div className="mb-5 flex flex-wrap items-center gap-3">
                 <p className="text-sm text-muted-foreground">
