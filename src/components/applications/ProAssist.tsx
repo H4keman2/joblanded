@@ -237,7 +237,7 @@ export function ProAssist() {
             ) : (
               <div className="flex flex-wrap items-center gap-2">
                 <Select value={prepJobId} onValueChange={setPrepJobId}>
-                  <SelectTrigger className="h-9 w-64" aria-label="Choose a posting to prep for">
+                  <SelectTrigger className="h-9 w-full sm:w-64" aria-label="Choose a posting to prep for">
                     <SelectValue placeholder="Choose a posting…" />
                   </SelectTrigger>
                   <SelectContent>
