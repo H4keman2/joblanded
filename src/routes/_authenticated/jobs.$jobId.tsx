@@ -264,7 +264,7 @@ function JobDetailPage() {
             <h1 className="text-2xl font-semibold">{job.data?.title ?? "Loading…"}</h1>
             {roleOptions.length > 1 && (
               <Hint tip="Roles are ranked by how well your parsed resume titles and skills line up with each posting. Each role keeps its own saved versions.">
-                <div className="min-w-72">
+                <div className="w-full sm:min-w-72">
                   <Select
                     value={jobId}
                     onValueChange={(id) => {
