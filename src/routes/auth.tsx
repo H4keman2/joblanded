@@ -135,8 +135,8 @@ function AuthPage() {
             {resetSent ? (
               <div className="mt-6 space-y-4">
                 <p className="text-sm text-foreground">
-                  Check <span className="font-medium">{cleanEmail}</span> for a reset link — it'll bring
-                  you back here to set a new password.
+                  Check <span className="font-medium">{cleanEmail}</span> for a reset link — it'll
+                  bring you back here to set a new password.
                 </p>
                 <Button
                   type="button"
