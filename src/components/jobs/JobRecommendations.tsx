@@ -190,6 +190,7 @@ export function JobRecommendations() {
           <Label htmlFor="rec-keyword">Job title or keyword</Label>
           <Input
             id="rec-keyword"
+            type="search"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="e.g. Senior Product Manager"
