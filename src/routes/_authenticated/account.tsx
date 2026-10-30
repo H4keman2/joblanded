@@ -165,12 +165,15 @@ function AccountPage() {
   }
 
   // --- Sessions ---
+  const [signingOut, setSigningOut] = useState(false);
   async function signOut() {
+    setSigningOut(true);
     await queryClient.cancelQueries();
     queryClient.clear();
     try {
       await supabase.auth.signOut({ scope: "local" });
     } finally {
+      setSigningOut(false);
       navigate({ to: "/auth", replace: true });
     }
   }
@@ -429,8 +432,11 @@ function AccountPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={signOut}>
-            Sign out
+          <Button variant="outline" onClick={signOut} disabled={signingOut}>
+            {signingOut ? (
+              <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
+            ) : null}
+            {signingOut ? "Signing out…" : "Sign out"}
           </Button>
           <AlertDialog>
             <Hint tip="Ends every active session for your account, on every device.">
