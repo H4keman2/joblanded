@@ -33,7 +33,7 @@ export function ScoreBar({ score, label }: { score: number; label: string }) {
       >
         <div className={`h-full rounded-full ${color}`} style={{ width: `${val}%` }} />
       </div>
-      <span className="text-xs font-semibold text-foreground">{val}</span>
+      <span className="text-xs font-semibold text-foreground">{val}%</span>
     </div>
   );
 }
