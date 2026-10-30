@@ -87,14 +87,29 @@ function PostingSearchPage() {
                 className="mt-1.5"
               />
             </div>
-            <Button type="submit" disabled={match.isPending || text.trim().length < 80}>
-              {match.isPending ? (
-                <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
-              ) : (
-                <Search aria-hidden="true" className="mr-1.5 h-4 w-4" />
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="submit" disabled={match.isPending || text.trim().length < 80}>
+                {match.isPending ? (
+                  <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <Search aria-hidden="true" className="mr-1.5 h-4 w-4" />
+                )}
+                Compare postings
+              </Button>
+              {(text !== "" || match.data || match.isError) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={match.isPending}
+                  onClick={() => {
+                    setText("");
+                    match.reset();
+                  }}
+                >
+                  Start over
+                </Button>
               )}
-              Compare postings
-            </Button>
+            </div>
             {text.trim().length < 80 && (
               <p id="postings-hint" className="text-xs text-muted-foreground">
                 {80 - text.trim().length} more characters needed — paste a fuller posting to
