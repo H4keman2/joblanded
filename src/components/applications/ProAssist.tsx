@@ -378,6 +378,7 @@ export function ProAssist() {
                     <Label htmlFor="offer-bonus">Bonus</Label>
                     <Input
                       id="offer-bonus"
+                      inputMode="decimal"
                       placeholder="10%"
                       value={bonus}
                       onChange={(e) => setBonus(e.target.value)}
@@ -388,6 +389,7 @@ export function ProAssist() {
                     <Label htmlFor="offer-equity">Equity</Label>
                     <Input
                       id="offer-equity"
+                      inputMode="decimal"
                       placeholder="0.05%"
                       value={equity}
                       onChange={(e) => setEquity(e.target.value)}
