@@ -22,7 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Archive, ArchiveRestore, Loader2, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -347,10 +347,25 @@ function JobsPage() {
                     type="search"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setSearch("");
+                    }}
                     placeholder="Search title, company, location"
                     aria-label="Search saved postings"
-                    className="h-9 w-full pl-8"
+                    className="h-9 w-full pl-8 pr-8"
                   />
+                  {search !== "" && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      aria-label="Clear search"
+                      className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2"
+                      onClick={() => setSearch("")}
+                    >
+                      <X aria-hidden="true" className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
                 {payOptions.buckets.length > 0 && (
                   <Select value={payFilter} onValueChange={setPayFilter}>
