@@ -274,6 +274,28 @@ export function ProAssist() {
 
             {prep && (
               <div className="space-y-3">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(
+                        (prep.questions ?? [])
+                          .map(
+                            (q, i) =>
+                              `${i + 1}. ${q.question}\nWhy they ask: ${q.why}\nYour angle: ${q.angle}`,
+                          )
+                          .join("\n\n"),
+                      );
+                      toast.success("Copied to clipboard");
+                    } catch {
+                      toast.error("Couldn't copy — your browser blocked clipboard access");
+                    }
+                  }}
+                >
+                  Copy questions
+                </Button>
                 {(prep.questions ?? []).map((q, i) => (
                   <details
                     key={i}
