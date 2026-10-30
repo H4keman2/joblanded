@@ -297,6 +297,7 @@ export function JobRecommendations() {
                         className={`shrink-0 cursor-help rounded-full px-2 py-0.5 text-xs font-semibold ${fitTone(job.fit)}`}
                       >
                         {job.fit}%
+                        <span className="sr-only"> match</span>
                       </span>
                     </Hint>
                   )}
