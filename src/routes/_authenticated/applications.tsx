@@ -510,7 +510,7 @@ function ApplicationsPage() {
             page, or add one above, and it'll show up here.
           </p>
         ) : (
-          <div className="max-h-[560px] overflow-y-auto pr-1">
+          <div aria-label="Applications" className="max-h-[560px] overflow-y-auto pr-1">
             <ul className="divide-y divide-border">
               {applications.data!.map((app) => {
                 const job = jobOf(app);
