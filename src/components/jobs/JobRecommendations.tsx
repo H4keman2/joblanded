@@ -193,6 +193,9 @@ export function JobRecommendations() {
             type="search"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setKeyword("");
+            }}
             placeholder="e.g. Senior Product Manager"
             className="mt-1.5"
             disabled={anyTitle}
