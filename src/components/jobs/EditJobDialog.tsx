@@ -114,6 +114,17 @@ export function EditJobDialog({
               toast.error("Role title can't be blank.");
               return;
             }
+            // Reject letter-suffixed values like "120k" before toNumber strips
+            // them to a tiny number ("120k" -> 120) with no warning.
+            const hasBadPayChars = (v: string) => /[^0-9,$.\s]/.test(v);
+            if (payMin.trim() && hasBadPayChars(payMin)) {
+              toast.error("Pay from didn't look like a number — enter digits only.");
+              return;
+            }
+            if (payMax.trim() && hasBadPayChars(payMax)) {
+              toast.error("Pay to didn't look like a number — enter digits only.");
+              return;
+            }
             const min = toNumber(payMin);
             if (payMin.trim() && min == null) {
               toast.error("Pay from didn't look like a number — enter digits only.");
