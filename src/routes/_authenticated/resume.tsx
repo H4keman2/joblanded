@@ -303,7 +303,17 @@ function ResumePage() {
                 value={draft.years_experience ?? ""}
                 onChange={(e) => {
                   const n = e.target.value === "" ? null : Number(e.target.value);
-                  update("years_experience", n !== null && n < 0 ? null : n);
+                  if (n !== null && n < 0) {
+                    // Explain the clear instead of silently blanking the field;
+                    // only toast on the transition in, so typing more digits
+                    // doesn't spam toasts.
+                    if (draft.years_experience != null) {
+                      toast.error("Years of experience can't be negative.");
+                    }
+                    update("years_experience", null);
+                    return;
+                  }
+                  update("years_experience", n);
                 }}
               />
             </Field>
