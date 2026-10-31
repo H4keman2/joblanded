@@ -292,9 +292,27 @@ export function DraftCard({
         <InsightList title="Suggestions" items={draft.insights.suggestions} tone="neutral" />
       </div>
 
-      <p className="mt-5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        Cover letter opener
-      </p>
+      <div className="mt-5 flex items-center gap-2">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Cover letter opener
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(draft.cover);
+              toast.success("Copied to clipboard");
+            } catch {
+              toast.error("Couldn't copy — your browser blocked clipboard access");
+            }
+          }}
+        >
+          <Copy aria-hidden="true" className="size-4" />
+          Copy opener
+        </Button>
+      </div>
       <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
         <DiffText base={diffAgainst?.cover} text={draft.cover} />
       </blockquote>
