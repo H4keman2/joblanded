@@ -589,6 +589,7 @@ function ApplicationsPage() {
                                   statusMutation.variables?.id === app.id
                                 }
                                 aria-pressed={app.status === s}
+                                aria-label={`Set status to ${STATUS_LABELS[s]} for ${job?.title ?? "Untitled role"}`}
                                 onClick={() =>
                                   s === "rejected"
                                     ? setRejectTarget({
