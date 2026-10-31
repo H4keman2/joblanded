@@ -243,9 +243,19 @@ function JobDetailPage() {
         <p className="text-sm text-muted-foreground">
           We couldn&apos;t load this posting. It may have been deleted.
         </p>
-        <Button asChild size="sm" className="mt-4">
-          <Link to="/jobs">Back to jobs</Link>
-        </Button>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button asChild size="sm">
+            <Link to="/jobs">Back to jobs</Link>
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void job.refetch()}
+            disabled={job.isFetching}
+          >
+            Try again
+          </Button>
+        </div>
       </div>
     );
   }
