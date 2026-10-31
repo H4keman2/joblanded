@@ -221,6 +221,21 @@ function PostingSearchPage() {
                   .sort((a, b) => (b.cell?.score ?? 0) - (a.cell?.score ?? 0));
                 const top = ranked[0];
                 if (!top) return null;
+                // A 0% top score means no posting supports this section — don't
+                // crown one as its best landing spot.
+                if ((top.cell?.score ?? 0) === 0) {
+                  return (
+                    <li
+                      key={section}
+                      className="border-b border-border pb-3 last:border-0 last:pb-0"
+                    >
+                      <p className="text-sm font-medium">
+                        {section} →{" "}
+                        <span className="text-muted-foreground">No strong match yet</span>
+                      </p>
+                    </li>
+                  );
+                }
                 return (
                   <li key={section} className="border-b border-border pb-3 last:border-0 last:pb-0">
                     <p className="text-sm font-medium">
