@@ -275,9 +275,32 @@ export function JobRecommendations() {
           </Button>
         </div>
       ) : results && results.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No matches found. Try a broader keyword or clearing the location/salary filters.
-        </p>
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            No matches found. Try a broader keyword or clearing the location/salary filters.
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setLocation("");
+              setSalaryMin("");
+              setSalaryMax("");
+              // Re-run directly with cleared filters: runSearch reads state
+              // from its closure, so it would re-submit the old filters here.
+              search.mutate({
+                keyword: anyTitle ? undefined : keyword.trim() || undefined,
+                anyTitle,
+                location: undefined,
+                salaryMin: undefined,
+                salaryMax: undefined,
+              });
+            }}
+            disabled={search.isPending}
+          >
+            Clear filters
+          </Button>
+        </div>
       ) : results && results.length > 0 ? (
         <div className="space-y-2">
           {search.isError && (
