@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Full nav — hidden below md, where it would otherwise become a
               horizontally-scrolling strip rather than a real menu. */}
-          <nav className="hidden flex-1 items-center gap-1 overflow-x-auto md:flex">
+          <nav aria-label="Primary" className="hidden flex-1 items-center gap-1 overflow-x-auto md:flex">
             {nav.map(({ to, label, tip }) => (
               <Hint key={to} tip={tip}>
                 <Link
@@ -89,7 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <SheetHeader>
                   <SheetTitle className="font-display text-primary">JobLanded</SheetTitle>
                 </SheetHeader>
-                <nav className="mt-4 flex flex-col gap-1">
+                <nav aria-label="Mobile" className="mt-4 flex flex-col gap-1">
                   {nav.map(({ to, label }) => (
                     <Link
                       key={to}
