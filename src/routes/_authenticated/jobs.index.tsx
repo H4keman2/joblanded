@@ -435,7 +435,10 @@ function JobsPage() {
                   </button>
                 </p>
               ) : (
-                <div className="mt-2 max-h-[560px] overflow-y-auto pr-1">
+                <div
+                  className="mt-2 max-h-[560px] overflow-y-auto pr-1"
+                  aria-label="Saved postings"
+                >
                   <ul className="divide-y divide-border">
                     {filteredJobs.map((job) => (
                       <li
