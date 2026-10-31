@@ -162,6 +162,7 @@ export function EditJobDialog({
                 id="edit-company"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
+                autoComplete="organization"
                 className="mt-1.5"
               />
             </div>
