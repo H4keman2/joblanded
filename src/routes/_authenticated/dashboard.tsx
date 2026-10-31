@@ -404,7 +404,15 @@ function DashboardPage() {
                       />
                     </Hint>
                     <div>
-                      <p className="font-medium">{job?.title ?? "Saved role"}</p>
+                      <p className="font-medium">
+                        <Link
+                          to="/jobs/$jobId"
+                          params={{ jobId: app.job_id }}
+                          className="hover:text-primary"
+                        >
+                          {job?.title ?? "Saved role"}
+                        </Link>
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {job?.company ? `${job.company} · ` : ""}
                         {overdue ? "Follow-up overdue since " : "Follow up today — due "}
