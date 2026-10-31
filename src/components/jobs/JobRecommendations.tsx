@@ -280,6 +280,17 @@ export function JobRecommendations() {
         </p>
       ) : results && results.length > 0 ? (
         <div className="space-y-2">
+          {search.isError && (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                We couldn&apos;t refresh recommendations — showing your last results. Your
+                connection may have dropped.
+              </p>
+              <Button size="sm" variant="secondary" onClick={runSearch} disabled={search.isPending}>
+                Try again
+              </Button>
+            </div>
+          )}
           <p role="status" className="text-sm text-muted-foreground">
             {results.length} {results.length === 1 ? "match" : "matches"}, ranked by fit
           </p>
