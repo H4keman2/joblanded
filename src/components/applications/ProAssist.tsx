@@ -19,7 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, MessagesSquare, BadgeDollarSign, ChevronDown, Copy } from "lucide-react";
+import {
+  Sparkles,
+  Loader2,
+  MessagesSquare,
+  BadgeDollarSign,
+  ChevronDown,
+  Copy,
+} from "lucide-react";
 
 type PrepQuestion = { question: string; why: string; angle: string };
 type PrepResult = {
