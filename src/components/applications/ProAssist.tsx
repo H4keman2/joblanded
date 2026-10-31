@@ -19,7 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Loader2, MessagesSquare, BadgeDollarSign, ChevronDown } from "lucide-react";
+import {
+  Sparkles,
+  Loader2,
+  MessagesSquare,
+  BadgeDollarSign,
+  ChevronDown,
+  Copy,
+} from "lucide-react";
 
 type PrepQuestion = { question: string; why: string; angle: string };
 type PrepResult = {
@@ -482,9 +489,28 @@ export function ProAssist() {
                   <p className="mt-1 text-muted-foreground">{offer.negotiateWhy}</p>
                 </div>
                 <div className="rounded-lg bg-secondary/40 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Say this
-                  </p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Say this
+                    </p>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-xs"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(offer.script);
+                          toast.success("Copied to clipboard");
+                        } catch {
+                          toast.error("Couldn't copy — your browser blocked clipboard access");
+                        }
+                      }}
+                    >
+                      <Copy aria-hidden="true" className="mr-1 h-3.5 w-3.5" />
+                      Copy script
+                    </Button>
+                  </div>
                   <p className="mt-1 text-sm italic">“{offer.script}”</p>
                 </div>
                 {(offer.watchouts ?? []).length > 0 && (
