@@ -282,7 +282,11 @@ export function DraftCard({
           </Hint>
         </div>
       </div>
-      <div className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 text-sm leading-relaxed text-foreground">
+      <div
+        className="mt-2 max-h-96 overflow-y-auto whitespace-pre-wrap rounded-lg border border-border bg-background p-4 text-sm leading-relaxed text-foreground"
+        tabIndex={0}
+        aria-label="Full tailored resume text"
+      >
         <DiffText base={diffAgainst?.resume} text={draft.resume} />
       </div>
 
