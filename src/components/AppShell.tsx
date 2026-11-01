@@ -78,9 +78,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               </Hint>
             ))}
-            {/* Quick save and Posting search stay out of the primary nav to keep
-                it short, but desktop users still need a path to them — they
-                were previously reachable only from the mobile drawer. */}
+            {/* Quick save and Posting search sit after a divider in the
+                desktop nav — they were previously reachable only from the
+                mobile drawer. */}
             <div aria-hidden="true" className="mx-1 h-5 w-px bg-border" />
             {secondaryNav.map(({ to, label }) => (
               <Link
