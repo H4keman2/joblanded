@@ -429,7 +429,10 @@ function ResumePage() {
                       inputMode="numeric"
                       onChange={(e) => {
                         const next = [...(draft.education ?? [])];
-                        next[i] = { ...next[i], year: e.target.value };
+                        next[i] = {
+                          ...next[i],
+                          year: e.target.value.replace(/[^0-9]/g, "").slice(0, 4),
+                        };
                         update("education", next);
                       }}
                     />
