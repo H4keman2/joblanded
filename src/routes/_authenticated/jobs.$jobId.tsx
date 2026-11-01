@@ -42,6 +42,17 @@ export const Route = createFileRoute("/_authenticated/jobs/$jobId")({
 
 type StoredDraft = { id: string; created_at: string; content: string };
 
+// Same display rule as the Jobs list paySuffix: legacy rows can hold
+// pay_min > pay_max, so sort the pair instead of printing "$150,000–$120,000".
+function payLine(job: { pay_min?: number | null; pay_max?: number | null } | null | undefined) {
+  if (!job) return "";
+  const values = [job.pay_min, job.pay_max].filter((v): v is number => Boolean(v));
+  if (!values.length) return "";
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  return `$${lo.toLocaleString()}${values.length > 1 ? `–$${hi.toLocaleString()}` : ""}`;
+}
+
 function normalize(content: string): TailorDraft {
   let raw: Record<string, unknown> = {};
   try {
@@ -318,6 +329,9 @@ function JobDetailPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {[job.data?.company, job.data?.location].filter(Boolean).join(" · ")}
           </p>
+          {payLine(job.data) && (
+            <p className="mt-0.5 text-sm text-muted-foreground">{payLine(job.data)}</p>
+          )}
 
           {job.data?.source_url && (
             <a
