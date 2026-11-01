@@ -78,6 +78,23 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </Link>
               </Hint>
             ))}
+            {/* Quick save and Posting search stay out of the primary nav to keep
+                it short, but desktop users still need a path to them — they
+                were previously reachable only from the mobile drawer. */}
+            <div aria-hidden="true" className="mx-1 h-5 w-px bg-border" />
+            {secondaryNav.map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
+                className="whitespace-nowrap rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                activeProps={{
+                  className: "bg-secondary text-foreground",
+                  "aria-current": "page",
+                }}
+              >
+                {label}
+              </Link>
+            ))}
           </nav>
 
           {/* Mobile nav — a slide-out drawer instead of a scrolling tab strip. */}
