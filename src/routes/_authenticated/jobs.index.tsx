@@ -262,7 +262,18 @@ function JobsPage() {
                 rows={10}
                 placeholder="Paste the full posting text here…"
                 className="mt-1.5"
+                aria-describedby={
+                  description.trim().length < 80 && !sourceUrl.trim()
+                    ? "description-hint"
+                    : undefined
+                }
               />
+              {description.trim().length < 80 && !sourceUrl.trim() && (
+                <p id="description-hint" className="mt-1.5 text-xs text-muted-foreground">
+                  {80 - description.trim().length} more characters needed — paste the full posting,
+                  or add a posting link instead.
+                </p>
+              )}
             </div>
             <div>
               <Label htmlFor="sourceUrl">
