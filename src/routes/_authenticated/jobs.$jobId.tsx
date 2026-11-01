@@ -333,7 +333,6 @@ function JobDetailPage() {
             <p className="mt-0.5 text-sm text-muted-foreground">{payLine(job.data)}</p>
           )}
 
-
           {job.data?.source_url && (
             <a
               href={job.data.source_url}
