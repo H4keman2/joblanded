@@ -318,6 +318,10 @@ function JobDetailPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             {[job.data?.company, job.data?.location].filter(Boolean).join(" · ")}
           </p>
+          {payLine(job.data) && (
+            <p className="mt-0.5 text-sm text-muted-foreground">{payLine(job.data)}</p>
+          )}
+
 
           {job.data?.source_url && (
             <a
