@@ -189,6 +189,7 @@ export function ResumeReview({
   const previewMutation = useMutation({
     mutationFn: (jobId: string) =>
       runPreview({ data: { resumeId: resumeId!, jobId, licenseKey: pro.key ?? "" } }),
+    onMutate: () => setPreview(null),
     onSuccess: (data) => {
       setPreview(data as unknown as PreviewResult);
     },
