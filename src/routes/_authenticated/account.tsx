@@ -102,8 +102,8 @@ function AccountPage() {
     try {
       await persistProfile({
         data: {
-          full_name: form.full_name,
-          phone: form.phone,
+          full_name: form.full_name.trim(),
+          phone: form.phone.trim(),
           email_notifications: form.email_notifications,
         },
       });
