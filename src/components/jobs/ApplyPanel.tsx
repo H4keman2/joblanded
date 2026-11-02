@@ -122,17 +122,31 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
         )}
       </div>
       {link && (
-        <a
-          href={link}
-          target="_blank"
-          rel="noreferrer"
-          aria-label="View application (opens in new tab)"
-          className="mt-1 block truncate text-xs text-primary underline"
-        >
-          {link}
-        </a>
+        <div className="mt-1 flex flex-wrap items-center gap-2">
+          <a
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="View application (opens in new tab)"
+            className="block max-w-full truncate text-xs text-primary underline"
+          >
+            {link}
+          </a>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            className="h-6 px-2 text-xs"
+            onClick={() => {
+              setUrl(link);
+              setEditing(true);
+            }}
+          >
+            Edit link
+          </Button>
+        </div>
       )}
-      {(!applied || !link) && (
+      {((!applied || !link) || editing) && (
         <form
           noValidate
           className="mt-3 flex flex-col gap-2 sm:flex-row"
