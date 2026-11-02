@@ -201,6 +201,10 @@ function ResumePage() {
                 aria-label="Resume text"
                 className="min-h-56 text-sm leading-relaxed"
               />
+              <p className="text-xs text-muted-foreground">
+                Edits here take effect when you re-parse below — Save changes saves the profile
+                fields, not this text.
+              </p>
               <Hint tip="Reads your resume text and builds the structured profile used for matching.">
                 <Button
                   onClick={() => parseMutation.mutate(rawText)}
