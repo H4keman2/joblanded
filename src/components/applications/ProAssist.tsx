@@ -152,6 +152,7 @@ export function ProAssist() {
   const activeJobs = (jobs.data ?? []).filter((j) => !j.archived_at);
 
   const prepMutation = useMutation({
+    onMutate: () => setPrep(null),
     mutationFn: (jobId: string) => runPrep({ data: { jobId, licenseKey: pro.key ?? "" } }),
     onSuccess: (data) => {
       setPrep(data as unknown as PrepResult);
@@ -243,7 +244,13 @@ export function ProAssist() {
               </p>
             ) : (
               <div className="flex flex-wrap items-center gap-2">
-                <Select value={prepJobId} onValueChange={setPrepJobId}>
+                <Select
+                  value={prepJobId}
+                  onValueChange={(id) => {
+                    setPrepJobId(id);
+                    setPrep(null);
+                  }}
+                >
                   <SelectTrigger
                     className="h-9 w-full sm:w-64"
                     aria-label="Choose a posting to prep for"
@@ -373,7 +380,13 @@ export function ProAssist() {
               <div className="space-y-3">
                 <div>
                   <Label htmlFor="offer-job">Posting</Label>
-                  <Select value={offerJobId} onValueChange={setOfferJobId}>
+                  <Select
+                    value={offerJobId}
+                    onValueChange={(id) => {
+                      setOfferJobId(id);
+                      setOffer(null);
+                    }}
+                  >
                     <SelectTrigger
                       id="offer-job"
                       className="mt-1.5 h-9"
