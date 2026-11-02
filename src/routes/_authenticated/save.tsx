@@ -124,7 +124,16 @@ function QuickSavePage() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Paste the posting here if the link needs a login…"
             className="mt-1.5"
+            aria-describedby={
+              description.trim().length < 80 && !sourceUrl.trim() ? "quick-text-hint" : undefined
+            }
           />
+          {description.trim().length < 80 && !sourceUrl.trim() && (
+            <p id="quick-text-hint" className="mt-1.5 text-xs text-muted-foreground">
+              {80 - description.trim().length} more characters needed — paste the full posting, or
+              add a posting link instead.
+            </p>
+          )}
         </div>
         <Button type="submit" className="w-full sm:w-auto" disabled={save.isPending}>
           {save.isPending && <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />}
