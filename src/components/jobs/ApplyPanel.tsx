@@ -146,7 +146,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
           </Button>
         </div>
       )}
-      {((!applied || !link) || editing) && (
+      {(!applied || !link) || editing) && (
         <form
           noValidate
           className="mt-3 flex flex-col gap-2 sm:flex-row"
