@@ -462,7 +462,10 @@ function JobDetailPage() {
                   tip={`Angle: ${normalize(v.content).angle}. Same resume and posting — only the framing changes.`}
                 >
                   <button
-                    onClick={() => setSelected(i)}
+                    onClick={() => {
+                      setSelected(i);
+                      setCompare((c) => (c === i ? null : c));
+                    }}
                     aria-pressed={i === selected}
                     aria-label={`Version ${i + 1}, angle: ${normalize(v.content).angle}${i === selected ? ", selected" : ""}`}
                     className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
