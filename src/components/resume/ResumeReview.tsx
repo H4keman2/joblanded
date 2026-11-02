@@ -395,7 +395,13 @@ export function ResumeReview({
               </p>
             ) : (
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Select value={previewJobId} onValueChange={setPreviewJobId}>
+                <Select
+                  value={previewJobId}
+                  onValueChange={(id) => {
+                    setPreviewJobId(id);
+                    setPreview(null);
+                  }}
+                >
                   <SelectTrigger
                     className="h-9 w-full sm:w-64"
                     aria-label="Choose a posting to preview"
