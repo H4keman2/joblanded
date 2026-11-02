@@ -37,6 +37,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
   const apps = useQuery({ queryKey: ["applications"], queryFn: () => fetchApps() });
   const app = apps.data?.find((a) => a.job_id === jobId);
   const [url, setUrl] = useState("");
+  const [editing, setEditing] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (applicationUrl?: string) =>
@@ -51,6 +52,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     onSuccess: async () => {
       toast.success("Marked as applied — it's now in your tracker");
       setUrl("");
+      setEditing(false);
       await Promise.all(
         ["applications", "jobs", "application-stats"].map((k) =>
           qc.invalidateQueries({ queryKey: [k] }),
