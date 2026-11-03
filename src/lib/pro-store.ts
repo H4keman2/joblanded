@@ -88,11 +88,13 @@ export function usePro() {
     [verify],
   );
 
+  const clearError = useCallback(() => setError(null), []);
+
   const deactivate = useCallback(() => {
     localStorage.removeItem(KEY);
     localStorage.removeItem(VERIFIED_AT);
     window.dispatchEvent(new Event(EVENT));
   }, []);
 
-  return { isPro: !!key, key, activate, deactivate, loaded, checking, error };
+  return { isPro: !!key, key, activate, deactivate, loaded, checking, error, clearError };
 }

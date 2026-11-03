@@ -631,7 +631,10 @@ function ProLicenseSection() {
           <Input
             id="license-key"
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+              pro.clearError();
+            }}
             placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX"
             className="min-w-0 flex-1"
             autoComplete="off"
