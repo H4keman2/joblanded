@@ -117,6 +117,14 @@ function ResumePage() {
       if (fileRef.current) fileRef.current.value = "";
       return;
     }
+    // The accept attribute is bypassable via the picker's "All files" option,
+    // so a .docx (a zip archive) would otherwise feed binary text into the parser.
+    const lowerName = file.name.toLowerCase();
+    if (!lowerName.endsWith(".pdf") && !lowerName.endsWith(".txt") && !lowerName.endsWith(".md")) {
+      toast.error("Word files aren't supported yet — export as PDF or paste the text instead.");
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
     setExtracting(true);
     try {
       const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
