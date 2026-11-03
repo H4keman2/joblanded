@@ -176,6 +176,7 @@ export function ResumeReview({
   const activeJobs = (jobs.data ?? []).filter((j) => !j.archived_at);
 
   const reviewMutation = useMutation({
+    onMutate: () => setReview(null),
     mutationFn: () => runReview({ data: { resumeId: resumeId!, licenseKey: pro.key ?? "" } }),
     onSuccess: (data) => {
       setReview(data as unknown as ReviewResult);
