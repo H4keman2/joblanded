@@ -178,6 +178,19 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
             )}
             {applied ? "Save link" : "I applied"}
           </Button>
+          {editing && (
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setUrl(link ?? "");
+                setEditing(false);
+              }}
+            >
+              Cancel
+            </Button>
+          )}
         </form>
       )}
     </div>
