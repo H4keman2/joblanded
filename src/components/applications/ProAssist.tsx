@@ -164,6 +164,7 @@ export function ProAssist() {
   });
 
   const offerMutation = useMutation({
+    onMutate: () => setOffer(null),
     mutationFn: () =>
       runOffer({
         data: {
