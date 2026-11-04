@@ -200,6 +200,7 @@ function PostingSearchPage() {
                               }
                             >
                               <div
+                                tabIndex={0}
                                 className={`rounded-md px-3 py-2 ${scoreTone(score)} ${
                                   isBest ? "ring-2 ring-primary" : ""
                                 }`}
