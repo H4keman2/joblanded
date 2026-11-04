@@ -141,7 +141,11 @@ function JobDetailPage() {
   }, [fits.data]);
 
   const roleOptions = useMemo(() => {
-    const list = (roles.data ?? []).map((r) => ({
+    // Archived postings stay out of the role picker unless the user opened one
+    // directly, so the page they're on still renders.
+    const list = (roles.data ?? [])
+      .filter((r) => r.id === jobId || !r.archived_at)
+      .map((r) => ({
       ...r,
       ...(fitById.get(r.id) ?? { fit: null, matched: [] }),
     }));
