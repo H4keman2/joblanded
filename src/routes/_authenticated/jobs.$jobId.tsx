@@ -141,12 +141,16 @@ function JobDetailPage() {
   }, [fits.data]);
 
   const roleOptions = useMemo(() => {
-    const list = (roles.data ?? []).map((r) => ({
-      ...r,
-      ...(fitById.get(r.id) ?? { fit: null, matched: [] }),
-    }));
+    // Archived postings stay out of the role picker unless the user opened one
+    // directly, so the page they're on still renders.
+    const list = (roles.data ?? [])
+      .filter((r) => r.id === jobId || !r.archived_at)
+      .map((r) => ({
+        ...r,
+        ...(fitById.get(r.id) ?? { fit: null, matched: [] }),
+      }));
     return list.sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
-  }, [roles.data, fitById]);
+  }, [roles.data, fitById, jobId]);
 
   const bestMatch = roleOptions[0]?.fit != null ? roleOptions[0] : undefined;
   const runnerUpFit = roleOptions[1]?.fit ?? null;
