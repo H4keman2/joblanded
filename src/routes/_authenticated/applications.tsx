@@ -662,6 +662,26 @@ function ApplicationsPage() {
                                 {app.follow_up_sent ? "Sent" : "Mark sent"}
                               </label>
                             </Hint>
+                            {!app.follow_up_sent && (
+                              <Input
+                                type="date"
+                                aria-label={`Follow-up date for ${job?.title ?? "Untitled role"}`}
+                                defaultValue={app.follow_up_date}
+                                disabled={
+                                  followUpMutation.isPending &&
+                                  followUpMutation.variables?.id === app.id
+                                }
+                                className="h-7 w-[10.5rem] text-xs"
+                                onChange={(e) => {
+                                  const next = e.target.value;
+                                  if (!next) return;
+                                  followUpMutation.mutate({
+                                    id: app.id,
+                                    follow_up_date: next,
+                                  });
+                                }}
+                              />
+                            )}
                           </>
                         )}
                       </div>
