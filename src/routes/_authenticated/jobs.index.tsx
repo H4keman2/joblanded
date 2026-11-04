@@ -543,6 +543,12 @@ function JobsPage() {
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
+                                {deleteMutation.isPending &&
+                                  deleteMutation.variables === job.id && (
+                                    <span className="sr-only" role="status">
+                                      Deleting job…
+                                    </span>
+                                  )}
                                 <AlertDialogCancel
                                   disabled={
                                     deleteMutation.isPending && deleteMutation.variables === job.id
