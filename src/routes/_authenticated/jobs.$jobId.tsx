@@ -146,11 +146,11 @@ function JobDetailPage() {
     const list = (roles.data ?? [])
       .filter((r) => r.id === jobId || !r.archived_at)
       .map((r) => ({
-      ...r,
-      ...(fitById.get(r.id) ?? { fit: null, matched: [] }),
-    }));
+        ...r,
+        ...(fitById.get(r.id) ?? { fit: null, matched: [] }),
+      }));
     return list.sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
-  }, [roles.data, fitById]);
+  }, [roles.data, fitById, jobId]);
 
   const bestMatch = roleOptions[0]?.fit != null ? roleOptions[0] : undefined;
   const runnerUpFit = roleOptions[1]?.fit ?? null;
