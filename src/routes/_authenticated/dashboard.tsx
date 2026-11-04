@@ -430,7 +430,13 @@ function DashboardPage() {
                       )}
                     </div>
                   </div>
-                  <Hint tip="Marks your follow-up as sent and clears this reminder.">
+                  <div>
+                    {marking && (
+                      <span className="sr-only" role="status">
+                        Marking follow-up sent…
+                      </span>
+                    )}
+                    <Hint tip="Marks your follow-up as sent and clears this reminder.">
                     <Button
                       size="sm"
                       variant="secondary"
