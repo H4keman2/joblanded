@@ -430,20 +430,27 @@ function DashboardPage() {
                       )}
                     </div>
                   </div>
-                  <Hint tip="Marks your follow-up as sent and clears this reminder.">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
-                      disabled={marking}
-                      onClick={() => followUpMutation.mutate(app.id)}
-                    >
-                      {marking && (
-                        <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      )}
-                      Mark sent
-                    </Button>
-                  </Hint>
+                  <div>
+                    {marking && (
+                      <span className="sr-only" role="status">
+                        Marking follow-up sent…
+                      </span>
+                    )}
+                    <Hint tip="Marks your follow-up as sent and clears this reminder.">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        aria-label={`Mark follow-up sent for ${job?.title ?? "Saved role"}`}
+                        disabled={marking}
+                        onClick={() => followUpMutation.mutate(app.id)}
+                      >
+                        {marking && (
+                          <Loader2 aria-hidden="true" className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        )}
+                        Mark sent
+                      </Button>
+                    </Hint>
+                  </div>
                 </li>
               );
             })}
