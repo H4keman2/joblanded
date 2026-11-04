@@ -449,7 +449,8 @@ function DashboardPage() {
                       )}
                       Mark sent
                     </Button>
-                  </Hint>
+                    </Hint>
+                  </div>
                 </li>
               );
             })}
