@@ -136,9 +136,18 @@ function PostingSearchPage() {
         </div>
       )}
 
+      {match.isPending && result && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Comparing your new postings…
+        </p>
+      )}
+
       {result && (
         <>
-          <div className="panel overflow-x-auto p-5 sm:p-8">
+          <div
+            className={`panel overflow-x-auto p-5 sm:p-8 ${match.isPending ? "opacity-60" : ""}`}
+            aria-busy={match.isPending || undefined}
+          >
             <h2 className="text-lg font-semibold">Section-by-section fit</h2>
             <p role="status" className="mt-1 text-sm text-muted-foreground">
               {result.postings.length} posting{result.postings.length === 1 ? "" : "s"} compared
