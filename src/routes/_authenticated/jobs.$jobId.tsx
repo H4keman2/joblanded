@@ -361,7 +361,11 @@ function JobDetailPage() {
           )}
         </div>
 
-        {!pro.isPro && pro.loaded ? (
+        {!pro.loaded ? (
+          <section className="panel p-6" role="status">
+            <p className="text-sm text-muted-foreground">Checking your Pro status…</p>
+          </section>
+        ) : !pro.isPro ? (
           <ProFeatureSection
             icon={<Wand2 className="h-5 w-5" />}
             title="AI resume tailoring"
