@@ -841,6 +841,11 @@ function TailorStudio() {
         <Button size="sm" variant="outline" onClick={regenerate} disabled={versions.length >= 4}>
           Regenerate
         </Button>
+        {versions.length >= 4 && (
+          <span className="text-xs text-muted-foreground">
+            All 4 demo angles shown — sign in to generate unlimited versions.
+          </span>
+        )}
         <Hint tip="Rewrites the selected draft to fix its weakest ATS readability flag and work its missing keywords back in — same evidence, higher coverage.">
           <Button size="sm" onClick={optimize}>
             ATS-optimize this draft
