@@ -317,9 +317,16 @@ function ResumePage() {
         <section className="panel space-y-6 p-6">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-xl font-semibold">Review your profile</h2>
-            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? "Saving…" : "Save changes"}
-            </Button>
+            <div className="flex items-center gap-3">
+              {isDirty && (
+                <span className="text-xs text-muted-foreground" aria-live="polite">
+                  Unsaved changes
+                </span>
+              )}
+              <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? "Saving…" : "Save changes"}
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
