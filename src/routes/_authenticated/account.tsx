@@ -85,28 +85,51 @@ function AccountPage() {
 
   const [form, setForm] = useState({ full_name: "", phone: "", email_notifications: true });
   const [saving, setSaving] = useState(false);
+  // JSON.stringify(form) as of the last load/save; used to detect unsaved
+  // profile edits. Scoped to the Profile section only — email/password,
+  // sessions, and the danger zone are separate flows.
+  const [snapshot, setSnapshot] = useState<string | null>(null);
 
   useEffect(() => {
     if (profile) {
-      setForm({
+      const loaded = {
         full_name: profile.full_name ?? "",
         phone: profile.phone ?? "",
         email_notifications: profile.email_notifications ?? true,
-      });
+      };
+      setForm(loaded);
+      setSnapshot(JSON.stringify(loaded));
     }
   }, [profile]);
+
+  const isDirty = snapshot !== null && JSON.stringify(form) !== snapshot;
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const guard = (e: BeforeUnloadEvent) => {
+      // Both calls are needed: Chrome requires returnValue, Firefox
+      // requires preventDefault, to actually show the browser's warning.
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", guard);
+    return () => window.removeEventListener("beforeunload", guard);
+  }, [isDirty]);
 
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     try {
+      const saved = {
+        full_name: form.full_name.trim(),
+        phone: form.phone.trim(),
+        email_notifications: form.email_notifications,
+      };
       await persistProfile({
-        data: {
-          full_name: form.full_name.trim(),
-          phone: form.phone.trim(),
-          email_notifications: form.email_notifications,
-        },
+        data: saved,
       });
+      setForm(saved);
+      setSnapshot(JSON.stringify(saved));
       await queryClient.invalidateQueries({ queryKey: ["profile"] });
       toast.success("Profile updated");
     } catch (err) {
@@ -290,9 +313,16 @@ function AccountPage() {
               </p>
             </div>
           </div>
-          <Button type="submit" disabled={saving || isLoading || isError}>
-            {saving ? "Saving…" : "Save changes"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button type="submit" disabled={saving || isLoading || isError}>
+              {saving ? "Saving…" : "Save changes"}
+            </Button>
+            {isDirty && (
+              <span className="text-xs text-muted-foreground" aria-live="polite">
+                Unsaved changes
+              </span>
+            )}
+          </div>
         </form>
       </section>
 
