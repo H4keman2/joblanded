@@ -666,7 +666,7 @@ function ApplicationsPage() {
                               <Input
                                 type="date"
                                 aria-label={`Follow-up date for ${job?.title ?? "Untitled role"}`}
-                                defaultValue={app.follow_up_date}
+                                value={app.follow_up_date ?? ""}
                                 disabled={
                                   followUpMutation.isPending &&
                                   followUpMutation.variables?.id === app.id
