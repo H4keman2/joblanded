@@ -431,6 +431,19 @@ export function ResumeReview({
               </div>
             )}
 
+            {previewMutation.isPending && (
+              <p
+                role="status"
+                className="mt-3 flex items-center gap-2 text-sm text-muted-foreground"
+              >
+                <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                Preparing your tailoring preview…
+              </p>
+            )}
+            {!previewJobId && activeJobs.length > 0 && (
+              <p className="mt-3 text-xs text-muted-foreground">Choose a posting to preview.</p>
+            )}
+
             {preview && (
               <div className="mt-4 space-y-4">
                 <p className="text-sm text-muted-foreground">{preview.matchNote}</p>
