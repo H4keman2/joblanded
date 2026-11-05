@@ -191,12 +191,12 @@ export function JobRecommendations() {
           <Input
             id="rec-keyword"
             type="search"
-            value={keyword}
+            value={anyTitle ? "" : keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setKeyword("");
             }}
-            placeholder="e.g. Senior Product Manager"
+            placeholder={anyTitle ? "Any title — keyword ignored" : "e.g. Senior Product Manager"}
             className="mt-1.5"
             disabled={anyTitle}
           />
