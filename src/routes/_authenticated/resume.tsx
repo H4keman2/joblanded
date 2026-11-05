@@ -110,6 +110,7 @@ function ResumePage() {
     onSuccess: (row) => {
       setResumeId(row.id);
       setDraft((row.parsed_json as Parsed | null) ?? {});
+      setSnapshot(JSON.stringify((row.parsed_json as Parsed | null) ?? {}));
       void queryClient.invalidateQueries({ queryKey: ["latest-resume"] });
       toast.success("Resume parsed — review the details below.");
     },
@@ -117,9 +118,13 @@ function ResumePage() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: () =>
-      runSave({ data: { id: resumeId!, parsed: (draft ?? {}) as Record<string, unknown> } }),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const parsed = (draft ?? {}) as Record<string, unknown>;
+      await runSave({ data: { id: resumeId!, parsed } });
+      return parsed;
+    },
+    onSuccess: (parsed) => {
+      setSnapshot(JSON.stringify(parsed));
       void queryClient.invalidateQueries({ queryKey: ["latest-resume"] });
       toast.success("Profile saved.");
     },
