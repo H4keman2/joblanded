@@ -60,8 +60,12 @@ function QuickSavePage() {
   const save = useMutation({
     mutationFn: () =>
       create({ data: { description: description.trim(), sourceUrl: sourceUrl.trim() } }),
-    onSuccess: () => {
-      toast.success("Saved — it's on your Dashboard now");
+    onSuccess: (job) => {
+      toast.success(
+        job.alreadySaved
+          ? "Already saved — it's on your Dashboard now"
+          : "Saved — it's on your Dashboard now",
+      );
       void qc.invalidateQueries({ queryKey: ["jobs"] });
       void navigate({ to: "/dashboard" });
     },

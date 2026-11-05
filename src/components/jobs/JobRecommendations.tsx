@@ -117,8 +117,8 @@ export function JobRecommendations() {
 
   const add = useMutation({
     mutationFn: (job: RecommendedJob) => saveJob({ data: { description: "", sourceUrl: job.url } }),
-    onSuccess: (_row, job) => {
-      toast.success("Job saved");
+    onSuccess: (row, job) => {
+      toast.success(row.alreadySaved ? "Already saved" : "Job saved");
       setResults((rows) => (rows ?? []).filter((r) => r.id !== job.id));
       void qc.invalidateQueries({ queryKey: ["jobs"] });
     },

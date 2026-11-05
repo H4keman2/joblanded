@@ -181,8 +181,8 @@ function JobsPage() {
 
   const addMutation = useMutation({
     mutationFn: (input: { description: string; sourceUrl: string }) => create({ data: input }),
-    onSuccess: () => {
-      toast.success("Job saved");
+    onSuccess: (job) => {
+      toast.success(job.alreadySaved ? "Already saved" : "Job saved");
       setDescription("");
       setSourceUrl("");
       setOpen(false);

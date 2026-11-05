@@ -133,39 +133,59 @@ export async function createJobForUser(
   userId: string,
   input: { description: string; sourceUrl?: string | undefined },
 ) {
-  const description =
-    input.description.trim().length >= 80
-      ? input.description
-      : await fetchJobDescriptionFromUrl(input.sourceUrl!);
+  // Saving the same posting URL twice used to create a duplicate posting
+  // (and burn a rate-limited AI extraction each time). Check first when a
+  // URL was given; description-only saves have nothing to match on.
+  const url = input.sourceUrl?.trim() || null;
+  const jobColumns = "id, title, company, location, pay_min, pay_max, source_url, date_added";
+  const { data: existing } = url
+    ? await supabase
+        .from("jobs")
+        .select(jobColumns)
+        .eq("user_id", userId)
+        .eq("source_url", url)
+        .maybeSingle()
+    : { data: null };
 
-  const extracted = await callAI(
-    supabase,
-    userId,
-    `Extract job posting metadata. Return ONLY JSON:
+  let job;
+  if (existing) {
+    job = existing;
+  } else {
+    const description =
+      input.description.trim().length >= 80
+        ? input.description
+        : await fetchJobDescriptionFromUrl(input.sourceUrl!);
+
+    const extracted = await callAI(
+      supabase,
+      userId,
+      `Extract job posting metadata. Return ONLY JSON:
 {"title": string, "company": string | null, "location": string | null, "pay_min": number | null, "pay_max": number | null}
 Pay values are annual USD numbers when stated, otherwise null. Never invent facts.`,
-    description.slice(0, 30000),
-    { bucket: "add-job", limit: 20, windowMinutes: 60 },
-  );
+      description.slice(0, 30000),
+      { bucket: "add-job", limit: 20, windowMinutes: 60 },
+    );
 
-  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
-  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 200) : null);
+    const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+    const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim().slice(0, 200) : null);
 
-  const { data: job, error: jobError } = await supabase
-    .from("jobs")
-    .insert({
-      user_id: userId,
-      title: str(extracted["title"]) ?? "Untitled role",
-      company: str(extracted["company"]),
-      location: str(extracted["location"]),
-      pay_min: num(extracted["pay_min"]),
-      pay_max: num(extracted["pay_max"]),
-      source_url: input.sourceUrl || null,
-      description,
-    })
-    .select("id, title, company, location, pay_min, pay_max, source_url, date_added")
-    .single();
-  if (jobError) throw new Error(jobError.message);
+    const { data: inserted, error: jobError } = await supabase
+      .from("jobs")
+      .insert({
+        user_id: userId,
+        title: str(extracted["title"]) ?? "Untitled role",
+        company: str(extracted["company"]),
+        location: str(extracted["location"]),
+        pay_min: num(extracted["pay_min"]),
+        pay_max: num(extracted["pay_max"]),
+        source_url: url,
+        description,
+      })
+      .select(jobColumns)
+      .single();
+    if (jobError) throw new Error(jobError.message);
+    job = inserted;
+  }
 
   // A database trigger already opens the "saved" application for every new
   // job; this upsert is a harmless safety net that never duplicates it.
@@ -177,7 +197,7 @@ Pay values are annual USD numbers when stated, otherwise null. Never invent fact
     );
   if (appError) throw new Error(appError.message);
 
-  return job;
+  return { ...job, alreadySaved: existing !== null };
 }
 
 export const addJob = createServerFn({ method: "POST" })
