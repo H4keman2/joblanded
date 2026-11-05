@@ -824,6 +824,8 @@ function TailorStudio() {
           >
             <button
               onClick={() => setSelected(i)}
+              aria-pressed={i === selected}
+              aria-label={`Version ${i + 1}, angle: ${resolveDraft(d).angle}${i === selected ? ", selected" : ""}`}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 i === selected
                   ? "bg-primary text-primary-foreground"
@@ -853,6 +855,7 @@ function TailorStudio() {
           <Button
             size="sm"
             variant="ghost"
+            aria-pressed={compare !== null}
             onClick={() =>
               setCompare((c) =>
                 c === null ? (versions.map((_, i) => i).find((i) => i !== selected) ?? null) : null,
@@ -867,6 +870,7 @@ function TailorStudio() {
             <Button
               size="sm"
               variant={showDiff ? "secondary" : "ghost"}
+              aria-pressed={showDiff}
               onClick={() => setShowDiff((d) => !d)}
             >
               {showDiff ? "Hide changes" : "Highlight changes"}
@@ -889,6 +893,8 @@ function TailorStudio() {
                   <button
                     key={i}
                     onClick={() => setCompare(i)}
+                    aria-pressed={i === compare}
+                    aria-label={`Compare with version ${i + 1}, angle: ${resolveDraft(versions[i]!).angle}`}
                     className={`rounded-full px-3 py-1 text-xs font-medium ${
                       i === compare
                         ? "bg-secondary text-secondary-foreground ring-1 ring-primary"
