@@ -66,6 +66,10 @@ function ResumePage() {
   const [extracting, setExtracting] = useState(false);
   const [draft, setDraft] = useState<Parsed | null>(null);
   const [resumeId, setResumeId] = useState<string | null>(null);
+  // JSON.stringify(draft) as of the last load/parse/save; used to detect
+  // unsaved profile edits. rawText is deliberately not covered — the form
+  // already tells users raw-text edits need a re-parse, not a save.
+  const [snapshot, setSnapshot] = useState<string | null>(null);
 
   const {
     data: resume,
@@ -82,15 +86,31 @@ function ResumePage() {
     if (resume) {
       setResumeId(resume.id);
       setDraft((resume.parsed_json as Parsed | null) ?? {});
+      setSnapshot(JSON.stringify((resume.parsed_json as Parsed | null) ?? {}));
       setRawText(resume.raw_text ?? "");
     }
   }, [resume]);
+
+  const isDirty = snapshot !== null && JSON.stringify(draft) !== snapshot;
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const guard = (e: BeforeUnloadEvent) => {
+      // Both calls are needed: Chrome requires returnValue, Firefox
+      // requires preventDefault, to actually show the browser's warning.
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", guard);
+    return () => window.removeEventListener("beforeunload", guard);
+  }, [isDirty]);
 
   const parseMutation = useMutation({
     mutationFn: (text: string) => runParse({ data: { rawText: text } }),
     onSuccess: (row) => {
       setResumeId(row.id);
       setDraft((row.parsed_json as Parsed | null) ?? {});
+      setSnapshot(JSON.stringify((row.parsed_json as Parsed | null) ?? {}));
       void queryClient.invalidateQueries({ queryKey: ["latest-resume"] });
       toast.success("Resume parsed — review the details below.");
     },
@@ -98,9 +118,13 @@ function ResumePage() {
   });
 
   const saveMutation = useMutation({
-    mutationFn: () =>
-      runSave({ data: { id: resumeId!, parsed: (draft ?? {}) as Record<string, unknown> } }),
-    onSuccess: () => {
+    mutationFn: async () => {
+      const parsed = (draft ?? {}) as Record<string, unknown>;
+      await runSave({ data: { id: resumeId!, parsed } });
+      return parsed;
+    },
+    onSuccess: (parsed) => {
+      setSnapshot(JSON.stringify(parsed));
       void queryClient.invalidateQueries({ queryKey: ["latest-resume"] });
       toast.success("Profile saved.");
     },
@@ -293,9 +317,16 @@ function ResumePage() {
         <section className="panel space-y-6 p-6">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-xl font-semibold">Review your profile</h2>
-            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? "Saving…" : "Save changes"}
-            </Button>
+            <div className="flex items-center gap-3">
+              {isDirty && (
+                <span className="text-xs text-muted-foreground" aria-live="polite">
+                  Unsaved changes
+                </span>
+              )}
+              <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? "Saving…" : "Save changes"}
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
