@@ -250,7 +250,7 @@ export function JobRecommendations() {
           </div>
         </div>
         <div className="lg:col-span-4">
-          <Button type="submit" disabled={search.isPending}>
+          <Button type="submit" disabled={search.isPending || !pro.loaded}>
             {search.isPending ? (
               <Loader2 aria-hidden="true" className="size-4 animate-spin" />
             ) : (
