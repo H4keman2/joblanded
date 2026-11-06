@@ -136,9 +136,9 @@ function PostingSearchPage() {
         </div>
       )}
 
-      {match.isPending && result && (
+      {match.isPending && (
         <p role="status" className="text-sm text-muted-foreground">
-          Comparing your new postings…
+          {result ? "Comparing your new postings…" : "Comparing your postings…"}
         </p>
       )}
 
