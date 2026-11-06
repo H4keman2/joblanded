@@ -141,12 +141,7 @@ function JobsPage() {
     return [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
   }, [baseJobs]);
   const payOptions = useMemo(() => {
-    const buckets = PAY_BUCKETS.filter((b) =>
-      baseJobs.some((j) => {
-        const p = j.pay_min ?? j.pay_max;
-        return p != null && b.test(p);
-      }),
-    );
+    const buckets = PAY_BUCKETS.filter((b) => baseJobs.some((j) => payInBucket(j, b)));
     const noPay = baseJobs.some((j) => (j.pay_min ?? j.pay_max) == null);
     return { buckets, noPay };
   }, [baseJobs]);
