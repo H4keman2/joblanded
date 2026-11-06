@@ -524,7 +524,15 @@ function JobsPage() {
                                 archiveMutation.mutate({ id: job.id, archived: !job.archived_at })
                               }
                             >
-                              {job.archived_at ? (
+                              {archiveMutation.isPending &&
+                              archiveMutation.variables?.id === job.id ? (
+                                <>
+                                  <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" />
+                                  <span className="sr-only" role="status">
+                                    {job.archived_at ? "Restoring…" : "Archiving…"}
+                                  </span>
+                                </>
+                              ) : job.archived_at ? (
                                 <ArchiveRestore aria-hidden="true" className="h-4 w-4" />
                               ) : (
                                 <Archive aria-hidden="true" className="h-4 w-4" />
