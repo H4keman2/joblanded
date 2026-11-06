@@ -131,6 +131,17 @@ function ResumePage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  // The server stores whatever is typed, so catch a typoed address here before
+  // it lands in tailored resumes and PDFs. Same check the account page uses.
+  function handleSave() {
+    const email = (draft?.email ?? "").trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("That doesn't look like an email address — check it and try again.");
+      return;
+    }
+    saveMutation.mutate();
+  }
+
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -323,7 +334,7 @@ function ResumePage() {
                   Unsaved changes
                 </span>
               )}
-              <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+              <Button onClick={handleSave} disabled={saveMutation.isPending}>
                 {saveMutation.isPending ? "Saving…" : "Save changes"}
               </Button>
             </div>
@@ -517,7 +528,7 @@ function ResumePage() {
           </Field>
 
           <div className="flex justify-end pt-2">
-            <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+            <Button onClick={handleSave} disabled={saveMutation.isPending}>
               {saveMutation.isPending ? "Saving…" : "Save changes"}
             </Button>
           </div>
