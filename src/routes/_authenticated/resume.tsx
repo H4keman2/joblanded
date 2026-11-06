@@ -357,6 +357,17 @@ function ResumePage() {
                 value={draft.years_experience ?? ""}
                 onChange={(e) => {
                   const n = e.target.value === "" ? null : Number(e.target.value);
+                  if (n !== null && !Number.isFinite(n)) {
+                    // "e" or an out-of-range exponent parses to NaN/Infinity,
+                    // which would serialize to null on save with no feedback.
+                    // Only toast on the transition in, so typing more digits
+                    // doesn't spam toasts.
+                    if (draft.years_experience != null) {
+                      toast.error("Years of experience needs a valid number.");
+                    }
+                    update("years_experience", null);
+                    return;
+                  }
                   if (n !== null && n < 0) {
                     // Explain the clear instead of silently blanking the field;
                     // only toast on the transition in, so typing more digits
