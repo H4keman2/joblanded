@@ -31,13 +31,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type PayBucket = { id: string; label: string; lo: number | null; hi: number | null };
+
 // Pay-range buckets for the smart filters. Only buckets that actually match
 // at least one saved posting are offered, so the filters always fit the list.
-const PAY_BUCKETS = [
-  { id: "under150", label: "Under $150K", test: (p: number) => p < 150_000 },
-  { id: "150to200", label: "$150K – $200K", test: (p: number) => p >= 150_000 && p < 200_000 },
-  { id: "200plus", label: "$200K+", test: (p: number) => p >= 200_000 },
-] as const;
+const PAY_BUCKETS: PayBucket[] = [
+  { id: "under150", label: "Under $150K", lo: null, hi: 150_000 },
+  { id: "150to200", label: "$150K – $200K", lo: 150_000, hi: 200_000 },
+  { id: "200plus", label: "$200K+", lo: 200_000, hi: null },
+];
+
+// A posting's pay is a range, so a bucket matches when the two ranges overlap:
+// the posting's low end sits under the bucket's ceiling AND its high end reaches
+// the bucket's floor. That way a $100K–$250K posting also shows up under "$200K+",
+// not only under "Under $150K". Legacy rows can hold pay_min > pay_max, so sort.
+function payInBucket(
+  job: { pay_min?: number | null; pay_max?: number | null },
+  bucket: PayBucket,
+) {
+  const bounds = [job.pay_min, job.pay_max].filter((n): n is number => n != null);
+  if (bounds.length === 0) return false;
+  const low = Math.min(...bounds);
+  const high = Math.max(...bounds);
+  if (bucket.hi != null && low >= bucket.hi) return false;
+  if (bucket.lo != null && high < bucket.lo) return false;
+  return true;
+}
 
 // The server checks the link too, but a bare "example.com/jobs" is almost always
 // a missing https:// rather than a real posting — catch it here with copy a person
