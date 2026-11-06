@@ -290,36 +290,44 @@ export function DraftCard({
         <DiffText base={diffAgainst?.resume} text={draft.resume} />
       </div>
 
-      <div className="mt-5 grid gap-4 rounded-lg border border-border bg-background p-3 sm:grid-cols-3">
-        <InsightList title="Strengths" items={draft.insights.strengths} tone="positive" />
-        <InsightList title="Gaps" items={draft.insights.gaps} tone="negative" />
-        <InsightList title="Suggestions" items={draft.insights.suggestions} tone="neutral" />
-      </div>
+      {(draft.insights.strengths.length > 0 ||
+        draft.insights.gaps.length > 0 ||
+        draft.insights.suggestions.length > 0) && (
+        <div className="mt-5 grid gap-4 rounded-lg border border-border bg-background p-3 sm:grid-cols-3">
+          <InsightList title="Strengths" items={draft.insights.strengths} tone="positive" />
+          <InsightList title="Gaps" items={draft.insights.gaps} tone="negative" />
+          <InsightList title="Suggestions" items={draft.insights.suggestions} tone="neutral" />
+        </div>
+      )}
 
-      <div className="mt-5 flex items-center gap-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Cover letter opener
-        </p>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(draft.cover);
-              toast.success("Copied to clipboard");
-            } catch {
-              toast.error("Couldn't copy — your browser blocked clipboard access");
-            }
-          }}
-        >
-          <Copy aria-hidden="true" className="size-4" />
-          Copy opener
-        </Button>
-      </div>
-      <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
-        <DiffText base={diffAgainst?.cover} text={draft.cover} />
-      </blockquote>
+      {draft.cover.trim() && (
+        <>
+          <div className="mt-5 flex items-center gap-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Cover letter opener
+            </p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(draft.cover);
+                  toast.success("Copied to clipboard");
+                } catch {
+                  toast.error("Couldn't copy — your browser blocked clipboard access");
+                }
+              }}
+            >
+              <Copy aria-hidden="true" className="size-4" />
+              Copy opener
+            </Button>
+          </div>
+          <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+            <DiffText base={diffAgainst?.cover} text={draft.cover} />
+          </blockquote>
+        </>
+      )}
 
       <p className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
         <span className="font-semibold text-foreground">Why this version: </span>
