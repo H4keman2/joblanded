@@ -323,7 +323,7 @@ function ResumePage() {
                   Unsaved changes
                 </span>
               )}
-              <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
+              <Button onClick={handleSave} disabled={saveMutation.isPending}>
                 {saveMutation.isPending ? "Saving…" : "Save changes"}
               </Button>
             </div>
