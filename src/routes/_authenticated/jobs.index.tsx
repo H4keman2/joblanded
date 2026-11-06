@@ -45,10 +45,7 @@ const PAY_BUCKETS: PayBucket[] = [
 // the posting's low end sits under the bucket's ceiling AND its high end reaches
 // the bucket's floor. That way a $100K–$250K posting also shows up under "$200K+",
 // not only under "Under $150K". Legacy rows can hold pay_min > pay_max, so sort.
-function payInBucket(
-  job: { pay_min?: number | null; pay_max?: number | null },
-  bucket: PayBucket,
-) {
+function payInBucket(job: { pay_min?: number | null; pay_max?: number | null }, bucket: PayBucket) {
   const bounds = [job.pay_min, job.pay_max].filter((n): n is number => n != null);
   if (bounds.length === 0) return false;
   const low = Math.min(...bounds);
