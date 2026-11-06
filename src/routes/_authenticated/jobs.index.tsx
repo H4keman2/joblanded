@@ -164,7 +164,7 @@ function JobsPage() {
           if (pay != null) return false;
         } else {
           const bucket = PAY_BUCKETS.find((b) => b.id === payFilter);
-          if (pay == null || !bucket || !bucket.test(pay)) return false;
+          if (!bucket || !payInBucket(job, bucket)) return false;
         }
       }
       return true;
