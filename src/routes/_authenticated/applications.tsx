@@ -659,6 +659,12 @@ function ApplicationsPage() {
                                     })
                                   }
                                 />
+                                {followUpMutation.isPending &&
+                                  followUpMutation.variables?.id === app.id && (
+                                    <span className="sr-only" role="status">
+                                      Marking follow-up sent…
+                                    </span>
+                                  )}
                                 {app.follow_up_sent ? "Sent" : "Mark sent"}
                               </label>
                             </Hint>
