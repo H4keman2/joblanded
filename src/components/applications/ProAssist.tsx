@@ -279,6 +279,11 @@ export function ProAssist() {
                     Prep me
                   </Button>
                 </Hint>
+                {prepMutation.isPending && (
+                  <span className="sr-only" role="status">
+                    Preparing your interview questions…
+                  </span>
+                )}
                 {!prepJobId && !prepMutation.isPending && (
                   <p className="w-full text-xs text-muted-foreground">
                     Choose a posting to prep for.
@@ -463,6 +468,11 @@ export function ProAssist() {
                     Evaluate offer
                   </Button>
                 </Hint>
+                {offerMutation.isPending && (
+                  <span className="sr-only" role="status">
+                    Evaluating your offer…
+                  </span>
+                )}
                 {(!offerJobId || !baseValid) && !offerMutation.isPending && (
                   <p className="w-full text-xs text-muted-foreground">
                     Choose a posting and enter a base salary to evaluate.
