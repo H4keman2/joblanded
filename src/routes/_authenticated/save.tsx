@@ -63,11 +63,11 @@ function QuickSavePage() {
     onSuccess: (job) => {
       toast.success(
         job.alreadySaved
-          ? "Already saved — it's on your Dashboard now"
-          : "Saved — it's on your Dashboard now",
+          ? "Already saved — it's on your Jobs page now"
+          : "Saved — it's on your Jobs page now",
       );
       void qc.invalidateQueries({ queryKey: ["jobs"] });
-      void navigate({ to: "/dashboard" });
+      void navigate({ to: "/jobs" });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -78,7 +78,7 @@ function QuickSavePage() {
         <h1 className="text-2xl font-semibold">Quick save</h1>
         <p className="mt-2 max-w-xl text-sm text-muted-foreground">
           Drop in a posting link — or paste the text if the page needs a login. It's saved to your
-          account, so it shows up on your Dashboard wherever you sign in next.
+          account, so it shows up on your Jobs page wherever you sign in next.
         </p>
       </div>
 
