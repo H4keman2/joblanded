@@ -311,6 +311,11 @@ function JobsPage() {
               )}
               Save job
             </Button>
+            {addMutation.isPending && (
+              <span className="sr-only" role="status">
+                Saving job…
+              </span>
+            )}
           </form>
         )}
       </div>

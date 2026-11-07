@@ -143,6 +143,11 @@ function QuickSavePage() {
           {save.isPending && <Loader2 aria-hidden="true" className="mr-1.5 h-4 w-4 animate-spin" />}
           Save posting
         </Button>
+        {save.isPending && (
+          <span className="sr-only" role="status">
+            Saving posting…
+          </span>
+        )}
       </form>
 
       <p className="text-xs text-muted-foreground">

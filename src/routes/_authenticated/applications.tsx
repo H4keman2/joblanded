@@ -358,6 +358,11 @@ function ApplicationsPage() {
               )}
               Save & add application
             </Button>
+            {addMutation.isPending && (
+              <span className="sr-only" role="status">
+                Adding application…
+              </span>
+            )}
           </form>
         )}
       </div>
