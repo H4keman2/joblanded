@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 // Primary destinations only. Quick save and Posting search are tasks you start
-// from Dashboard or Jobs, so they'd only dilute a seven-item menu; they stay
-// one tap away in the mobile drawer, where phone saving actually happens.
+// from Dashboard or Jobs, so they'd only dilute a seven-item menu; they sit
+// after a divider in the desktop nav (and in the mobile drawer).
 const nav = [
   {
     to: "/dashboard",

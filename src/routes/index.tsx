@@ -998,6 +998,7 @@ function DiffText({ base, text }: { base?: string | undefined; text: string }) {
             key={i}
             className="rounded-sm bg-primary/15 px-0.5 font-medium text-foreground decoration-primary/50"
           >
+            <span className="sr-only">Added: </span>
             {t.text}
           </span>
         ) : (
@@ -1005,6 +1006,7 @@ function DiffText({ base, text }: { base?: string | undefined; text: string }) {
             key={i}
             className="rounded-sm bg-destructive/10 px-0.5 text-destructive/70 line-through"
           >
+            <span className="sr-only">Removed: </span>
             {t.text}
           </span>
         ),
