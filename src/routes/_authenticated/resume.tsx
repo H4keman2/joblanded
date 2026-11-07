@@ -202,7 +202,12 @@ function ResumePage() {
       <ResumeReview
         resumeId={resumeId}
         hasResume={Boolean(draft && resumeId)}
-        onUseSummary={(s) => update("summary", s)}
+        onUseSummary={(s) => {
+          update("summary", s);
+          document
+            .getElementById("resume-summary")
+            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }}
       />
 
       <section className="panel space-y-4 p-6">
@@ -413,13 +418,15 @@ function ResumePage() {
             </Field>
           </div>
 
-          <Field label="Summary">
-            <Textarea
-              value={draft.summary ?? ""}
-              onChange={(e) => update("summary", e.target.value)}
-              className="min-h-24"
-            />
-          </Field>
+          <div id="resume-summary">
+            <Field label="Summary">
+              <Textarea
+                value={draft.summary ?? ""}
+                onChange={(e) => update("summary", e.target.value)}
+                className="min-h-24"
+              />
+            </Field>
+          </div>
 
           <Field label="Skills (comma separated)">
             <Textarea
