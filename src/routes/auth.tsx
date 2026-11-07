@@ -102,7 +102,6 @@ function AuthPage() {
           setLoading(false);
           return;
         }
-        toast.success("Account created. Let's set up your resume.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email: cleanEmail,
@@ -111,8 +110,10 @@ function AuthPage() {
         if (error) throw error;
       }
       const { data } = await supabase.auth.getSession();
-      if (data.session) navigate({ to: "/applications", replace: true });
-      else toast.message("Check your inbox to confirm your email.");
+      if (data.session) {
+        if (mode === "signup") toast.success("Account created. Let's set up your resume.");
+        navigate({ to: "/applications", replace: true });
+      } else toast.message("Check your inbox to confirm your email.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
     } finally {
