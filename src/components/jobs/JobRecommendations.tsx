@@ -314,10 +314,19 @@ export function JobRecommendations() {
               </Button>
             </div>
           )}
+          {search.isPending && (
+            <p role="status" className="text-sm text-muted-foreground">
+              Refreshing recommendations…
+            </p>
+          )}
           <p role="status" className="text-sm text-muted-foreground">
             {results.length} {results.length === 1 ? "match" : "matches"}, ranked by fit
           </p>
-          <div aria-label="Recommended jobs" className="-mx-2 flex gap-4 overflow-x-auto px-2 pb-2">
+          <div
+            aria-label="Recommended jobs"
+            aria-busy={search.isPending}
+            className={`-mx-2 flex gap-4 overflow-x-auto px-2 pb-2 ${search.isPending ? "opacity-60" : ""}`}
+          >
             {results.map((job) => (
               <Card key={job.id} className="w-72 shrink-0 space-y-3 p-4">
                 <div className="flex items-start justify-between gap-2">
