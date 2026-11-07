@@ -329,10 +329,12 @@ export function DraftCard({
         </>
       )}
 
-      <p className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">Why this version: </span>
-        {draft.why}
-      </p>
+      {draft.why.trim() && (
+        <p className="mt-4 rounded-lg border border-border bg-background p-3 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Why this version: </span>
+          {draft.why}
+        </p>
+      )}
     </div>
   );
 }
