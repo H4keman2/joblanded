@@ -685,10 +685,9 @@ function ApplicationsPage() {
                                 className="h-7 w-[10.5rem] text-xs"
                                 onChange={(e) => {
                                   const next = e.target.value;
-                                  if (!next) return;
                                   followUpMutation.mutate({
                                     id: app.id,
-                                    follow_up_date: next,
+                                    follow_up_date: next || null,
                                   });
                                 }}
                               />
