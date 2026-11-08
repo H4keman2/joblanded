@@ -101,10 +101,10 @@ function payLine(job: JobInfo | null) {
   // Legacy rows can hold pay_min > pay_max (the edit dialog only rejects that
   // from here on), so sort the pair at display rather than printing it backwards.
   const values = [job.pay_min, job.pay_max].filter((v): v is number => Boolean(v));
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
   const pay = values.length
-    ? ` · $${Math.min(...values).toLocaleString()}${
-        values.length > 1 ? `–$${Math.max(...values).toLocaleString()}` : ""
-      }`
+    ? ` · $${lo.toLocaleString()}${values.length > 1 && lo !== hi ? `–$${hi.toLocaleString()}` : ""}`
     : "";
   return parts + pay;
 }

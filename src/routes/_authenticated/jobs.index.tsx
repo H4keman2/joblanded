@@ -74,7 +74,7 @@ function paySuffix(job: { pay_min?: number | null; pay_max?: number | null }) {
   if (!values.length) return "";
   const lo = Math.min(...values);
   const hi = Math.max(...values);
-  return ` · $${lo.toLocaleString()}${values.length > 1 ? `–$${hi.toLocaleString()}` : ""}`;
+  return ` · $${lo.toLocaleString()}${values.length > 1 && lo !== hi ? `–$${hi.toLocaleString()}` : ""}`;
 }
 
 export const Route = createFileRoute("/_authenticated/jobs/")({

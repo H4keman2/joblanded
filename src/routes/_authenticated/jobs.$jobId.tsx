@@ -50,7 +50,7 @@ function payLine(job: { pay_min?: number | null; pay_max?: number | null } | nul
   if (!values.length) return "";
   const lo = Math.min(...values);
   const hi = Math.max(...values);
-  return `$${lo.toLocaleString()}${values.length > 1 ? `–$${hi.toLocaleString()}` : ""}`;
+  return `$${lo.toLocaleString()}${values.length > 1 && lo !== hi ? `–$${hi.toLocaleString()}` : ""}`;
 }
 
 function normalize(content: string): TailorDraft {
