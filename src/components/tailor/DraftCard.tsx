@@ -290,6 +290,29 @@ export function DraftCard({
         <DiffText base={diffAgainst?.resume} text={draft.resume} />
       </div>
 
+      {draft.summary.trim() && (
+        <>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Rewritten resume summary
+            </p>
+            {diffAgainst && (
+              <span className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                <span className="rounded-sm bg-primary/15 px-1 font-medium text-foreground">
+                  added
+                </span>
+                <span className="rounded-sm bg-destructive/10 px-1 text-destructive/70 line-through">
+                  removed
+                </span>
+              </span>
+            )}
+          </div>
+          <blockquote className="mt-2 border-l-2 border-primary pl-4 text-sm text-muted-foreground">
+            <DiffText base={diffAgainst?.summary} text={draft.summary} />
+          </blockquote>
+        </>
+      )}
+
       {(draft.insights.strengths.length > 0 ||
         draft.insights.gaps.length > 0 ||
         draft.insights.suggestions.length > 0) && (
