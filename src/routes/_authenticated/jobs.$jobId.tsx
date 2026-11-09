@@ -12,9 +12,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Layers, Sparkles, Wand2 } from "lucide-react";
-import { generateDraft, getJob, listDrafts, listJobs, rankRoles } from "@/lib/jobs.functions";
+import { ArrowLeft, Loader2, Layers, Sparkles, Trash2, Wand2 } from "lucide-react";
+import {
+  deleteDraft,
+  generateDraft,
+  getJob,
+  listDrafts,
+  listJobs,
+  rankRoles,
+} from "@/lib/jobs.functions";
 import { DraftCard, Hint, type TailorDraft } from "@/components/tailor/DraftCard";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ApplyPanel } from "@/components/jobs/ApplyPanel";
 import { ProFeatureSection } from "@/components/ProFeatureSection";
 import { usePro, toastProError } from "@/lib/pro-store";
@@ -108,6 +126,7 @@ function JobDetailPage() {
   const fetchDrafts = useServerFn(listDrafts);
   const fetchFits = useServerFn(rankRoles);
   const generate = useServerFn(generateDraft);
+  const removeVersion = useServerFn(deleteDraft);
   const pro = usePro();
 
   const [selected, setSelected] = useState(0);
@@ -244,6 +263,33 @@ function JobDetailPage() {
       toast.success(input.optimizeFromId ? "ATS-optimized version ready" : "New version ready");
     },
     onError: toastProError,
+  });
+
+  const deleteVersion = useMutation({
+    mutationFn: (id: string) => removeVersion({ data: { id } }),
+    onSuccess: (_r, id) => {
+      // Keep the selection valid against the post-delete list: deleting the
+      // selected version moves to the next one (or the new last), deleting
+      // an earlier one shifts the indices down, and a deleted compare
+      // target exits compare mode.
+      const idx = versions.findIndex((v) => v.id === id);
+      const newLength = versions.length - 1;
+      setSelected((s) => {
+        if (idx === -1) return s;
+        if (idx < s) return Math.max(0, s - 1);
+        if (idx === s) return Math.min(idx, Math.max(0, newLength - 1));
+        return s;
+      });
+      setCompare((c) => {
+        if (c === null || idx === -1) return c;
+        if (c === idx) return null;
+        if (c > idx) return c - 1;
+        return c;
+      });
+      void qc.invalidateQueries({ queryKey: ["drafts", jobId] });
+      toast.success("Version deleted");
+    },
+    onError: (e: Error) => toast.error(e.message || "Couldn't delete that version — try again."),
   });
 
   const primaryEntry = versions[selected];
@@ -543,6 +589,55 @@ function JobDetailPage() {
                       ATS-optimize this draft
                     </Button>
                   </Hint>
+                )}
+
+                {primaryEntry && (
+                  <AlertDialog>
+                    <Hint
+                      tip={`Delete ${label(selected)} — this version's tailored resume and cover opener.`}
+                    >
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          aria-label={`Delete version ${selected + 1}`}
+                          disabled={deleteVersion.isPending}
+                        >
+                          <Trash2 aria-hidden="true" className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                    </Hint>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this version?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This removes {label(selected)} ({normalize(primaryEntry.content).angle}) —
+                          the tailored resume and cover opener for this framing. This can&apos;t be
+                          undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        {deleteVersion.isPending && (
+                          <span className="sr-only" role="status">
+                            Deleting version…
+                          </span>
+                        )}
+                        <AlertDialogCancel disabled={deleteVersion.isPending}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          disabled={deleteVersion.isPending}
+                          onClick={() => deleteVersion.mutate(primaryEntry.id)}
+                        >
+                          {deleteVersion.isPending ? (
+                            <Loader2 aria-hidden="true" className="mr-1.5 size-4 animate-spin" />
+                          ) : null}
+                          Delete version
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 )}
 
                 {/* These runs can take 30s+; the buttons only swap icons, so
