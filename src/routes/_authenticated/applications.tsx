@@ -232,6 +232,9 @@ function ApplicationsPage() {
     title: string;
   } | null>(null);
 
+  // Which row is revealing the date picker to (re-)add a follow-up reminder.
+  const [addingFollowUpId, setAddingFollowUpId] = useState<string | null>(null);
+
   function handleRejectDecide(archiveIt: boolean) {
     if (!rejectTarget) return;
     if (archiveIt) {
@@ -694,6 +697,37 @@ function ApplicationsPage() {
                             )}
                           </>
                         )}
+                        {!app.follow_up_date &&
+                          (addingFollowUpId === app.id ? (
+                            <Input
+                              type="date"
+                              aria-label={`Follow-up date for ${job?.title ?? "Untitled role"}`}
+                              value=""
+                              disabled={
+                                followUpMutation.isPending &&
+                                followUpMutation.variables?.id === app.id
+                              }
+                              className="h-7 w-[10.5rem] text-xs"
+                              onChange={(e) => {
+                                const next = e.target.value;
+                                if (!next) return;
+                                followUpMutation.mutate({
+                                  id: app.id,
+                                  follow_up_date: next,
+                                });
+                                setAddingFollowUpId(null);
+                              }}
+                            />
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs"
+                              onClick={() => setAddingFollowUpId(app.id)}
+                            >
+                              Add follow-up
+                            </Button>
+                          ))}
                       </div>
                     )}
                   </li>
