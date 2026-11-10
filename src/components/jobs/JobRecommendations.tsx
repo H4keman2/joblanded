@@ -106,6 +106,14 @@ export function JobRecommendations() {
       toast.error("Salaries can't be negative — check your range.");
       return;
     }
+    if ((min != null && !Number.isInteger(min)) || (max != null && !Number.isInteger(max))) {
+      toast.error("Salaries need whole dollars — no cents.");
+      return;
+    }
+    if ((min != null && min > 10_000_000) || (max != null && max > 10_000_000)) {
+      toast.error("Salaries top out at $10,000,000 — check your range.");
+      return;
+    }
     search.mutate({
       keyword: anyTitle ? undefined : keyword.trim() || undefined,
       anyTitle,
