@@ -185,7 +185,8 @@ export function ProAssist() {
     },
   });
 
-  const baseValid = Number(base) > 0;
+  const baseNum = Number(base);
+  const baseValid = Number.isInteger(baseNum) && baseNum > 0 && baseNum <= 10_000_000;
 
   if (!pro.loaded) {
     return (
@@ -475,7 +476,9 @@ export function ProAssist() {
                 )}
                 {(!offerJobId || !baseValid) && !offerMutation.isPending && (
                   <p className="w-full text-xs text-muted-foreground">
-                    Choose a posting and enter a base salary to evaluate.
+                    {base !== "" && !baseValid
+                      ? "Enter a whole-dollar base salary up to $10,000,000."
+                      : "Choose a posting and enter a base salary to evaluate."}
                   </p>
                 )}
               </div>
