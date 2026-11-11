@@ -163,6 +163,7 @@ export function EditJobDialog({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="mt-1.5"
+              maxLength={200}
               required
             />
           </div>
@@ -175,6 +176,7 @@ export function EditJobDialog({
                 onChange={(e) => setCompany(e.target.value)}
                 autoComplete="organization"
                 className="mt-1.5"
+                maxLength={200}
               />
             </div>
             <div>
@@ -185,6 +187,7 @@ export function EditJobDialog({
                 onChange={(e) => setLocation(e.target.value)}
                 autoComplete="address-level2"
                 className="mt-1.5"
+                maxLength={200}
               />
             </div>
           </div>
