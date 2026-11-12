@@ -428,6 +428,7 @@ export function ProAssist() {
                     <Input
                       id="offer-bonus"
                       inputMode="decimal"
+                      maxLength={200}
                       placeholder="10%"
                       value={bonus}
                       onChange={(e) => setBonus(e.target.value)}
@@ -439,6 +440,7 @@ export function ProAssist() {
                     <Input
                       id="offer-equity"
                       inputMode="decimal"
+                      maxLength={200}
                       placeholder="0.05%"
                       value={equity}
                       onChange={(e) => setEquity(e.target.value)}
@@ -451,6 +453,7 @@ export function ProAssist() {
                   <Textarea
                     id="offer-notes"
                     rows={2}
+                    maxLength={2000}
                     placeholder="Level, competing offers, anything the numbers don't show…"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
