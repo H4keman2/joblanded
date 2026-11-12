@@ -86,11 +86,11 @@ export function JobRecommendations() {
     const parsed = (resume.data?.parsed_json as Parsed | null) ?? {};
     const defaultKeyword = parsed.titles?.[0] ?? "";
     const defaultLocation = parsed.location ?? "";
-    setKeyword(defaultKeyword);
-    setLocation(defaultLocation);
+    setKeyword(defaultKeyword.slice(0, 200));
+    setLocation(defaultLocation.slice(0, 200));
     search.mutate({
       anyTitle: true,
-      location: defaultLocation || undefined,
+      location: defaultLocation.slice(0, 200) || undefined,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resume.isLoading, resume.data, pro.isPro]);
@@ -199,6 +199,7 @@ export function JobRecommendations() {
           <Input
             id="rec-keyword"
             type="search"
+            maxLength={200}
             value={anyTitle ? "" : keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => {
@@ -223,6 +224,7 @@ export function JobRecommendations() {
           <Input
             id="rec-location"
             value={location}
+            maxLength={200}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="City, State"
             autoComplete="address-level2"
