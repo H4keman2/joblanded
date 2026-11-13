@@ -281,6 +281,7 @@ function AccountPage() {
             <Input
               id="full_name"
               autoComplete="name"
+              maxLength={200}
               value={form.full_name}
               onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
               placeholder={isLoading ? "Loading…" : "Jane Doe"}
@@ -293,6 +294,7 @@ function AccountPage() {
               type="tel"
               inputMode="tel"
               autoComplete="tel"
+              maxLength={50}
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
               placeholder="+1 555 000 1234"
