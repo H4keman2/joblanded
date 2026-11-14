@@ -182,15 +182,6 @@ function FeedPage() {
           },
         ]}
         feature="Match feed"
-        preview={
-          <>
-            <p className="text-sm font-medium">Senior Product Manager · 84% fit</p>
-            <p className="text-sm text-muted-foreground">
-              Overlaps on product strategy, roadmapping, SQL…
-            </p>
-            <p className="text-xs text-muted-foreground">Like · Pass</p>
-          </>
-        }
       />
     );
   }

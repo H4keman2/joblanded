@@ -124,28 +124,6 @@ function ReviewLocked() {
       description="A deeper AI pass over your resume: richer extraction, an ATS score, ranked improvements — and a live look at how Pro tailoring rewrites your lines for a real posting."
       benefits={PRO_BENEFITS}
       feature="AI Resume Review"
-      preview={
-        <>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-900">
-              Technical
-            </span>
-            <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-medium text-violet-900">
-              Tools & Platforms
-            </span>
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-900">
-              Leadership
-            </span>
-          </div>
-          <p className="mt-3 text-sm">
-            <span className="font-semibold text-emerald-700">ATS score: 84</span>
-            <span className="text-muted-foreground"> — strong keyword coverage…</span>
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Suggestion: your summary buries the $1B product launch — lead with it…
-          </p>
-        </>
-      }
     />
   );
 }

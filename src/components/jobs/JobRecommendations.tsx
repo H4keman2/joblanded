@@ -154,25 +154,6 @@ export function JobRecommendations() {
           },
         ]}
         feature="AI job recommendations"
-        preview={
-          <>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">AI Product Manager · $160K–$200K</p>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                92% fit
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Your multimodal data-capture background maps directly to their AI roadmap…
-            </p>
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">Product Manager, Applied AI · Remote</p>
-              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600">
-                64% fit
-              </span>
-            </div>
-          </>
-        }
       />
     );
   }

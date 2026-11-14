@@ -434,18 +434,6 @@ function JobDetailPage() {
               },
             ]}
             feature="Tailoring for this job"
-            preview={
-              <>
-                <p className="text-sm font-medium">Version 2 · Leadership angle</p>
-                <p className="text-sm">
-                  Led a <mark className="rounded bg-emerald-200 px-0.5">cross-functional</mark>{" "}
-                  launch of an industry-first{" "}
-                  <mark className="rounded bg-emerald-200 px-0.5">multimodal data capture</mark>{" "}
-                  platform…
-                </p>
-                <p className="text-xs text-muted-foreground">ATS: 84 · 12 keywords matched</p>
-              </>
-            }
           />
         ) : (
           <div className="panel p-5 sm:p-8">

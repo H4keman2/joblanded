@@ -1,27 +1,24 @@
 import type { ReactNode } from "react";
-import { Check, Eye } from "lucide-react";
+import { Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProUpsell } from "@/components/ProUpsell";
 
 /**
  * The standard locked-Pro section used across the app: header with Pro
- * badge, what it does, a benefit checklist, a blurred preview, and the
- * upsell. Every premium feature uses this so they all look like one family.
+ * badge, what it does, a benefit checklist, and the upsell. Every premium
+ * feature uses this so they all look like one family.
  */
 export function ProFeatureSection({
   icon,
   title,
   description,
   benefits,
-  preview,
   feature,
 }: {
   icon: ReactNode;
   title: string;
   description: string;
   benefits: { title: string; body: string }[];
-  /** Rendered blurred behind the "Preview" badge. Keep it short. */
-  preview: ReactNode;
   /** Label passed to the upsell, e.g. "AI resume review". */
   feature: string;
 }) {
@@ -56,17 +53,6 @@ export function ProFeatureSection({
           </li>
         ))}
       </ul>
-
-      <div className="relative overflow-hidden rounded-lg border border-border">
-        <div className="pointer-events-none space-y-2 p-4 select-none blur-sm" aria-hidden="true">
-          {preview}
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center bg-background/40">
-          <Badge className="text-xs">
-            <Eye aria-hidden="true" className="mr-1 h-3 w-3" /> Preview
-          </Badge>
-        </div>
-      </div>
 
       <ProUpsell feature={feature} />
     </section>
