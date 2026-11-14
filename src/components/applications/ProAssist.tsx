@@ -108,7 +108,7 @@ function AssistLocked() {
     <ProFeatureSection
       icon={<Sparkles className="h-5 w-5" />}
       title="Interview prep & offer check"
-      description="When a posting turns into interviews \u2014 or an offer \u2014 Pro helps you walk in ready and negotiate with numbers."
+      description="When a posting turns into interviews — or an offer — Pro helps you walk in ready and negotiate with numbers."
       benefits={PRO_BENEFITS}
       feature="Interview prep & offer check"
       preview={
