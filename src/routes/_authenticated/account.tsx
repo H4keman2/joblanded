@@ -4,11 +4,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { deleteAccount, exportAccountData, getProfile, saveProfile } from "@/lib/account.functions";
+import {
+  deleteAccount,
+  exportAccountData,
+  getProfile,
+  saveJobPreferences,
+  saveProfile,
+} from "@/lib/account.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Hint } from "@/components/ui/hint";
 import { PASSWORD_HINT, passwordIssue } from "@/lib/password";
 import { todayStr } from "@/lib/dates";
@@ -327,6 +340,8 @@ function AccountPage() {
           </div>
         </form>
       </section>
+
+      <JobPreferencesSection />
 
       <section className="panel max-w-xl space-y-5 p-6">
         <div>
@@ -687,6 +702,197 @@ function ProLicenseSection() {
           {pro.error}
         </p>
       )}
+    </section>
+  );
+}
+
+const WORK_STYLES = [
+  { value: "any", label: "Any work style" },
+  { value: "remote", label: "Remote" },
+  { value: "hybrid", label: "Hybrid" },
+  { value: "onsite", label: "On-site" },
+] as const;
+
+type WorkStyleValue = (typeof WORK_STYLES)[number]["value"];
+
+// Job-search preferences that steer the Match feed: the pay floor hides
+// below-floor postings there, and location / work style flag cards that
+// don't line up. Saved separately from the Profile form above so the two
+// never block each other.
+function JobPreferencesSection() {
+  const fetchProfile = useServerFn(getProfile);
+  const persist = useServerFn(saveJobPreferences);
+  const queryClient = useQueryClient();
+
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: ["profile"],
+    queryFn: () => fetchProfile(),
+  });
+
+  const [form, setForm] = useState<{
+    target_roles: string;
+    pay_floor: string;
+    preferred_location: string;
+    work_style: WorkStyleValue;
+    willing_to_relocate: boolean;
+  }>({
+    target_roles: "",
+    pay_floor: "",
+    preferred_location: "",
+    work_style: "any",
+    willing_to_relocate: false,
+  });
+  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (profile && !loaded) {
+      setForm({
+        target_roles: profile.target_roles ?? "",
+        pay_floor: profile.pay_floor != null ? String(profile.pay_floor) : "",
+        preferred_location: profile.preferred_location ?? "",
+        work_style: (WORK_STYLES.some((w) => w.value === profile.work_style)
+          ? profile.work_style
+          : "any") as WorkStyleValue,
+        willing_to_relocate: profile.willing_to_relocate ?? false,
+      });
+      setLoaded(true);
+    }
+  }, [profile, loaded]);
+
+  async function onSave(e: React.FormEvent) {
+    e.preventDefault();
+    const rawPay = form.pay_floor.trim();
+    if (rawPay.includes(".")) {
+      toast.error("Pay floors are whole dollars — no cents.");
+      return;
+    }
+    const digits = rawPay.replace(/[^0-9]/g, "");
+    const payFloor = digits ? Number(digits) : null;
+    if (payFloor != null && (!Number.isFinite(payFloor) || payFloor > 10_000_000)) {
+      toast.error("That pay floor looks too high — check it and try again.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await persist({
+        data: {
+          target_roles: form.target_roles.trim() || null,
+          pay_floor: payFloor,
+          preferred_location: form.preferred_location.trim() || null,
+          work_style: form.work_style,
+          willing_to_relocate: form.willing_to_relocate,
+        },
+      });
+      await queryClient.invalidateQueries({ queryKey: ["profile"] });
+      toast.success("Preferences saved");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save your preferences");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <section className="panel max-w-xl space-y-1 p-6">
+      <h2 className="text-lg font-semibold">Job preferences</h2>
+      <p className="text-sm text-muted-foreground">
+        What you&apos;re aiming for. Your pay floor hides postings that top out below it from the
+        Match feed; location and work style flag feed cards that don&apos;t line up.
+      </p>
+      {isError && (
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <p className="text-sm text-muted-foreground">
+            We could not load your preferences. Your connection may have dropped.
+          </p>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void refetch()}
+            disabled={isFetching}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
+      <form onSubmit={onSave} className="mt-4 space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="target_roles">Target roles</Label>
+          <Input
+            id="target_roles"
+            maxLength={200}
+            value={form.target_roles}
+            onChange={(e) => setForm((f) => ({ ...f, target_roles: e.target.value }))}
+            placeholder={isLoading ? "Loading…" : "Product Manager, Program Manager"}
+          />
+          <p className="text-xs text-muted-foreground">Comma-separated titles you&apos;re after.</p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="pay_floor">Pay floor (annual USD)</Label>
+          <Input
+            id="pay_floor"
+            inputMode="numeric"
+            value={form.pay_floor}
+            onChange={(e) => setForm((f) => ({ ...f, pay_floor: e.target.value }))}
+            placeholder={isLoading ? "Loading…" : "150000"}
+          />
+          <p className="text-xs text-muted-foreground">
+            Leave blank for no floor. Postings with no stated pay are never hidden.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="preferred_location">Preferred location</Label>
+          <Input
+            id="preferred_location"
+            maxLength={200}
+            value={form.preferred_location}
+            onChange={(e) => setForm((f) => ({ ...f, preferred_location: e.target.value }))}
+            placeholder={isLoading ? "Loading…" : "New York, NY"}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="work_style">Work style</Label>
+          <Select
+            value={form.work_style}
+            onValueChange={(v) => setForm((f) => ({ ...f, work_style: v as WorkStyleValue }))}
+          >
+            <SelectTrigger id="work_style" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {WORK_STYLES.map((w) => (
+                <SelectItem key={w.value} value={w.value}>
+                  {w.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-start gap-3">
+          <input
+            id="willing_to_relocate"
+            type="checkbox"
+            className="mt-1 h-4 w-4 accent-primary"
+            checked={form.willing_to_relocate}
+            onChange={(e) => setForm((f) => ({ ...f, willing_to_relocate: e.target.checked }))}
+          />
+          <div>
+            <Label htmlFor="willing_to_relocate">Open to relocating</Label>
+            <p className="text-sm text-muted-foreground">
+              Roles outside your preferred location won&apos;t be flagged when this is on.
+            </p>
+          </div>
+        </div>
+        <Button type="submit" disabled={saving || isLoading || isError}>
+          {saving ? "Saving…" : "Save preferences"}
+        </Button>
+      </form>
     </section>
   );
 }

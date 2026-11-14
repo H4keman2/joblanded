@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { CheckCircle2, Heart, Layers, Loader2, X } from "lucide-react";
 import { getJob, listJobs, rankRoles, setFeedDecision } from "@/lib/jobs.functions";
 import { listApplications } from "@/lib/applications.functions";
+import { getProfile } from "@/lib/account.functions";
 import { ProFeatureSection } from "@/components/ProFeatureSection";
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/ui/hint";
@@ -48,8 +49,11 @@ function FeedPage() {
   const fetchApplications = useServerFn(listApplications);
   const fetchFits = useServerFn(rankRoles);
   const fetchJob = useServerFn(getJob);
+  const fetchProfile = useServerFn(getProfile);
   const decide = useServerFn(setFeedDecision);
   const pro = usePro();
+
+  const profile = useQuery({ queryKey: ["profile"], queryFn: () => fetchProfile() });
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
   const applications = useQuery({
@@ -76,14 +80,47 @@ function FeedPage() {
     return map;
   }, [fits.data]);
 
-  // The queue: undecided, unarchived postings still at "saved" status,
-  // strongest resume fit first (unscored postings go last, not hidden).
-  const queue = useMemo(() => {
+  // Account-page preferences steer the queue: a posting whose stated pay
+  // tops out below the pay floor never enters the feed (postings with no
+  // stated pay are never hidden — unknown isn't below-floor).
+  const payFloor = profile.data?.pay_floor ?? null;
+
+  const undecided = useMemo(() => {
     return (jobs.data ?? [])
       .filter((j) => !j.archived_at && !j.feed_decision && statusByJob.get(j.id) === "saved")
-      .map((j) => ({ job: j, ...(fitById.get(j.id) ?? { fit: null, matched: [] }) }))
-      .sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
+      .map((j) => ({ job: j, ...(fitById.get(j.id) ?? { fit: null, matched: [] }) }));
   }, [jobs.data, statusByJob, fitById]);
+
+  const hiddenBelowFloor = useMemo(() => {
+    if (payFloor == null) return 0;
+    return undecided.filter((e) => e.job.pay_max != null && e.job.pay_max < payFloor).length;
+  }, [undecided, payFloor]);
+
+  // The queue: undecided postings minus the below-floor ones, strongest
+  // resume fit first (unscored postings go last, not hidden).
+  const queue = useMemo(() => {
+    return undecided
+      .filter((e) => !(payFloor != null && e.job.pay_max != null && e.job.pay_max < payFloor))
+      .sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
+  }, [undecided, payFloor]);
+
+  // Preference flags for the current card: soft signals only — the card is
+  // still decidable, the badge just says "check this before you like it".
+  const prefFlags = (job: { location: string | null }): string[] => {
+    const prefs = profile.data;
+    if (!prefs || !job.location) return [];
+    const flags: string[] = [];
+    const loc = job.location.toLowerCase();
+    const style = prefs.work_style;
+    if (style === "remote" && !loc.includes("remote")) flags.push("Not flagged remote");
+    if (style === "onsite" && loc.includes("remote")) flags.push("Listed as remote");
+    if (style === "hybrid" && !loc.includes("hybrid") && !loc.includes("remote"))
+      flags.push("Not flagged hybrid");
+    const prefLoc = prefs.preferred_location?.trim().toLowerCase();
+    if (prefLoc && !prefs.willing_to_relocate && !loc.includes(prefLoc) && !prefLoc.includes(loc))
+      flags.push("Outside your preferred location");
+    return flags;
+  };
 
   const likedCount = useMemo(
     () => (jobs.data ?? []).filter((j) => j.feed_decision === "liked").length,
@@ -169,6 +206,15 @@ function FeedPage() {
         <p className="mt-3 text-xs text-muted-foreground" aria-live="polite">
           {queue.length} to review · {likedCount} liked · {passedCount} passed
         </p>
+        {hiddenBelowFloor > 0 && payFloor != null && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {hiddenBelowFloor} {hiddenBelowFloor === 1 ? "posting" : "postings"} hidden — below your
+            ${payFloor.toLocaleString()} pay floor.{" "}
+            <Link to="/account" className="text-primary underline">
+              Update preferences
+            </Link>
+          </p>
+        )}
       </div>
 
       {jobs.isLoading || applications.isLoading || fits.isLoading ? (
@@ -202,7 +248,11 @@ function FeedPage() {
           </p>
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">
             {hasSavedPostings
-              ? "You've reviewed every saved posting in the feed. Liked postings are waiting in your Jobs list, ready to tailor."
+              ? `You've reviewed every saved posting in the feed. Liked postings are waiting in your Jobs list, ready to tailor.${
+                  hiddenBelowFloor > 0
+                    ? " The only postings left are hidden by your pay floor."
+                    : ""
+                }`
               : "Nothing to review right now — postings you save will show up here for a quick yes or no."}
           </p>
           <div className="mt-4">
@@ -225,6 +275,14 @@ function FeedPage() {
             {current.fit != null && queue.length > 1 && (
               <span className="text-xs text-muted-foreground">Strongest remaining match</span>
             )}
+            {prefFlags(current.job).map((flag) => (
+              <span
+                key={flag}
+                className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-600"
+              >
+                {flag}
+              </span>
+            ))}
           </div>
           <h2 className="mt-3 text-xl font-semibold">
             <Link

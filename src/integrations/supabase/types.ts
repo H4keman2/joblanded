@@ -157,24 +157,39 @@ export type Database = {
           email_notifications: boolean
           full_name: string | null
           id: string
+          pay_floor: number | null
           phone: string | null
+          preferred_location: string | null
+          target_roles: string | null
           user_id: string
+          willing_to_relocate: boolean
+          work_style: string | null
         }
         Insert: {
           created_at?: string
           email_notifications?: boolean
           full_name?: string | null
           id?: string
+          pay_floor?: number | null
           phone?: string | null
+          preferred_location?: string | null
+          target_roles?: string | null
           user_id: string
+          willing_to_relocate?: boolean
+          work_style?: string | null
         }
         Update: {
           created_at?: string
           email_notifications?: boolean
           full_name?: string | null
           id?: string
+          pay_floor?: number | null
           phone?: string | null
+          preferred_location?: string | null
+          target_roles?: string | null
           user_id?: string
+          willing_to_relocate?: boolean
+          work_style?: string | null
         }
         Relationships: []
       }

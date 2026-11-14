@@ -7,7 +7,9 @@ export const getProfile = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("profiles")
-      .select("id, full_name, phone, email_notifications")
+      .select(
+        "id, full_name, phone, email_notifications, target_roles, pay_floor, preferred_location, work_style, willing_to_relocate",
+      )
       .eq("user_id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -64,7 +66,54 @@ export const saveProfile = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// Bundles everything the account owns into one JSON payload for a
+// Job-search preferences (Account page's "Job preferences" section). Kept
+// apart from saveProfile so the contact-details form and the preferences
+// form save independently. The Match feed reads these back: pay_floor hides
+// postings whose stated pay tops out below it; preferred_location and
+// work_style flag cards that don't line up. Everything nullable — unset
+// preferences mean the feed applies no filtering or flagging.
+const jobPreferencesInput = z.object({
+  target_roles: z.string().trim().max(200).nullable(),
+  pay_floor: z.number().int().nonnegative().max(10_000_000).nullable(),
+  preferred_location: z.string().trim().max(200).nullable(),
+  work_style: z.enum(["any", "remote", "hybrid", "onsite"]).nullable(),
+  willing_to_relocate: z.boolean(),
+});
+
+export const saveJobPreferences = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => jobPreferencesInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const values = {
+      target_roles: data.target_roles || null,
+      pay_floor: data.pay_floor,
+      preferred_location: data.preferred_location || null,
+      work_style: data.work_style === "any" ? null : data.work_style,
+      willing_to_relocate: data.willing_to_relocate,
+    };
+
+    const { data: existing, error: readError } = await context.supabase
+      .from("profiles")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
+    if (readError) throw new Error(readError.message);
+
+    if (existing) {
+      const { error } = await context.supabase
+        .from("profiles")
+        .update(values)
+        .eq("id", existing.id)
+        .eq("user_id", context.userId);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await context.supabase
+        .from("profiles")
+        .insert({ ...values, user_id: context.userId });
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
 // self-service "download your data" export. Read-only, scoped to the
 // caller's own rows via the authenticated (RLS) client.
 export const exportAccountData = createServerFn({ method: "GET" })
