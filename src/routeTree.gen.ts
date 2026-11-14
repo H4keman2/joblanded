@@ -16,6 +16,7 @@ import { Route as ProRouteImport } from './routes/pro'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedApplicationsRouteImport } from './routes/_authenticated/applications'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedFeedRouteImport } from './routes/_authenticated/feed'
 import { Route as AuthenticatedPostingSearchRouteImport } from './routes/_authenticated/posting-search'
 import { Route as AuthenticatedResumeRouteImport } from './routes/_authenticated/resume'
 import { Route as AuthenticatedSaveRouteImport } from './routes/_authenticated/save'
@@ -58,6 +59,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFeedRoute = AuthenticatedFeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPostingSearchRoute =
   AuthenticatedPostingSearchRouteImport.update({
     id: '/posting-search',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AuthenticatedAccountRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/feed': typeof AuthenticatedFeedRoute
   '/posting-search': typeof AuthenticatedPostingSearchRoute
   '/resume': typeof AuthenticatedResumeRoute
   '/save': typeof AuthenticatedSaveRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/account': typeof AuthenticatedAccountRoute
   '/applications': typeof AuthenticatedApplicationsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/feed': typeof AuthenticatedFeedRoute
   '/posting-search': typeof AuthenticatedPostingSearchRoute
   '/resume': typeof AuthenticatedResumeRoute
   '/save': typeof AuthenticatedSaveRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/applications': typeof AuthenticatedApplicationsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/feed': typeof AuthenticatedFeedRoute
   '/_authenticated/posting-search': typeof AuthenticatedPostingSearchRoute
   '/_authenticated/resume': typeof AuthenticatedResumeRoute
   '/_authenticated/save': typeof AuthenticatedSaveRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/applications'
     | '/dashboard'
+    | '/feed'
     | '/posting-search'
     | '/resume'
     | '/save'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/applications'
     | '/dashboard'
+    | '/feed'
     | '/posting-search'
     | '/resume'
     | '/save'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account'
     | '/_authenticated/applications'
     | '/_authenticated/dashboard'
+    | '/_authenticated/feed'
     | '/_authenticated/posting-search'
     | '/_authenticated/resume'
     | '/_authenticated/save'
@@ -238,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/feed': {
+      id: '/_authenticated/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof AuthenticatedFeedRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/posting-search': {
       id: '/_authenticated/posting-search'
       path: '/posting-search'
@@ -287,6 +306,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedApplicationsRoute: typeof AuthenticatedApplicationsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedFeedRoute: typeof AuthenticatedFeedRoute
   AuthenticatedPostingSearchRoute: typeof AuthenticatedPostingSearchRoute
   AuthenticatedResumeRoute: typeof AuthenticatedResumeRoute
   AuthenticatedSaveRoute: typeof AuthenticatedSaveRoute
@@ -298,6 +318,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedApplicationsRoute: AuthenticatedApplicationsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedFeedRoute: AuthenticatedFeedRoute,
   AuthenticatedPostingSearchRoute: AuthenticatedPostingSearchRoute,
   AuthenticatedResumeRoute: AuthenticatedResumeRoute,
   AuthenticatedSaveRoute: AuthenticatedSaveRoute,

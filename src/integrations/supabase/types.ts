@@ -67,6 +67,7 @@ export type Database = {
           company: string | null
           date_added: string
           description: string
+          feed_decision: string | null
           id: string
           location: string | null
           pay_max: number | null
@@ -80,6 +81,7 @@ export type Database = {
           company?: string | null
           date_added?: string
           description: string
+          feed_decision?: string | null
           id?: string
           location?: string | null
           pay_max?: number | null
@@ -93,6 +95,7 @@ export type Database = {
           company?: string | null
           date_added?: string
           description?: string
+          feed_decision?: string | null
           id?: string
           location?: string | null
           pay_max?: number | null

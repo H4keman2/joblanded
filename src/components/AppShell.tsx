@@ -20,6 +20,11 @@ const nav = [
     tip: "Save postings, get resume-matched recommendations, and generate tailored versions.",
   },
   {
+    to: "/feed",
+    label: "Match feed",
+    tip: "Review saved postings one at a time — like the keepers, pass the rest.",
+  },
+  {
     to: "/resume",
     label: "Resume",
     tip: "Upload or paste your resume and review the skills, titles and details we extracted.",

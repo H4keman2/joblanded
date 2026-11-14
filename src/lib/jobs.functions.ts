@@ -11,7 +11,9 @@ export const listJobs = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("jobs")
-      .select("id, title, company, location, pay_min, pay_max, source_url, date_added, archived_at")
+      .select(
+        "id, title, company, location, pay_min, pay_max, source_url, date_added, archived_at, feed_decision",
+      )
       .eq("user_id", context.userId)
       .order("date_added", { ascending: false });
     if (error) throw new Error(error.message);
@@ -264,6 +266,25 @@ export const setJobArchived = createServerFn({ method: "POST" })
     const { error } = await context.supabase
       .from("jobs")
       .update({ archived_at: data.archived ? new Date().toISOString() : null })
+      .eq("id", data.id)
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Records a Match feed yes/no on a posting. 'liked' keeps the posting in
+// play; 'passed' dismisses it from the feed. Neither touches the tracker
+// status or the archived flag — the feed is a triage layer over saved
+// postings, not a second tracker.
+export const setFeedDecision = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid(), decision: z.enum(["liked", "passed"]) }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { error } = await context.supabase
+      .from("jobs")
+      .update({ feed_decision: data.decision })
       .eq("id", data.id)
       .eq("user_id", context.userId);
     if (error) throw new Error(error.message);
