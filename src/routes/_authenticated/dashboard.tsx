@@ -287,10 +287,7 @@ function DashboardPage() {
         />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-emerald-200/80">
-              {"// job search, automated"}
-            </p>
-            <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
               {firstName ? `Hey ${firstName}` : "JobLanded Dashboard"}
             </h1>
             <p className="mt-3 font-mono text-xs text-white/75 sm:text-sm">
