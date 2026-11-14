@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { listJobs } from "@/lib/jobs.functions";
+import { WorthApplyingTo } from "@/components/jobs/WorthApplyingTo";
 import { listApplications, updateApplicationFollowUp } from "@/lib/applications.functions";
 import { formatDate, todayStr } from "@/lib/dates";
 import { getLatestResume } from "@/lib/resume.functions";
@@ -457,6 +458,9 @@ function DashboardPage() {
           </ul>
         )}
       </section>
+
+      {/* Worth applying to — best saved-but-not-applied matches, by fit. */}
+      <WorthApplyingTo />
 
       {/* First-run checklist — disappears once the basics are in place. */}
       {setupLoaded && !setupDone && (
