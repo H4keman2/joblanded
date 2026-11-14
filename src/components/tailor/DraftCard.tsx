@@ -8,7 +8,7 @@ export { Hint };
 
 export interface TailorDraft {
   angle: string;
-  match: { score: number; note: string };
+  match: { score: number; note: string; before?: number | null | undefined };
   resume: string;
   summary: string;
   cover: string;
@@ -38,7 +38,19 @@ export function ScoreBar({ score, label }: { score: number; label: string }) {
   );
 }
 
-export function MatchScore({ score, note }: { score: number; note: string }) {
+export function MatchScore({
+  score,
+  note,
+  before,
+}: {
+  score: number;
+  note: string;
+  before?: number | null | undefined;
+}) {
+  const after = Math.max(0, Math.min(100, score));
+  const beforeVal =
+    before != null && Number.isFinite(before) ? Math.max(0, Math.min(100, before)) : null;
+  const delta = beforeVal != null ? after - beforeVal : null;
   const tone =
     score >= 85
       ? "text-primary border-primary/30 bg-primary/10"
@@ -47,10 +59,20 @@ export function MatchScore({ score, note }: { score: number; note: string }) {
         : "text-destructive border-destructive/30 bg-destructive/10";
   return (
     <div className={`flex items-center gap-3 rounded-lg border p-3 ${tone}`}>
-      <span className="text-2xl font-bold leading-none">{Math.max(0, Math.min(100, score))}%</span>
+      <span className="text-2xl font-bold leading-none">{after}%</span>
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide">Match score</p>
         <p className="text-xs opacity-90">{note}</p>
+        {beforeVal != null && delta != null && (
+          <p className="mt-1 text-xs font-medium">
+            Before tailoring: {beforeVal}% ·{" "}
+            {delta === 0
+              ? "tailoring held the score"
+              : delta > 0
+                ? `up ${delta} points`
+                : `down ${Math.abs(delta)} points`}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -176,7 +198,7 @@ export function DraftCard({
       </div>
 
       <div className="mt-4">
-        <MatchScore score={draft.match.score} note={draft.match.note} />
+        <MatchScore score={draft.match.score} note={draft.match.note} before={draft.match.before} />
       </div>
 
       <div className="mt-3 grid gap-3 rounded-lg border border-border bg-background p-3 sm:grid-cols-2">

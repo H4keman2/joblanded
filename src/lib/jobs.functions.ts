@@ -400,6 +400,14 @@ export const generateDraft = createServerFn({ method: "POST" })
       ? (existing ?? []).find((r) => r.id === data.optimizeFromId)
       : undefined;
 
+    // The "before" half of the before → after match pair shown on the new
+    // draft: for an optimize run it's the source draft's own match score (the
+    // same AI-scored metric, before this rewrite); for a fresh tailor it's
+    // the original resume's deterministic fit for this posting.
+    const beforeScore = optimizeSource
+      ? draftMatchScore(optimizeSource.content)
+      : preTailorFit(job, resume.parsed_json);
+
     const system = optimizeSource
       ? `You are an ATS optimization editor. You are given a resume, a job posting, and an existing tailored draft
 (including its full rewritten resume text).
@@ -429,6 +437,11 @@ ${DRAFT_SHAPE}`;
       limit: 20,
       windowMinutes: 60,
     });
+
+    if (beforeScore != null) {
+      const match = (draft["match"] ?? {}) as Record<string, unknown>;
+      draft["match"] = { ...match, before: beforeScore };
+    }
 
     const { data: row, error } = await supabase
       .from("tailored_documents")
@@ -547,6 +560,38 @@ export function scoreAgainstResume(
 
   const fit = Math.max(0, Math.min(100, Math.round((skillScore * 0.6 + titleScore * 0.4) * 130)));
   return { fit, matched: matched.slice(0, 6) };
+}
+
+// The match score a stored tailored draft carries for its version, or null
+// when the stored content is missing/malformed. Used to show a before → after
+// pair when a new version is generated from an existing draft.
+export function draftMatchScore(content: string): number | null {
+  try {
+    const raw = JSON.parse(content) as { match?: { score?: unknown } };
+    const score = raw?.match?.score;
+    return typeof score === "number" && Number.isFinite(score) ? Math.round(score) : null;
+  } catch {
+    return null;
+  }
+}
+
+// How well the ORIGINAL (untailored) resume fits a posting, scored with the
+// same deterministic overlap scorer rankRoles uses for its "% fit" badges.
+// This is the "before" half of the before → after pair stored on each new
+// tailored draft, so the tailoring gain is visible instead of implied.
+export function preTailorFit(
+  job: { title: string; company: string | null; description: string },
+  parsedJson: unknown,
+): number | null {
+  const parsed = (parsedJson ?? {}) as Record<string, unknown>;
+  const skills = dedupeSkills(strings(parsed["skills"]).concat(strings(parsed["keywords"])));
+  const titleWords = titleWordsFrom(strings(parsed["titles"]));
+  return scoreAgainstResume(
+    `${job.title} ${job.company ?? ""} ${job.description}`,
+    job.title,
+    skills,
+    titleWords,
+  ).fit;
 }
 
 export const rankRoles = createServerFn({ method: "GET" })

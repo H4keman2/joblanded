@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { containsToken, scoreAgainstResume, titleWordsFrom, dedupeSkills } from "./jobs.functions";
+import {
+  containsToken,
+  scoreAgainstResume,
+  titleWordsFrom,
+  dedupeSkills,
+  draftMatchScore,
+  preTailorFit,
+} from "./jobs.functions";
 
 describe("containsToken", () => {
   it("matches a whole-word occurrence", () => {
@@ -76,5 +83,39 @@ describe("scoreAgainstResume", () => {
     );
     expect(fit).not.toBeNull();
     expect(fit!).toBeLessThanOrEqual(100);
+  });
+});
+
+describe("draftMatchScore", () => {
+  it("reads the match score out of stored draft JSON", () => {
+    expect(draftMatchScore(JSON.stringify({ match: { score: 64.4, note: "x" } }))).toBe(64);
+  });
+
+  it("returns null for malformed or score-less content", () => {
+    expect(draftMatchScore("not json")).toBeNull();
+    expect(draftMatchScore(JSON.stringify({ angle: "No match here" }))).toBeNull();
+    expect(draftMatchScore(JSON.stringify({ match: { score: "high" } }))).toBeNull();
+  });
+});
+
+describe("preTailorFit", () => {
+  const job = {
+    title: "Product Manager",
+    company: "Acme",
+    description: "Looking for a product manager skilled in python and sql.",
+  };
+
+  it("scores the original resume against the posting", () => {
+    const fit = preTailorFit(job, {
+      skills: ["python", "sql"],
+      titles: ["Product Manager"],
+    });
+    expect(fit).not.toBeNull();
+    expect(fit!).toBeGreaterThan(0);
+  });
+
+  it("returns null when the resume has no parsed skills or titles", () => {
+    expect(preTailorFit(job, {})).toBeNull();
+    expect(preTailorFit(job, null)).toBeNull();
   });
 });

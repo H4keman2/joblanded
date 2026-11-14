@@ -80,6 +80,7 @@ function normalize(content: string): TailorDraft {
   }
   const s = (v: unknown, fallback = "") => (typeof v === "string" ? v : fallback);
   const n = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? Math.round(v) : 0);
+  const nn = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? Math.round(v) : null);
   const arr = (v: unknown) =>
     Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
   const ats = (raw["ats"] ?? {}) as Record<string, unknown>;
@@ -88,7 +89,7 @@ function normalize(content: string): TailorDraft {
   const insights = (raw["insights"] ?? {}) as Record<string, unknown>;
   return {
     angle: s(raw["angle"], "Tailored draft"),
-    match: { score: n(match["score"]), note: s(match["note"]) },
+    match: { score: n(match["score"]), note: s(match["note"]), before: nn(match["before"]) },
     resume: s(raw["resume"]),
     summary: s(raw["summary"]),
     cover: s(raw["cover"]),
