@@ -136,6 +136,13 @@ export function EditJobDialog({
               toast.error("Pay to didn't look like a number — enter digits only.");
               return;
             }
+            if (
+              (min != null && !Number.isInteger(min)) ||
+              (max != null && !Number.isInteger(max))
+            ) {
+              toast.error("Salaries need whole dollars — no cents.");
+              return;
+            }
             if (min != null && max != null && min > max) {
               toast.error("The pay range is flipped — ‘Pay from’ should be lower than ‘Pay to’.");
               return;
