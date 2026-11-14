@@ -61,7 +61,11 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
     },
     onError: (e: Error) =>
       toast.error(
-        e.message.includes("url") ? "Enter a valid link starting with https://" : e.message,
+        e.message.includes("2000")
+          ? "That link is too long to save — paste a shorter link."
+          : e.message.includes("url")
+            ? "Enter a valid link starting with https://"
+            : e.message,
       ),
   });
 
@@ -164,6 +168,7 @@ export function ApplyPanel({ jobId, sourceUrl }: { jobId: string; sourceUrl: str
             type="url"
             inputMode="url"
             autoComplete="url"
+            maxLength={2000}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder={
