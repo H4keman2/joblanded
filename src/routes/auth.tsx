@@ -46,7 +46,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/applications", replace: true });
+      if (data.session) navigate({ to: "/dashboard", replace: true });
     });
   }, [navigate]);
 
@@ -85,7 +85,7 @@ function AuthPage() {
         const { data, error } = await supabase.auth.signUp({
           email: cleanEmail,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/applications` },
+          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
         });
         if (error) throw error;
         if (data.user?.identities?.length === 0) {
@@ -112,7 +112,7 @@ function AuthPage() {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         if (mode === "signup") toast.success("Account created. Let's set up your resume.");
-        navigate({ to: "/applications", replace: true });
+        navigate({ to: "/dashboard", replace: true });
       } else toast.message("Check your inbox to confirm your email.");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
