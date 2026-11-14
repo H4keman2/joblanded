@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { addJob, deleteJob, listJobs, setJobArchived } from "@/lib/jobs.functions";
+import { addJob, deleteJob, listJobs, rankRoles, setJobArchived } from "@/lib/jobs.functions";
+import { usePro } from "@/lib/pro-store";
 import { JobRecommendations } from "@/components/jobs/JobRecommendations";
 import { EditJobDialog, type EditableJob } from "@/components/jobs/EditJobDialog";
 import { Button } from "@/components/ui/button";
@@ -97,9 +98,11 @@ export const Route = createFileRoute("/_authenticated/jobs/")({
 function JobsPage() {
   const qc = useQueryClient();
   const fetchJobs = useServerFn(listJobs);
+  const fetchFits = useServerFn(rankRoles);
   const create = useServerFn(addJob);
   const remove = useServerFn(deleteJob);
   const archive = useServerFn(setJobArchived);
+  const pro = usePro();
 
   const [description, setDescription] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -112,6 +115,20 @@ function JobsPage() {
   const [locationFilter, setLocationFilter] = useState<string>("any");
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
+
+  // Fit badges on each row (Pro: rankRoles re-verifies the license
+  // server-side, and the query stays disabled for non-Pro users, who
+  // simply see the list without badges — same as before this existed).
+  const fits = useQuery({
+    queryKey: ["role-fit", pro.key],
+    queryFn: () => fetchFits({ data: { licenseKey: pro.key ?? "" } }),
+    enabled: pro.isPro,
+  });
+  const fitById = useMemo(() => {
+    const map = new Map<string, number | null>();
+    for (const f of fits.data ?? []) map.set(f.id, f.fit);
+    return map;
+  }, [fits.data]);
 
   const archivedCount = useMemo(
     () => (jobs.data ?? []).filter((j) => j.archived_at).length,
@@ -473,13 +490,20 @@ function JobsPage() {
                         className="flex flex-wrap items-center justify-between gap-3 py-4 first:pt-0 last:pb-0"
                       >
                         <div>
-                          <Link
-                            to="/jobs/$jobId"
-                            params={{ jobId: job.id }}
-                            className="font-medium hover:text-primary"
-                          >
-                            {job.title}
-                          </Link>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link
+                              to="/jobs/$jobId"
+                              params={{ jobId: job.id }}
+                              className="font-medium hover:text-primary"
+                            >
+                              {job.title}
+                            </Link>
+                            {fitById.get(job.id) != null && (
+                              <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+                                {fitById.get(job.id)}% fit
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             {[job.company, job.location].filter(Boolean).join(" · ") ||
                               "No company listed"}

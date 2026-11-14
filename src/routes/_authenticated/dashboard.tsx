@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { listJobs } from "@/lib/jobs.functions";
+import { getProfile } from "@/lib/account.functions";
 import { WorthApplyingTo } from "@/components/jobs/WorthApplyingTo";
 import { listApplications, updateApplicationFollowUp } from "@/lib/applications.functions";
 import { formatDate, todayStr } from "@/lib/dates";
@@ -141,6 +142,10 @@ function DashboardPage() {
   const fetchJobs = useServerFn(listJobs);
   const fetchApplications = useServerFn(listApplications);
   const fetchResume = useServerFn(getLatestResume);
+  const fetchProfile = useServerFn(getProfile);
+
+  const profile = useQuery({ queryKey: ["profile"], queryFn: () => fetchProfile() });
+  const firstName = profile.data?.full_name?.trim().split(/\s+/)[0] || null;
 
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => fetchJobs() });
   const applications = useQuery({
@@ -286,7 +291,7 @@ function DashboardPage() {
               {"// job search, automated"}
             </p>
             <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-              JobLanded Dashboard
+              {firstName ? `Hey ${firstName}` : "JobLanded Dashboard"}
             </h1>
             <p className="mt-3 font-mono text-xs text-white/75 sm:text-sm">
               {show(stats.activeApplications)} ACTIVE · {show(stats.followUpsDue)} FOLLOW-UPS DUE ·{" "}
@@ -368,7 +373,7 @@ function DashboardPage() {
         ) : dueFollowUps.length === 0 ? (
           <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
             <CheckCircle2 aria-hidden="true" className="h-4 w-4 text-primary" />
-            Nothing due right now — no follow-ups are waiting on you.
+            You&apos;re all caught up — no follow-ups are waiting on you.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-border">
