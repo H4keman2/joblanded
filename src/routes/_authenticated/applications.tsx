@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import {
@@ -35,6 +35,69 @@ function isFullUrl(value: string) {
   } catch {
     return false;
   }
+}
+
+// Editing an existing follow-up date used to mutate on every keystroke, but a
+// native date input reports "" while the new date is still incomplete — so the
+// first digit typed sent follow_up_date: null and wiped the saved date. Hold
+// the edit in local state and commit on blur instead. An empty draft only
+// clears when the user deliberately deleted a complete date (Backspace/Delete
+// on a filled input, with no retyping after); abandoning a half-typed date
+// just restores the saved one.
+function FollowUpDateInput({
+  label,
+  value,
+  disabled,
+  onCommit,
+}: {
+  label: string;
+  value: string | null;
+  disabled: boolean;
+  onCommit: (next: string | null) => void;
+}) {
+  const [draft, setDraft] = useState(value ?? "");
+  const lastKey = useRef<string | null>(null);
+  const pendingClear = useRef(false);
+
+  return (
+    <Input
+      type="date"
+      aria-label={label}
+      value={draft}
+      disabled={disabled}
+      className="h-7 w-[10.5rem] text-xs"
+      onFocus={() => {
+        lastKey.current = null;
+        pendingClear.current = false;
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Backspace" || e.key === "Delete") lastKey.current = "delete";
+        else if (e.key.length === 1) lastKey.current = "other";
+      }}
+      onChange={(e) => {
+        const next = e.target.value;
+        // Going from a complete date to "" only happens by deleting it — a
+        // digit key mid-edit leaves the draft empty already, so this can't
+        // fire on partial typing.
+        if (next === "" && draft !== "" && lastKey.current === "delete") {
+          pendingClear.current = true;
+        } else if (next !== "") {
+          pendingClear.current = false;
+        }
+        setDraft(next);
+      }}
+      onBlur={() => {
+        if (draft !== "" && draft !== (value ?? "")) {
+          onCommit(draft);
+        } else if (draft === "" && pendingClear.current && lastKey.current === "delete") {
+          pendingClear.current = false;
+          onCommit(null);
+        } else if (draft === "") {
+          setDraft(value ?? "");
+        }
+      }}
+    />
+  );
 }
 
 export const Route = createFileRoute("/_authenticated/applications")({
@@ -677,22 +740,19 @@ function ApplicationsPage() {
                               </label>
                             </Hint>
                             {!app.follow_up_sent && (
-                              <Input
-                                type="date"
-                                aria-label={`Follow-up date for ${job?.title ?? "Untitled role"}`}
-                                value={app.follow_up_date ?? ""}
+                              <FollowUpDateInput
+                                label={`Follow-up date for ${job?.title ?? "Untitled role"}`}
+                                value={app.follow_up_date}
                                 disabled={
                                   followUpMutation.isPending &&
                                   followUpMutation.variables?.id === app.id
                                 }
-                                className="h-7 w-[10.5rem] text-xs"
-                                onChange={(e) => {
-                                  const next = e.target.value;
+                                onCommit={(next) =>
                                   followUpMutation.mutate({
                                     id: app.id,
-                                    follow_up_date: next || null,
-                                  });
-                                }}
+                                    follow_up_date: next,
+                                  })
+                                }
                               />
                             )}
                           </>
