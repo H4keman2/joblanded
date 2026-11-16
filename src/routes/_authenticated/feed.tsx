@@ -43,6 +43,14 @@ function payLine(job: { pay_min?: number | null; pay_max?: number | null }) {
   return `$${lo.toLocaleString()}${values.length > 1 && lo !== hi ? `–$${hi.toLocaleString()}` : ""}`;
 }
 
+// The top of a stated pay range, for the pay-floor filter: same sorted-pair
+// rule as payLine, so a flipped legacy row isn't hidden by its low end.
+// No stated max means no known top, so the posting is never hidden.
+function payTop(job: { pay_min?: number | null; pay_max?: number | null }) {
+  if (job.pay_max == null) return null;
+  return Math.max(job.pay_min ?? job.pay_max, job.pay_max);
+}
+
 function FeedPage() {
   const qc = useQueryClient();
   const fetchJobs = useServerFn(listJobs);
@@ -93,14 +101,21 @@ function FeedPage() {
 
   const hiddenBelowFloor = useMemo(() => {
     if (payFloor == null) return 0;
-    return undecided.filter((e) => e.job.pay_max != null && e.job.pay_max < payFloor).length;
+    return undecided.filter((e) => {
+      const top = payTop(e.job);
+      return top != null && top < payFloor;
+    }).length;
   }, [undecided, payFloor]);
 
   // The queue: undecided postings minus the below-floor ones, strongest
   // resume fit first (unscored postings go last, not hidden).
   const queue = useMemo(() => {
     return undecided
-      .filter((e) => !(payFloor != null && e.job.pay_max != null && e.job.pay_max < payFloor))
+      .filter((e) => {
+        if (payFloor == null) return true;
+        const top = payTop(e.job);
+        return top == null || top >= payFloor;
+      })
       .sort((a, b) => (b.fit ?? -1) - (a.fit ?? -1));
   }, [undecided, payFloor]);
 
