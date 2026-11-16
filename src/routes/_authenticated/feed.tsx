@@ -158,11 +158,21 @@ function FeedPage() {
   });
 
   const decideMutation = useMutation({
-    mutationFn: (input: { id: string; decision: "liked" | "passed" }) => decide({ data: input }),
+    mutationFn: (input: { id: string; decision: "liked" | "passed" | null }) =>
+      decide({ data: input }),
     onSuccess: (_r, v) => {
-      toast.success(
-        v.decision === "liked" ? "Liked — it stays in your Jobs list" : "Passed — out of the feed",
-      );
+      if (v.decision === "passed") {
+        toast.success("Passed — out of the feed", {
+          action: {
+            label: "Undo",
+            onClick: () => decideMutation.mutate({ id: v.id, decision: null }),
+          },
+        });
+      } else if (v.decision === "liked") {
+        toast.success("Liked — it stays in your Jobs list");
+      } else {
+        toast.success("Back in the feed");
+      }
       void qc.invalidateQueries({ queryKey: ["jobs"] });
     },
     onError: (e: Error) => toast.error(e.message || "Couldn't save that decision — try again."),
@@ -189,7 +199,7 @@ function FeedPage() {
           },
           {
             title: "Decisions stick",
-            body: "Liked postings stay in your Jobs list ready to tailor; passed ones leave the feed for good.",
+            body: "Liked postings stay in your Jobs list ready to tailor; passed ones leave the feed (undo from the toast if you change your mind).",
           },
           {
             title: "Nothing else changes",

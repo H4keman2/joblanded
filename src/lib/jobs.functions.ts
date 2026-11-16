@@ -279,7 +279,9 @@ export const setJobArchived = createServerFn({ method: "POST" })
 export const setFeedDecision = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) =>
-    z.object({ id: z.string().uuid(), decision: z.enum(["liked", "passed"]) }).parse(input),
+    z
+      .object({ id: z.string().uuid(), decision: z.enum(["liked", "passed"]).nullable() })
+      .parse(input),
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
