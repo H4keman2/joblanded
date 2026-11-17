@@ -233,11 +233,11 @@ function FeedPage() {
         )}
       </div>
 
-      {jobs.isLoading || applications.isLoading || fits.isLoading ? (
+      {jobs.isLoading || applications.isLoading || fits.isLoading || profile.isLoading ? (
         <section className="panel p-6" role="status">
           <p className="text-sm text-muted-foreground">Loading your feed…</p>
         </section>
-      ) : jobs.isError || applications.isError || fits.isError ? (
+      ) : jobs.isError || applications.isError || fits.isError || profile.isError ? (
         <section className="panel p-6">
           <div className="flex flex-wrap items-center gap-3">
             <p className="text-sm text-muted-foreground">
@@ -250,6 +250,7 @@ function FeedPage() {
                 void jobs.refetch();
                 void applications.refetch();
                 void fits.refetch();
+                void profile.refetch();
               }}
             >
               Try again
