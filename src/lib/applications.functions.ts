@@ -54,7 +54,33 @@ export const listApplications = createServerFn({ method: "GET" })
     // choice, and re-stamping it on read would silently undo the clear.
     // First moves past "saved" still stamp the date at status-change time
     // (updateApplicationStatus / setJobStatus below).
-    return data ?? [];
+    const apps = data ?? [];
+    // Attach the newest logged email event per application, so the tracker
+    // can show "last update" from what actually landed in the inbox rather
+    // than only what the user remembered to edit by hand.
+    if (apps.length > 0) {
+      const { data: events, error: eventsError } = await context.supabase
+        .from("application_events")
+        .select("application_id, event_type, event_date, created_at")
+        .eq("user_id", context.userId)
+        .in(
+          "application_id",
+          apps.map((a) => a.id),
+        )
+        .order("created_at", { ascending: false });
+      if (eventsError) throw new Error(eventsError.message);
+      const latestByApp = new Map<string, { event_type: string; event_date: string | null }>();
+      for (const event of events ?? []) {
+        if (event.application_id && !latestByApp.has(event.application_id)) {
+          latestByApp.set(event.application_id, {
+            event_type: event.event_type,
+            event_date: event.event_date,
+          });
+        }
+      }
+      return apps.map((app) => ({ ...app, last_event: latestByApp.get(app.id) ?? null }));
+    }
+    return apps.map((app) => ({ ...app, last_event: null }));
   });
 
 // Lets someone add an application straight from this page (paste a posting, or
