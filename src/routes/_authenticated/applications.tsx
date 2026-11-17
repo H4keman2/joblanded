@@ -22,6 +22,8 @@ import { Hint } from "@/components/ui/hint";
 import { setJobArchived } from "@/lib/jobs.functions";
 import { RejectArchiveDialog } from "@/components/jobs/RejectArchiveDialog";
 import { ProAssist } from "@/components/applications/ProAssist";
+import { InboxPanel } from "@/components/applications/InboxPanel";
+import { EVENT_LABELS, type ApplicationEventType } from "@/lib/inbox";
 import { toast } from "sonner";
 import { Loader2, Plus, FileText, Briefcase, ClipboardList } from "lucide-react";
 
@@ -151,6 +153,7 @@ type ApplicationRow = {
   created_at: string;
   job_id: string;
   application_url?: string | null;
+  last_event?: { event_type: string; event_date: string | null } | null;
   jobs: JobInfo | JobInfo[] | null;
 };
 
@@ -333,6 +336,18 @@ function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <ProAssist />
+
+      <InboxPanel
+        applications={(applications.data ?? []).map((app) => {
+          const job = jobOf(app);
+          return {
+            id: app.id,
+            title: job?.title ?? "Untitled role",
+            company: job?.company ?? null,
+            status: app.status,
+          };
+        })}
+      />
 
       <div className="panel p-5 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -689,6 +704,17 @@ function ApplicationsPage() {
                         </div>
                       </div>
                     </div>
+
+                    {app.last_event && (
+                      <p className="text-xs text-muted-foreground">
+                        Last update:{" "}
+                        {EVENT_LABELS[app.last_event.event_type as ApplicationEventType] ??
+                          "Update"}
+                        {app.last_event.event_date
+                          ? ` · ${formatDate(app.last_event.event_date)}`
+                          : ""}
+                      </p>
+                    )}
 
                     {submitted && (app.date_applied || app.follow_up_date) && (
                       <div className="flex flex-wrap items-center gap-3 rounded-md bg-secondary/40 px-3 py-2 text-xs">
