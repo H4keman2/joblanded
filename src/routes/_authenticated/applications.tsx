@@ -338,6 +338,7 @@ function ApplicationsPage() {
       <ProAssist />
 
       <InboxPanel
+        suppressUpsell
         applications={(applications.data ?? []).map((app) => {
           const job = jobOf(app);
           return {

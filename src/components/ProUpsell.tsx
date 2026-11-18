@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react";
 
 export function ProUpsell({ feature }: { feature: string }) {
   return (
-    <div className="panel flex flex-wrap items-center justify-between gap-4 p-6">
+    <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-primary/25 bg-primary/5 p-6">
       <div>
         <p className="font-semibold">{feature} is a JobLanded Pro feature</p>
         <p className="mt-1 text-sm text-muted-foreground">

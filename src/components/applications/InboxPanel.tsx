@@ -57,7 +57,15 @@ function optionLabel(app: InboxApplicationOption) {
  * user confirms — the user stays the sender, the tracker just stops
  * depending on their memory.
  */
-export function InboxPanel({ applications }: { applications: InboxApplicationOption[] }) {
+export function InboxPanel({
+  applications,
+  suppressUpsell = false,
+}: {
+  applications: InboxApplicationOption[];
+  /** The Applications page already shows a Get Pro card in the section
+   * above; don't repeat it here. */
+  suppressUpsell?: boolean;
+}) {
   const pro = usePro();
   const qc = useQueryClient();
   const runParse = useServerFn(parseApplicationEmail);
@@ -130,6 +138,7 @@ export function InboxPanel({ applications }: { applications: InboxApplicationOpt
           },
         ]}
         feature="Application inbox"
+        hideUpsell={suppressUpsell}
       />
     );
   }

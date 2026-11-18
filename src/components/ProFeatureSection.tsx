@@ -14,6 +14,7 @@ export function ProFeatureSection({
   description,
   benefits,
   feature,
+  hideUpsell = false,
 }: {
   icon: ReactNode;
   title: string;
@@ -21,6 +22,9 @@ export function ProFeatureSection({
   benefits: { title: string; body: string }[];
   /** Label passed to the upsell, e.g. "AI resume review". */
   feature: string;
+  /** Skip the Get Pro card when another locked section on the same page
+   * already shows it — one upsell per page is enough. */
+  hideUpsell?: boolean;
 }) {
   return (
     <section className="panel space-y-6 p-6" aria-label={`${title} — Pro feature`}>
@@ -41,20 +45,20 @@ export function ProFeatureSection({
         {benefits.map((b) => (
           <li
             key={b.title}
-            className="flex items-start gap-2.5 rounded-lg border border-border p-3"
+            className="flex items-start gap-2.5 rounded-lg border border-border bg-secondary/40 p-3"
           >
             <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
               <Check aria-hidden="true" className="h-3 w-3 text-primary" />
             </span>
             <div>
               <p className="text-sm font-semibold">{b.title}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{b.body}</p>
+              <p className="mt-0.5 text-xs text-foreground/75">{b.body}</p>
             </div>
           </li>
         ))}
       </ul>
 
-      <ProUpsell feature={feature} />
+      {hideUpsell ? null : <ProUpsell feature={feature} />}
     </section>
   );
 }
