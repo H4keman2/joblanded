@@ -327,11 +327,29 @@ function FeedPage() {
               ))}
             </div>
           )}
-          {detail.data?.description && (
-            <p className="mt-4 max-w-2xl whitespace-pre-wrap text-sm text-muted-foreground">
-              {detail.data.description.slice(0, 400)}
-              {detail.data.description.length > 400 ? "…" : ""}
-            </p>
+          {detail.isPending ? (
+            <div className="mt-4 max-w-2xl space-y-2" role="status">
+              <span className="sr-only">Loading description…</span>
+              <div aria-hidden="true" className="h-3.5 animate-pulse rounded bg-muted" />
+              <div aria-hidden="true" className="h-3.5 w-11/12 animate-pulse rounded bg-muted" />
+              <div aria-hidden="true" className="h-3.5 w-3/4 animate-pulse rounded bg-muted" />
+            </div>
+          ) : detail.isError ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <p className="text-sm text-muted-foreground">
+                We couldn&apos;t load this posting&apos;s description.
+              </p>
+              <Button size="sm" variant="secondary" onClick={() => void detail.refetch()}>
+                Try again
+              </Button>
+            </div>
+          ) : (
+            detail.data?.description && (
+              <p className="mt-4 max-w-2xl whitespace-pre-wrap text-sm text-muted-foreground">
+                {detail.data.description.slice(0, 400)}
+                {detail.data.description.length > 400 ? "…" : ""}
+              </p>
+            )
           )}
           {current.job.source_url && (
             <a
