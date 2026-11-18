@@ -176,6 +176,7 @@ export function InboxPanel({
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="e.g. Update on your application to Stripe"
+            maxLength={500}
             className="mt-1.5"
           />
         </div>
@@ -187,6 +188,7 @@ export function InboxPanel({
             onChange={(e) => setBody(e.target.value)}
             rows={6}
             placeholder="Paste the full email text here…"
+            maxLength={20000}
             className="mt-1.5"
           />
         </div>
