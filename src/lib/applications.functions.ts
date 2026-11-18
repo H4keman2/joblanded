@@ -68,14 +68,18 @@ export const listApplications = createServerFn({ method: "GET" })
           apps.map((a) => a.id),
         )
         .order("created_at", { ascending: false });
-      if (eventsError) throw new Error(eventsError.message);
+      // Events are an enhancement, never a dependency: if that query fails
+      // (e.g. the table's migration hasn't landed yet), the tracker must
+      // still load with no last-event data rather than erroring the list.
       const latestByApp = new Map<string, { event_type: string; event_date: string | null }>();
-      for (const event of events ?? []) {
-        if (event.application_id && !latestByApp.has(event.application_id)) {
-          latestByApp.set(event.application_id, {
-            event_type: event.event_type,
-            event_date: event.event_date,
-          });
+      if (!eventsError) {
+        for (const event of events ?? []) {
+          if (event.application_id && !latestByApp.has(event.application_id)) {
+            latestByApp.set(event.application_id, {
+              event_type: event.event_type,
+              event_date: event.event_date,
+            });
+          }
         }
       }
       return apps.map((app) => ({ ...app, last_event: latestByApp.get(app.id) ?? null }));
