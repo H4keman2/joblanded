@@ -268,6 +268,24 @@ export function InboxPanel({
         </div>
       )}
 
+      {events.isError && (
+        <div>
+          <h3 className="text-sm font-semibold">Recent updates</h3>
+          <p role="status" className="mt-2 text-xs text-muted-foreground">
+            We couldn&apos;t load your recent updates. Your connection may have dropped.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2"
+            onClick={() => events.refetch()}
+            disabled={events.isFetching}
+          >
+            Try again
+          </Button>
+        </div>
+      )}
+
       {(events.data ?? []).length > 0 && (
         <div>
           <h3 className="text-sm font-semibold">Recent updates</h3>
