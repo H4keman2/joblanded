@@ -252,10 +252,20 @@ function JobDetailPage() {
         },
       }),
     onSuccess: async (_res, input) => {
-      const fresh = (await qc.fetchQuery({
-        queryKey: ["drafts", jobId],
-        queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
-      })) as StoredDraft[];
+      // The version was generated — a failed refresh must not swallow the
+      // success toast. Fall back to invalidating so the new version arrives
+      // on the next render instead.
+      let fresh: StoredDraft[];
+      try {
+        fresh = (await qc.fetchQuery({
+          queryKey: ["drafts", jobId],
+          queryFn: () => fetchDrafts({ data: { jobId } }) as Promise<StoredDraft[]>,
+        })) as StoredDraft[];
+      } catch {
+        void qc.invalidateQueries({ queryKey: ["drafts", jobId] });
+        toast.success(input.optimizeFromId ? "ATS-optimized version ready" : "New version ready");
+        return;
+      }
       const idx = input.optimizeFromId
         ? fresh.findIndex((d) => d.id === input.optimizeFromId)
         : fresh.length - 1;
