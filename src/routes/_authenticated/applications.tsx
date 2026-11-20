@@ -55,11 +55,18 @@ function FollowUpDateInput({
   label: string;
   value: string | null;
   disabled: boolean;
-  onCommit: (next: string | null) => void;
+  onCommit: (next: string | null) => Promise<unknown>;
 }) {
   const [draft, setDraft] = useState(value ?? "");
   const lastKey = useRef<string | null>(null);
   const pendingClear = useRef(false);
+
+  // A failed write must not leave the input showing a date that was never
+  // saved — restore the saved value. The mutation's onError already toasts,
+  // so the restore itself stays silent.
+  const commit = (next: string | null) => {
+    void onCommit(next).catch(() => setDraft(value ?? ""));
+  };
 
   return (
     <Input
@@ -90,10 +97,10 @@ function FollowUpDateInput({
       }}
       onBlur={() => {
         if (draft !== "" && draft !== (value ?? "")) {
-          onCommit(draft);
+          commit(draft);
         } else if (draft === "" && pendingClear.current && lastKey.current === "delete") {
           pendingClear.current = false;
-          onCommit(null);
+          commit(null);
         } else if (draft === "") {
           setDraft(value ?? "");
         }
@@ -775,7 +782,7 @@ function ApplicationsPage() {
                                   followUpMutation.variables?.id === app.id
                                 }
                                 onCommit={(next) =>
-                                  followUpMutation.mutate({
+                                  followUpMutation.mutateAsync({
                                     id: app.id,
                                     follow_up_date: next,
                                   })
