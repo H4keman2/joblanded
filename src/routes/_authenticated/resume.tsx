@@ -61,6 +61,11 @@ function ResumePage() {
   const runParse = useServerFn(parseResume);
   const runSave = useServerFn(saveParsedResume);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Id of the resume row the form was last hydrated from. Background
+  // refetches (window-focus, reconnect — QueryClient defaults) return a
+  // fresh object for the same row; re-hydrating on those would silently
+  // wipe unsaved profile edits and disarm the beforeunload guard.
+  const loadedId = useRef<string | null>(null);
 
   const [rawText, setRawText] = useState("");
   const [extracting, setExtracting] = useState(false);
@@ -83,7 +88,12 @@ function ResumePage() {
   });
 
   useEffect(() => {
-    if (resume) {
+    // Hydrate only when a different resume row loads. Same-id refetches
+    // (background refetch of the row already on screen) must not touch the
+    // form — the parse/save mutations already sync draft/snapshot locally
+    // in their onSuccess handlers.
+    if (resume && resume.id !== loadedId.current) {
+      loadedId.current = resume.id;
       setResumeId(resume.id);
       setDraft((resume.parsed_json as Parsed | null) ?? {});
       setSnapshot(JSON.stringify((resume.parsed_json as Parsed | null) ?? {}));
