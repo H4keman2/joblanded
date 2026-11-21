@@ -1425,10 +1425,9 @@ function FounderTrust() {
           Built by someone who’s been there
         </h2>
         <p className="mt-3 text-sm text-muted-foreground">
-          I’m Ryan Hake, a PMP-certified product manager working on AI products at Zebra
-          Technologies. I built JobLanded during my own job search — I was drowning in spreadsheets
-          and spray-and-pray applications, and I wanted a tool that told me which jobs were actually
-          worth my time.
+          I’m Ryan Hake, a PMP-certified product manager working on AI products. I built JobLanded
+          during my own job search — I was drowning in spreadsheets and spray-and-pray applications,
+          and I wanted a tool that told me which jobs were actually worth my time.
         </p>
         <a
           href="https://www.linkedin.com/in/ryanhake1/"
