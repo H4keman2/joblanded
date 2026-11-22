@@ -65,6 +65,31 @@ export function WorthApplyingTo() {
       .slice(0, MAX_PICKS);
   }, [pro.isPro, fits.data, applications.data, jobs.data]);
 
+  if (pro.isPro && fits.isError) {
+    return (
+      <section className="panel p-6 sm:p-8" aria-labelledby="worth-applying-heading">
+        <div className="flex flex-wrap items-center gap-2">
+          <Sparkles aria-hidden="true" className="h-5 w-5 text-primary" />
+          <h2 id="worth-applying-heading" className="font-display text-xl font-bold tracking-tight">
+            Worth applying to
+          </h2>
+        </div>
+        <p role="status" className="mt-1 text-sm text-muted-foreground">
+          We couldn&apos;t load your fit scores. Your connection may have dropped.
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-3"
+          onClick={() => fits.refetch()}
+          disabled={fits.isFetching}
+        >
+          Try again
+        </Button>
+      </section>
+    );
+  }
+
   if (picks.length === 0) return null;
 
   return (
