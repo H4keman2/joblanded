@@ -793,25 +793,41 @@ function ApplicationsPage() {
                         )}
                         {!app.follow_up_date &&
                           (addingFollowUpId === app.id ? (
-                            <Input
-                              type="date"
-                              aria-label={`Follow-up date for ${job?.title ?? "Untitled role"}`}
-                              value=""
-                              disabled={
-                                followUpMutation.isPending &&
-                                followUpMutation.variables?.id === app.id
-                              }
-                              className="h-7 w-[10.5rem] text-xs"
-                              onChange={(e) => {
-                                const next = e.target.value;
-                                if (!next) return;
-                                followUpMutation.mutate({
-                                  id: app.id,
-                                  follow_up_date: next,
-                                });
-                                setAddingFollowUpId(null);
-                              }}
-                            />
+                            <span className="flex items-center gap-1">
+                              <Input
+                                type="date"
+                                aria-label={`Follow-up date for ${job?.title ?? "Untitled role"}`}
+                                value=""
+                                disabled={
+                                  followUpMutation.isPending &&
+                                  followUpMutation.variables?.id === app.id
+                                }
+                                className="h-7 w-[10.5rem] text-xs"
+                                onChange={(e) => {
+                                  const next = e.target.value;
+                                  if (!next) return;
+                                  followUpMutation.mutate(
+                                    {
+                                      id: app.id,
+                                      follow_up_date: next,
+                                    },
+                                    {
+                                      // Stay open on failure so the error
+                                      // toast isn't the end of the attempt.
+                                      onSuccess: () => setAddingFollowUpId(null),
+                                    },
+                                  );
+                                }}
+                              />
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 text-xs"
+                                onClick={() => setAddingFollowUpId(null)}
+                              >
+                                Cancel
+                              </Button>
+                            </span>
                           ) : (
                             <Button
                               size="sm"
