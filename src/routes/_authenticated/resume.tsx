@@ -118,6 +118,10 @@ function ResumePage() {
   const parseMutation = useMutation({
     mutationFn: (text: string) => runParse({ data: { rawText: text } }),
     onSuccess: (row) => {
+      // parseResume INSERTs a new row, so the invalidated refetch returns
+      // a new id — without this, the hydrate effect would re-run and wipe
+      // any profile edit made between parse success and the refetch.
+      loadedId.current = row.id;
       setResumeId(row.id);
       setDraft((row.parsed_json as Parsed | null) ?? {});
       setSnapshot(JSON.stringify((row.parsed_json as Parsed | null) ?? {}));
