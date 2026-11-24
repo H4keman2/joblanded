@@ -121,19 +121,31 @@ function FeedPage() {
 
   // Preference flags for the current card: soft signals only — the card is
   // still decidable, the badge just says "check this before you like it".
-  const prefFlags = (job: { location: string | null }): string[] => {
+  const prefFlags = (job: { title: string | null; location: string | null }): string[] => {
     const prefs = profile.data;
-    if (!prefs || !job.location) return [];
+    if (!prefs) return [];
     const flags: string[] = [];
-    const loc = job.location.toLowerCase();
-    const style = prefs.work_style;
-    if (style === "remote" && !loc.includes("remote")) flags.push("Not flagged remote");
-    if (style === "onsite" && loc.includes("remote")) flags.push("Listed as remote");
-    if (style === "hybrid" && !loc.includes("hybrid") && !loc.includes("remote"))
-      flags.push("Not flagged hybrid");
-    const prefLoc = prefs.preferred_location?.trim().toLowerCase();
-    if (prefLoc && !prefs.willing_to_relocate && !loc.includes(prefLoc) && !prefLoc.includes(loc))
-      flags.push("Outside your preferred location");
+    // Target roles are comma-separated on the Account page
+    // ("Product Manager, Program Manager"); a posting whose title matches
+    // none of them gets a soft flag — the card stays decidable.
+    const roles = (prefs.target_roles ?? "")
+      .split(",")
+      .map((r) => r.trim().toLowerCase())
+      .filter(Boolean);
+    const title = (job.title ?? "").toLowerCase();
+    if (roles.length > 0 && title && !roles.some((r) => title.includes(r) || r.includes(title)))
+      flags.push("Outside your target roles");
+    if (job.location) {
+      const loc = job.location.toLowerCase();
+      const style = prefs.work_style;
+      if (style === "remote" && !loc.includes("remote")) flags.push("Not flagged remote");
+      if (style === "onsite" && loc.includes("remote")) flags.push("Listed as remote");
+      if (style === "hybrid" && !loc.includes("hybrid") && !loc.includes("remote"))
+        flags.push("Not flagged hybrid");
+      const prefLoc = prefs.preferred_location?.trim().toLowerCase();
+      if (prefLoc && !prefs.willing_to_relocate && !loc.includes(prefLoc) && !prefLoc.includes(loc))
+        flags.push("Outside your preferred location");
+    }
     return flags;
   };
 
