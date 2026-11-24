@@ -381,6 +381,21 @@ function JobsPage() {
             </p>
           ) : (
             <>
+              {pro.isPro && fits.isError && (
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    We couldn&apos;t load your fit scores. Your connection may have dropped.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => void fits.refetch()}
+                    disabled={fits.isFetching}
+                  >
+                    Try again
+                  </Button>
+                </div>
+              )}
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative min-w-0 flex-1 basis-48">
                   <Search
