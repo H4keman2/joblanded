@@ -51,6 +51,12 @@ function PostingSearchPage() {
   });
 
   const result = match.data;
+  // Hoisted: inside the `result &&` branch below, TS narrows `match` to its
+  // success variant, so `match.isError` / `match.mutate` read as `never`
+  // there. Capture the pieces the stale-result note needs up front.
+  const compareFailed = match.isError;
+  const comparePending = match.isPending;
+  const retryCompare = () => match.mutate(text);
 
   return (
     <div className="space-y-6">
@@ -144,6 +150,22 @@ function PostingSearchPage() {
 
       {result && (
         <>
+          {compareFailed && (
+            <div className="panel space-y-2 p-5 sm:p-8">
+              <p className="text-sm text-muted-foreground">
+                We couldn&apos;t refresh the comparison — showing your last results. Your connection
+                may have dropped.
+              </p>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={retryCompare}
+                disabled={comparePending}
+              >
+                Try again
+              </Button>
+            </div>
+          )}
           <div
             className={`panel overflow-x-auto p-5 sm:p-8 ${match.isPending ? "opacity-60" : ""}`}
             aria-busy={match.isPending || undefined}
