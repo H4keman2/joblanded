@@ -172,6 +172,20 @@ function FeedPage() {
   const decideMutation = useMutation({
     mutationFn: (input: { id: string; decision: "liked" | "passed" | null }) =>
       decide({ data: input }),
+    onMutate: (input) => {
+      // Advance the queue immediately: the card leaves the feed on click
+      // instead of lingering until the refetch lands, during which a second
+      // click could fire the same decision twice.
+      const prevJobs = qc.getQueryData(["jobs"]);
+      qc.setQueryData(["jobs"], (old: unknown) =>
+        Array.isArray(old)
+          ? old.map((j: { id: string }) =>
+              j.id === input.id ? { ...j, feed_decision: input.decision } : j,
+            )
+          : old,
+      );
+      return { prevJobs };
+    },
     onSuccess: (_r, v) => {
       if (v.decision === "passed") {
         toast.success("Passed — out of the feed", {
@@ -187,7 +201,10 @@ function FeedPage() {
       }
       void qc.invalidateQueries({ queryKey: ["jobs"] });
     },
-    onError: (e: Error) => toast.error(e.message || "Couldn't save that decision — try again."),
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prevJobs) qc.setQueryData(["jobs"], ctx.prevJobs);
+      toast.error(e.message || "Couldn't save that decision — try again.");
+    },
   });
 
   if (!pro.loaded) {
