@@ -308,20 +308,27 @@ function ApplicationsPage() {
   // Which row is revealing the date picker to (re-)add a follow-up reminder.
   const [addingFollowUpId, setAddingFollowUpId] = useState<string | null>(null);
 
-  function handleRejectDecide(archiveIt: boolean) {
+  async function handleRejectDecide(archiveIt: boolean) {
     if (!rejectTarget) return;
-    if (archiveIt) {
-      statusMutation.mutate({ id: rejectTarget.appId, status: "rejected" });
-      archiveMutation.mutate({ id: rejectTarget.jobId, archived: true });
-    } else {
-      // Success toast only after the write resolves — a premature toast plus a
-      // failure rollback would show contradictory feedback on a dropped connection.
-      statusMutation.mutate(
-        { id: rejectTarget.appId, status: "rejected" },
-        { onSuccess: () => toast.success("Marked rejected") },
-      );
+    // Sequence the writes and close the dialog only once they land: firing
+    // both mutations in parallel and closing immediately left a failed
+    // archive (or status) stranded with the dialog already gone, and the
+    // dialog's pending spinner could never show.
+    const target = rejectTarget;
+    try {
+      await statusMutation.mutateAsync({ id: target.appId, status: "rejected" });
+      if (archiveIt) {
+        await archiveMutation.mutateAsync({ id: target.jobId, archived: true });
+      } else {
+        // Success toast only after the write resolves — a premature toast plus a
+        // failure rollback would show contradictory feedback on a dropped connection.
+        toast.success("Marked rejected");
+      }
+      setRejectTarget(null);
+    } catch {
+      // The failed mutation's onError already toasted; leave the dialog open
+      // so the user can retry instead of losing the choice.
     }
-    setRejectTarget(null);
   }
 
   const funnelTotal = stats
