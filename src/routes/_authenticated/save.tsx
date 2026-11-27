@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { launchPath } from "@/lib/launch-path";
 
 // The server checks the link too, but a bare "example.com/jobs" is almost always
 // a missing https:// rather than a real posting — catch it here with copy a person
@@ -29,6 +30,25 @@ export const Route = createFileRoute("/_authenticated/save")({
     url: typeof search["url"] === "string" ? search["url"] : undefined,
     text: typeof search["text"] === "string" ? search["text"] : undefined,
   }),
+  // The installed PWA's start_url was /save until Nov 17, so a home-screen
+  // icon created before then still cold-starts the app on Quick save even
+  // though the manifest now says /dashboard. Bounce that launch to the
+  // dashboard — but only a genuine cold launch: share targets (search params),
+  // in-app navigation to Quick save, and reloads of it must keep landing here.
+  beforeLoad: ({ search }) => {
+    if (search.url || search.text) return;
+    if (launchPath !== "/save") return;
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    if (!standalone) return;
+    if (document.referrer !== "") return;
+    const navType = (
+      performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined
+    )?.type;
+    if (navType !== "navigate") return;
+    throw redirect({ to: "/dashboard", replace: true });
+  },
   head: () => ({
     meta: [
       { title: "Quick save a posting — JobLanded" },

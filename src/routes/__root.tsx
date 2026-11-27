@@ -14,6 +14,9 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
+// Side-effect import only: launch-path must evaluate at initial page load
+// (this module is in the first bundle), not when a lazy route chunk loads.
+import "@/lib/launch-path";
 
 function NotFoundComponent() {
   return (
