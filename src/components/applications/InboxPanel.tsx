@@ -190,7 +190,13 @@ export function InboxPanel({
             placeholder="Paste the full email text here…"
             maxLength={20000}
             className="mt-1.5"
+            aria-describedby={body.trim().length < 20 ? "inbox-body-hint" : undefined}
           />
+          {body.trim().length < 20 && (
+            <p id="inbox-body-hint" className="mt-1.5 text-xs text-muted-foreground">
+              {20 - body.trim().length} more characters needed — paste the full email to read it.
+            </p>
+          )}
         </div>
         <Button
           onClick={() => parseMutation.mutate()}
