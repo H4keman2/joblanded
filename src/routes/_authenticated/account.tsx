@@ -103,17 +103,24 @@ function AccountPage() {
   // sessions, and the danger zone are separate flows.
   const [snapshot, setSnapshot] = useState<string | null>(null);
 
+  // Hydrate the form once only: a background refetch (window focus,
+  // reconnect, or saving Job Preferences below) must not overwrite
+  // unsaved edits or disarm the beforeunload guard. Mirrors the
+  // JobPreferencesSection guard in this file and the resume.tsx fix.
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   useEffect(() => {
-    if (profile) {
-      const loaded = {
+    if (profile && !profileLoaded) {
+      const initial = {
         full_name: profile.full_name ?? "",
         phone: profile.phone ?? "",
         email_notifications: profile.email_notifications ?? true,
       };
-      setForm(loaded);
-      setSnapshot(JSON.stringify(loaded));
+      setForm(initial);
+      setSnapshot(JSON.stringify(initial));
+      setProfileLoaded(true);
     }
-  }, [profile]);
+  }, [profile, profileLoaded]);
 
   const isDirty = snapshot !== null && JSON.stringify(form) !== snapshot;
 
